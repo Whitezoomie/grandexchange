@@ -1,0 +1,644 @@
+﻿
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="theme-color" content="#0f1117">
+    <title>Bass | OSRS Price Tracker</title>
+    <link rel="preload" as="style" href="styles.css?v=20260301-fbdel-005">
+    <link rel="stylesheet" href="styles.css?v=20260301-fbdel-005">
+    <style>
+        /* Prevent FOUC by hiding unstyled content briefly */
+        html { display: none; }
+    </style>
+    <noscript><style>html { display: block !important; }</style></noscript>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://oldschool.runescape.wiki" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <meta name="description" content="Track OSRS Bass prices. Current price: 80 gp. View price history, trends, and market data.">
+    <meta name="keywords" content="OSRS, Grand Exchange, Bass, price, tracker">
+    
+    <!-- Open Graph Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Bass | OSRS Price Tracker">
+    <meta property="og:description" content="Track OSRS Bass prices. Current price: 80 gp. View price history, trends, and market data.">
+    <meta property="og:image" content="https://oldschool.runescape.wiki/images/Bass.png">
+    <meta property="og:url" content="https://therealge.com/bass">
+    <meta property="og:site_name" content="OSRS Grand Exchange Tracker">
+    <meta property="og:locale" content="en_US">
+    
+    <!-- Twitter Card Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Bass | OSRS Price Tracker">
+    <meta name="twitter:description" content="Track OSRS Bass prices. Current price: 80 gp. View price history, trends, and market data.">
+    <meta name="twitter:image" content="https://oldschool.runescape.wiki/images/Bass.png">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://therealge.com/bass">
+    
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "brand": {"@type": "Brand", "name": "Old School RuneScape"},
+      "category": "OSRS Grand Exchange Items",
+      "name": "Bass",
+      "description": "Track OSRS Bass prices. Current price: 80 gp. View price history, trends, and market data.",
+      "image": "https://oldschool.runescape.wiki/images/Bass.png",
+      "offers": {
+        "@type": "Offer",
+        "priceCurrency": "GP",
+        "price": "80",
+        "availability": "https://schema.org/InStock"
+      },
+      "url": "https://therealge.com/bass"
+    }
+    </script>
+    
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Grand Exchange",
+          "item": "https://therealge.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Bass",
+          "item": "https://therealge.com/bass"
+        }
+      ]
+    }
+    </script>
+    <link rel="icon" type="image/png" href="favicon.png">
+</head>
+<body data-initial-item="365">
+    <h1 class="seo-item-title">Bass - OSRS Grand Exchange Price</h1>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-inner">
+            <div class="logo" id="logoHome" style="cursor:pointer" title="Reset to home">
+                <div class="logo-text">
+                    <span class="logo-heading">Grand Exchange</span>
+                    <span class="subtitle">OSRS Price Tracker by Zoomie</span>
+                </div>
+            </div>
+            <div class="header-stats">
+                <div class="stat-box">
+                    <span class="stat-label">Items Loaded</span>
+                    <span class="stat-value" id="totalItems">-</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Last Updated</span>
+                    <span class="stat-value" id="lastUpdated">-</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Shown</span>
+                    <span class="stat-value" id="shownItems">-</span>
+                </div>
+                <div class="stat-box favorites-stat" id="favoritesStatBox">
+                    <span class="stat-label">Favorites</span>
+                    <span class="stat-value" id="favoritesCount">0</span>
+                </div>
+                <div class="stat-box portfolio-stat" id="portfolioStatBox">
+                    <span class="stat-label">Favorite Value</span>
+                    <span class="stat-value portfolio-value" id="portfolioValue">-</span>
+                </div>
+                <!-- GE Radio (compact, header-inline) -->
+                <div class="ge-radio" id="geRadio">
+                    <button class="ge-radio-toggle" id="geRadioToggle" title="GE Radio â€” OSRS Soundtrack">
+                        <svg class="ge-radio-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+                        <div class="ge-radio-bars" id="geRadioBars"><span></span><span></span><span></span></div>
+                        <span class="ge-radio-label" id="geRadioLabel">GE Radio</span>
+                    </button>
+                    <div class="ge-radio-dropdown" id="geRadioDropdown">
+                        <div class="ge-radio-dd-header">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+                            <span>GE Radio</span>
+                        </div>
+                        <div class="ge-radio-now-playing" id="geRadioNowPlaying">Not playing</div>
+                        <div class="ge-radio-dd-controls">
+                            <button class="ge-radio-dd-btn" id="geRadioPrev" title="Previous">
+                                <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+                            </button>
+                            <button class="ge-radio-dd-btn ge-radio-dd-play" id="geRadioPlay" title="Play">
+                                <svg class="ge-radio-play-icon" viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M8 5v14l11-7z"/></svg>
+                                <svg class="ge-radio-pause-icon" viewBox="0 0 24 24" fill="currentColor" width="18" height="18" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                            </button>
+                            <button class="ge-radio-dd-btn" id="geRadioNext" title="Next">
+                                <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                            </button>
+                            <div class="ge-radio-dd-vol">
+                                <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8.5v7a4.47 4.47 0 0 0 2.5-3.5z"/></svg>
+                                <input type="range" id="geRadioVolume" min="0" max="100" value="30" class="ge-radio-vol-slider">
+                            </div>
+                        </div>
+                        <div class="ge-radio-dd-opts">
+                            <label class="ge-radio-dd-shuffle">
+                                <input type="checkbox" id="geRadioShuffle" checked> Shuffle
+                            </label>
+                        </div>
+                        <div class="ge-radio-dd-tracklist">
+                            <select id="geRadioTrackSelect" class="ge-radio-track-select">
+                                <option value="-1" selected disabled>Choose a song...</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="header-action-btn spin-wheel-btn" id="spinWheelBtn" title="Spin the Wheel â€” Top 20 margin items">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="10"/><path d="M12 2v10l7 7"/><path d="M12 12L5 19"/><path d="M2 12h10"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
+                    <span>Spin the Wheel</span>
+                </button>
+                <div class="effects-selector" id="effectsSelector">
+                    <button class="header-action-btn" id="effectsToggle" title="Effects, Pet & Cursor">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"/><circle cx="12" cy="12" r="4"/></svg>
+                        <span id="effectsLabel">Effects</span>
+                        <svg class="effects-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="effects-dropdown" id="effectsDropdown">
+                        <div class="effects-dropdown-section">
+                            <div class="effects-dropdown-header">Visual Effects</div>
+                            <button class="effects-toggle-option" id="effectsOnOffBtn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"/><circle cx="12" cy="12" r="4"/></svg>
+                                <span id="effectsOnOffLabel">Effects On</span>
+                                <span class="effects-status-dot" id="effectsStatusDot"></span>
+                            </button>
+                        </div>
+                        <div class="effects-dropdown-divider"></div>
+                        <div class="effects-dropdown-section">
+                            <button class="effects-dropdown-toggle" id="cursorSectionToggle">
+                                <span class="effects-dropdown-header">Cursor Style</span>
+                                <svg class="effects-section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="6 9 12 15 18 9"/></svg>
+                            </button>
+                            <div class="effects-section-body collapsed" id="cursorSectionBody">
+                                <div class="cursor-list" id="cursorList"></div>
+                            </div>
+                        </div>
+                        <div class="effects-dropdown-divider"></div>
+                        <div class="effects-dropdown-section">
+                            <button class="effects-dropdown-toggle" id="petSectionToggle">
+                                <span class="effects-dropdown-header">Pet Companion</span>
+                                <svg class="effects-section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="6 9 12 15 18 9"/></svg>
+                            </button>
+                            <div class="effects-section-body collapsed" id="petSectionBody">
+                                <div class="pet-list" id="petList"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="theme-selector" id="themeSelector">
+                    <button class="header-action-btn" id="themeToggle" title="Toggle Theme">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M12 2a7 7 0 0 0 0 14h.5a5.5 5.5 0 0 0 0-11H12V2z"/><circle cx="12" cy="12" r="10" stroke-dasharray="2 2"/></svg>
+                        <span id="themeLabel">Theme</span>
+                        <svg class="theme-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="theme-dropdown" id="themeDropdown">
+                        <div class="theme-dropdown-header">Choose Theme</div>
+                        <button class="theme-option" data-theme="dark">
+                            <span class="theme-swatch" style="background: linear-gradient(135deg, #0f1117, #22263a)"></span>
+                            <span class="theme-option-name">Dark</span>
+                        </button>
+                        <button class="theme-option" data-theme="light">
+                            <span class="theme-swatch" style="background: linear-gradient(135deg, #f5ebe0, #fdf8f0)"></span>
+                            <span class="theme-option-name">Light</span>
+                        </button>
+                        <button class="theme-option" data-theme="blood-moon">
+                            <span class="theme-swatch" style="background: linear-gradient(135deg, #1a0a0a, #3d1111)"></span>
+                            <span class="theme-option-name">Blood Moon</span>
+                        </button>
+                        <button class="theme-option" data-theme="dark-green">
+                            <span class="theme-swatch" style="background: linear-gradient(135deg, #0a1410, #132e1f)"></span>
+                            <span class="theme-option-name">Dark Forest</span>
+                        </button>
+                        <button class="theme-option" data-theme="ocean">
+                            <span class="theme-swatch" style="background: linear-gradient(135deg, #0a1628, #142d4f)"></span>
+                            <span class="theme-option-name">Ocean Depths</span>
+                        </button>
+                        <button class="theme-option" data-theme="royal-purple">
+                            <span class="theme-swatch" style="background: linear-gradient(135deg, #140a1e, #2a1540)"></span>
+                            <span class="theme-option-name">Royal Purple</span>
+                        </button>
+                        <button class="theme-option" data-theme="sunset">
+                            <span class="theme-swatch" style="background: linear-gradient(135deg, #1a1008, #3d2810)"></span>
+                            <span class="theme-option-name">Sunset</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <div class="toolbar-inner">
+            <!-- Search -->
+            <div class="search-container">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input type="text" id="searchInput" placeholder="Search items... (e.g. 'Abyssal whip', 'Dragon')" autocomplete="one-time-code">
+                <button class="clear-search" id="clearSearch" title="Clear search">&times;</button>
+            </div>
+
+            <!-- Filters Row -->
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label>Members</label>
+                    <select id="membersFilter">
+                        <option value="all">All Items</option>
+                        <option value="true">Members Only</option>
+                        <option value="false">Free-to-Play</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Min Price</label>
+                    <input type="text" id="minPrice" placeholder="0 or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Max Price</label>
+                    <input type="text" id="maxPrice" placeholder="No limit or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Min Margin</label>
+                    <input type="text" id="minMargin" placeholder="0 or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Max Margin</label>
+                    <input type="text" id="maxMargin" placeholder="No limit or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Min Volume</label>
+                    <input type="text" id="minVolume" placeholder="0 or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Max Volume</label>
+                    <input type="text" id="maxVolume" placeholder="No limit or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Min Buy Limit</label>
+                    <input type="text" id="minBuyLimit" placeholder="0 or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Max Buy Limit</label>
+                    <input type="text" id="maxBuyLimit" placeholder="No limit or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Sort By</label>
+                    <select id="sortBy">
+                        <option value="popular-desc" selected>Most Popular</option>
+                        <option value="best-flipping">Best Flipping Items</option>
+                        <option value="name-asc">Name (A-Z)</option>
+                        <option value="name-desc">Name (Z-A)</option>
+                        <option value="price-desc">Price (High to Low)</option>
+                        <option value="price-asc">Price (Low to High)</option>
+                        <option value="margin-desc">Margin (High to Low)</option>
+                        <option value="margin-asc">Margin (Low to High)</option>
+                        <option value="volume-desc">Volume (High to Low)</option>
+                        <option value="highalch-desc">High Alch (High to Low)</option>
+                        <option value="traded-desc">Most Recently Traded</option>
+                        <option value="traded-asc">Least Recently Traded</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Show</label>
+                    <div class="filter-toggle">
+                        <button class="filter-toggle-btn" data-filter="all" id="filterAll" title="All Items">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                        </button>
+                        <button class="filter-toggle-btn" data-filter="favorites" id="filterFavorites" title="Favorites Only">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label>View</label>
+                    <div class="view-toggle">
+                        <button class="view-btn active" data-view="grid" title="Grid View">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                        </button>
+                        <button class="view-btn" data-view="list" title="List View">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><rect x="3" y="4" width="18" height="3" rx="1"/><rect x="3" y="10.5" width="18" height="3" rx="1"/><rect x="3" y="17" width="18" height="3" rx="1"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <button class="save-filters-btn" id="saveFilters">Save Filters</button>
+                <button class="reset-btn" id="resetFilters">Reset All</button>
+
+                <div class="budget-group">
+                    <label>Budget (GP)</label>
+                    <div class="budget-input-row">
+                        <input type="text" id="budgetInput" placeholder="e.g. 5000000 or 5m" inputmode="numeric" autocomplete="one-time-code" data-lpignore="true" data-1p-ignore="true" data-form-type="other">
+                        <button class="budget-toggle-btn" id="budgetToggle" type="button" title="What Can I Afford?">Go</button>
+                    </div>
+                </div>
+
+                <!-- Item Spotlight (inline in filters) -->
+                <div class="spotlight-banner" id="spotlightBanner" style="display:none">
+                    <div class="spotlight-glow"></div>
+                    <img class="spotlight-icon" id="spotlightIcon" alt="" src="">
+                    <div class="spotlight-text">
+                        <span class="spotlight-label">Item Spotlight</span>
+                        <span class="spotlight-name" id="spotlightName"></span>
+                        <span class="spotlight-lore" id="spotlightLore"></span>
+                    </div>
+                    <div class="spotlight-stats">
+                        <span class="spotlight-price" id="spotlightPrice"></span>
+                        <button class="spotlight-view-btn" id="spotlightView">View</button>
+                    </div>
+                    <button class="spotlight-close" id="spotlightClose" title="Dismiss">&times;</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-container" id="loadingContainer">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">Loading Grand Exchange data...</p>
+        <p class="loading-subtext" id="loadingStatus">Fetching item database...</p>
+    </div>
+
+    <!-- Error State -->
+    <div class="error-container" id="errorContainer" style="display: none;">
+        <div class="error-icon">âš ï¸</div>
+        <h2>Failed to Load Data</h2>
+        <p id="errorMessage">Something went wrong while fetching data.</p>
+        <button class="retry-btn" id="retryBtn">Try Again</button>
+    </div>
+
+    <!-- Items Container -->
+    <main class="main-content" id="mainContent" style="display: none;">
+      <div class="content-with-sidebar">
+        <div class="items-area">
+            <div class="items-grid" id="itemsContainer"></div>
+        
+            <!-- Pagination -->
+            <div class="pagination" id="pagination">
+            <button class="page-btn" id="prevPage" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="m15 18-6-6 6-6"/></svg>
+                Previous
+            </button>
+            <div class="page-info">
+                Page <span id="currentPage">1</span> of <span id="totalPages">1</span>
+            </div>
+            <button class="page-btn" id="nextPage">
+                Next
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+        </div>
+        </div><!-- /.items-area -->
+
+        <!-- OSRS News Sidebar -->
+        <div class="sidebar-column">
+        <aside class="news-sidebar" id="newsSidebar">
+            <div class="sidebar-header collapsed" data-collapse-toggle="newsFeed">
+                <svg class="news-icon" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                <h3>OSRS News</h3>
+                <span class="sidebar-header-hint">click to expand</span>
+                <button class="news-refresh-btn" id="newsRefreshBtn" title="Refresh news feed">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                </button>
+            </div>
+            <div class="sidebar-feed collapsed" id="newsFeed">
+                <div class="feed-loading">
+                    <div class="loading-spinner small"></div>
+                    <span>Loading news...</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Feedback Sidebar -->
+        <aside class="feedback-sidebar" id="feedbackSidebar">
+            <div class="sidebar-header collapsed" data-collapse-toggle="feedbackContent">
+                <svg class="feedback-icon" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+                <h3>Feedback</h3>
+                <span class="sidebar-header-hint">click to expand</span>
+            </div>
+            <div class="feedback-content collapsed" id="feedbackContent">
+                <form class="feedback-form" id="feedbackForm">
+                    <div class="feedback-type-row">
+                        <label class="feedback-type-label">
+                            <input type="radio" name="feedbackType" value="suggestion" checked>
+                            <span>ðŸ’¡ Suggestion</span>
+                        </label>
+                        <label class="feedback-type-label">
+                            <input type="radio" name="feedbackType" value="bug">
+                            <span>ðŸ› Bug Report</span>
+                        </label>
+                    </div>
+                    <input type="text" class="feedback-name" id="feedbackName" placeholder="Your name (optional)" maxlength="50" autocomplete="one-time-code">
+                    <textarea class="feedback-message" id="feedbackMessage" placeholder="Tell us what you think..." rows="4" maxlength="2000" required></textarea>
+                    <div class="feedback-actions">
+                        <span class="feedback-char-count" id="feedbackCharCount">0 / 2000</span>
+                        <button type="submit" class="feedback-submit" id="feedbackSubmitBtn">Send Feedback</button>
+                    </div>
+                    <div class="feedback-status" id="feedbackStatus"></div>
+                </form>
+            </div>
+        </aside>
+        </div><!-- /.sidebar-column -->
+      </div><!-- /.content-with-sidebar -->
+    </main>
+
+    <!-- Item Detail Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal" id="itemModal">
+            <button class="modal-close" id="modalClose">&times;</button>
+            <div class="modal-header">
+                <img class="modal-icon" id="modalIcon" src="" alt="">
+                <div class="modal-header-text">
+                    <h2 class="modal-title" id="modalTitle"></h2>
+                    <p class="modal-examine" id="modalExamine"></p>
+                </div>
+                <button class="modal-fav-btn" id="modalFavBtn" title="Toggle Favorite">
+                    <svg class="fav-icon-outline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    <svg class="fav-icon-filled" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-tags" id="modalTags"></div>
+                <div class="modal-prices">
+                    <div class="modal-price-card buy">
+                        <span class="price-label">Buy Price (Instant)</span>
+                        <span class="price-value" id="modalBuyPrice">-</span>
+                        <span class="price-time" id="modalBuyTime">-</span>
+                    </div>
+                    <div class="modal-price-card sell">
+                        <span class="price-label">Sell Price (Instant)</span>
+                        <span class="price-value" id="modalSellPrice">-</span>
+                        <span class="price-time" id="modalSellTime">-</span>
+                    </div>
+                    <div class="modal-price-card margin">
+                        <span class="price-label">Margin</span>
+                        <span class="price-value" id="modalMargin">-</span>
+                        <span class="price-time" id="modalMarginPct">-</span>
+                    </div>
+                </div>
+                <div class="modal-details">
+                    <div class="detail-row">
+                        <span>GE Tax (2%)</span>
+                        <span id="modalGeTax" style="color: var(--red)">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Buy Limit (4h)</span>
+                        <span id="modalLimit">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Buy Limit Profit</span>
+                        <span id="modalLimitProfit">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>High Alchemy</span>
+                        <span id="modalHighAlch">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>High Alch Profit</span>
+                        <span id="modalAlchProfit">-</span>
+                    </div>
+                </div>
+                <!-- Price & Volume History -->
+                <div class="history-section">
+                    <div class="history-header">
+                        <h3>Price & Volume History</h3>
+                        <div class="history-tabs">
+                            <button class="history-tab active" data-period="5m">24h</button>
+                            <button class="history-tab" data-period="1h">7d</button>
+                            <button class="history-tab" data-period="24h">30d</button>
+                            <button class="history-tab" data-period="1y">1y</button>
+                        </div>
+                    </div>
+                    <div class="chart-container" style="display:none;">
+                        <canvas id="priceChart"></canvas>
+                    </div>
+                    <div class="chart-container volume-chart" style="display:none;">
+                        <canvas id="volumeChart"></canvas>
+                    </div>
+                    <div class="history-loading" id="historyLoading" style="display:none;">
+                        <div class="loading-spinner small"></div>
+                        <span>Loading history...</span>
+                    </div>
+                    <div class="history-error" id="historyError" style="display:none;">
+                        <span>No history data available for this item.</span>
+                    </div>
+                </div>
+
+                <a class="wiki-link" id="modalWikiLink" href="#" target="_blank" rel="noopener noreferrer">
+                    View on OSRS Wiki â†’
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back to Top -->
+    <button class="back-to-top" id="backToTop" title="Back to top">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20" height="20"><path d="m18 15-6-6-6 6"/></svg>
+    </button>
+
+    <!-- Buy Me a Coffee Button -->
+    <a href="https://ko-fi.com/whitezoomie" target="_blank" rel="noopener" class="donation-float-btn" title="Buy me a coffee">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M20 3H4v10c0 2.2 1.8 4 4 4h6c2.2 0 4-1.8 4-4v-3h2c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 5h-2V5h2v3zM4 14c-1.1 0-2-.9-2-2v-2h2v4zm16 3H8c-1.1 0-2 .9-2 2s.9 2 2 2h12c1.1 0 2-.9 2-2s-.9-2-2-2z"/></svg>
+        <span>Buy me a coffee</span>
+    </a>
+
+    <!-- Spin the Wheel Overlay -->
+    <div class="spin-overlay" id="spinOverlay">
+        <div class="spin-container">
+            <button class="spin-close" id="spinClose" title="Close">&times;</button>
+            <h2 class="spin-title">Spin the Wheel</h2>
+            <p class="spin-subtitle">Top 20 highest-margin items (volume &ge; 200)</p>
+            <div class="spin-wheel-wrapper">
+                <div class="spin-pointer"></div>
+                <div class="spin-reel" id="spinReel"></div>
+            </div>
+            <div class="spin-controls">
+                <label class="spin-sound-label">
+                    <input type="checkbox" id="spinSoundToggle" checked>
+                    Spin Sound
+                </label>
+            </div>
+            <button class="spin-go-btn" id="spinGoBtn">SPIN!</button>
+            <div class="spin-result" id="spinResult"></div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="visitor-stats-bar">
+            <div class="visitor-stat">
+                <span class="visitor-dot"></span>
+                <span><strong id="onlineCount">0</strong> online now</span>
+            </div>
+            <div class="visitor-stat">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+                <span><strong id="totalVisitors">0</strong> visitors</span>
+            </div>
+        </div>
+        <p>Data from <a href="https://prices.runescape.wiki" target="_blank" rel="noopener noreferrer">prices.runescape.wiki</a> &bull; Not affiliated with Jagex Ltd &bull; Â© 2026 Zoomie</p>
+        <span class="footer-manage" id="footerManage" title="Site management">Manage</span>
+    </footer>
+
+
+    <!-- Admin Login Modal -->
+    <div class="admin-overlay" id="adminOverlay">
+        <div class="admin-modal">
+            <button class="admin-close" id="adminClose">&times;</button>
+            <div class="admin-login" id="adminLogin">
+                <h3>Site Management</h3>
+                <input type="text" class="admin-input" id="adminUser" placeholder="Username" autocomplete="new-password">
+                <input type="password" class="admin-input" id="adminPass" placeholder="Password" autocomplete="new-password">
+                <button class="admin-btn" id="adminLoginBtn">Login</button>
+                <div class="admin-error" id="adminError"></div>
+            </div>
+            <div class="admin-panel" id="adminPanel" style="display:none">
+                <div class="admin-panel-header">
+                    <h3>Feedback Inbox</h3>
+                    <button class="admin-btn admin-btn-sm" id="adminLogout">Logout</button>
+                </div>
+                <div class="admin-feedback-list" id="adminFeedbackList">
+                    <p class="admin-loading">Loading feedback...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+      // Auto-version: forces browser to always fetch fresh CSS & JS
+      (function(){
+        var ts = Date.now();
+        // Refresh the stylesheet
+        document.querySelector('link[href*="styles.css"]').href = 'styles.css?v=' + ts;
+        // Dynamically load app.js with a fresh cache-bust
+        var s = document.createElement('script');
+        s.src = 'app.js?v=' + ts;
+        document.body.appendChild(s);
+      })();
+    </script>
+</body>
+</html>
+

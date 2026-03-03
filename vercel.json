@@ -1,0 +1,27 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": ".",
+  "framework": "static",
+  "functions": {
+    "render-server/**": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "routes": [
+    {
+      "src": "^/api/.*",
+      "dest": "/render-server/server.js"
+    },
+    {
+      "src": "^/((?!api).*?)(?:\\.html)?/?$",
+      "dest": "/$1.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
+}

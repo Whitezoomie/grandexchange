@@ -1,0 +1,17 @@
+{
+  "name": "osrs-ge-visitor-counter",
+  "version": "1.0.0",
+  "description": "WebSocket visitor counter for OSRS GE Tracker",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "generate-pages": "node generate-pages.js",
+    "generate-sitemap": "node generate-sitemap.js"
+  },
+  "engines": {
+    "node": "18.x"
+  },
+  "dependencies": {
+    "ws": "^8.16.0"
+  }
+}

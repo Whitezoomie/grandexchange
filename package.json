@@ -1,0 +1,28 @@
+{
+  "name": "osrs-ge-tracker",
+  "version": "1.0.0",
+  "description": "OSRS Grand Exchange Tracker - Live Item Prices & Market Data",
+  "main": "index.html",
+  "scripts": {
+    "start": "node render-server/server.js",
+    "generate-pages": "node render-server/generate-pages.js",
+    "generate-sitemap": "node render-server/generate-sitemap.js",
+    "build": "node render-server/generate-pages.js && node render-server/generate-sitemap.js"
+  },
+  "engines": {
+    "node": "18.x"
+  },
+  "dependencies": {
+    "ws": "^8.16.0"
+  },
+  "keywords": [
+    "OSRS",
+    "Grand Exchange",
+    "RuneScape",
+    "price tracker",
+    "trading",
+    "market data"
+  ],
+  "author": "Zoomie",
+  "license": "ISC"
+}

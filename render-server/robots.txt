@@ -1,0 +1,39 @@
+# Robots.txt for OSRS Grand Exchange Tracker
+# Last updated: 2026-03-02
+
+# Allow all bots to crawl the site
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /private/
+Disallow: /temp/
+Disallow: /*.json$
+Disallow: /api/internal/*
+
+# Specific rules for known search engines
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 2
+
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+# Block bad bots
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+# Sitemap location
+Sitemap: https://therealge.com/sitemap.xml
+
+# Search Console
+Sitemap: https://therealge.com/sitemap-index.xml

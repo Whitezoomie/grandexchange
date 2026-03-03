@@ -1,0 +1,20 @@
+# Generated item pages (auto-generated from render-server/generate-pages.js)
+# These are large files and regenerated frequently, so they're excluded from git
+# The pattern matches lowercase-slug-style item names
+[a-z]*-[a-z]*.html
+!index.html
+!200.html
+!googleab55c024c30b52c2.html
+
+# Node modules
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temp files
+*.tmp
+*.temp
