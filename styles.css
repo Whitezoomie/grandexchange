@@ -2528,11 +2528,15 @@ body.theme-transitioning *::after {
 
 .footer a {
     color: var(--accent);
-    text-decoration: none;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+    text-decoration-color: color-mix(in srgb, var(--accent) 50%, transparent);
 }
 
 .footer a:hover {
     text-decoration: underline;
+    text-decoration-color: var(--accent);
 }
 
 
