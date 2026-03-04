@@ -70,6 +70,59 @@
     let effectsEnabled = localStorage.getItem('ge_effects') !== 'off';
     let previousPrices = {};  // track old prices for pulse
 
+    // --- SEO Meta Helpers ---
+    const DEFAULT_TITLE = 'OSRS Grand Exchange Tracker | Live Item Prices & Market Data';
+    const DEFAULT_DESCRIPTION = 'Track OSRS Grand Exchange prices in real-time. Live price charts, buy/sell margins, flip alerts, and historical data for 4,000+ Old School RuneScape items. Free GE tracker.';
+    const DEFAULT_URL = 'https://therealge.com/';
+    const DEFAULT_IMAGE = 'https://therealge.com/og-image.png';
+
+    function setMetaTag(attr, attrValue, content) {
+        let el = document.querySelector(`meta[${attr}="${attrValue}"]`);
+        if (el) {
+            el.setAttribute('content', content);
+        } else {
+            el = document.createElement('meta');
+            el.setAttribute(attr, attrValue);
+            el.setAttribute('content', content);
+            document.head.appendChild(el);
+        }
+    }
+
+    function updateSeoForItem(item, price) {
+        const slug = slugify(item.name);
+        const title = `${item.name} | OSRS Price Tracker`;
+        const priceStr = price ? formatGp(price) : 'N/A';
+        const description = `Track OSRS ${item.name} prices. Current price: ${priceStr} gp. View live price history, trends, margins, and market data.`;
+        const url = `https://therealge.com/${slug}`;
+        const imageUrl = `${WIKI_IMAGE_BASE}/${item.icon || 'Item_None.png'}`;
+
+        document.title = title;
+        setMetaTag('name', 'description', description);
+        setMetaTag('property', 'og:title', title);
+        setMetaTag('property', 'og:description', description);
+        setMetaTag('property', 'og:url', url);
+        setMetaTag('property', 'og:image', imageUrl);
+        setMetaTag('name', 'twitter:title', title);
+        setMetaTag('name', 'twitter:description', description);
+        setMetaTag('name', 'twitter:image', imageUrl);
+        const canonical = document.querySelector('link[rel="canonical"]');
+        if (canonical) canonical.href = url;
+    }
+
+    function resetSeoToDefault() {
+        document.title = DEFAULT_TITLE;
+        setMetaTag('name', 'description', DEFAULT_DESCRIPTION);
+        setMetaTag('property', 'og:title', DEFAULT_TITLE);
+        setMetaTag('property', 'og:description', DEFAULT_DESCRIPTION);
+        setMetaTag('property', 'og:url', DEFAULT_URL);
+        setMetaTag('property', 'og:image', DEFAULT_IMAGE);
+        setMetaTag('name', 'twitter:title', DEFAULT_TITLE);
+        setMetaTag('name', 'twitter:description', DEFAULT_DESCRIPTION);
+        setMetaTag('name', 'twitter:image', DEFAULT_IMAGE);
+        const canonical = document.querySelector('link[rel="canonical"]');
+        if (canonical) canonical.href = DEFAULT_URL;
+    }
+
     // --- DOM References ---
     const $ = (id) => document.getElementById(id);
     const dom = {
@@ -463,7 +516,7 @@
                 <svg class="fav-filled" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
             </button>
             <div class="item-card-header">
-                <img class="item-icon" src="${iconUrl}" alt="" loading="lazy" 
+                <img class="item-icon" src="${iconUrl}" alt="${escapeHtml(item.name)} icon" loading="lazy" 
                      onerror="this.outerHTML='<div class=\\'item-icon placeholder\\'>📦</div>'">
                 <span class="item-name">${escapeHtml(item.name)}</span>
             </div>
@@ -610,6 +663,7 @@
     function openModal(item) {
         const iconUrl = getIconUrl(item.icon);
         $('modalIcon').src = iconUrl;
+        $('modalIcon').alt = item.name + ' icon';
         $('modalIcon').onerror = function() { this.style.display = 'none'; };
         $('modalTitle').textContent = item.name;
         $('modalExamine').textContent = item.examine;
@@ -677,6 +731,10 @@
             history.pushState({ itemSlug: slugify(item.name) }, '', itemPath);
         }
 
+        // Update page SEO meta tags for this item
+        const itemPrice = item.buyPrice || item.sellPrice || 0;
+        updateSeoForItem(item, itemPrice);
+
         // Set favorite state on modal button
         currentModalItemId = item.id;
         dom.modalFavBtn.classList.toggle('is-fav', isFavorite(item.id));
@@ -700,6 +758,9 @@
         if (!skipPushState && window.location.pathname !== '/') {
             history.pushState({}, '', '/');
         }
+
+        // Restore default SEO meta tags
+        resetSeoToDefault();
     }
 
     // ========================================

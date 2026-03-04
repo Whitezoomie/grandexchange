@@ -27,20 +27,33 @@
     <meta property="og:image" content="https://therealge.com/og-image.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="OSRS Grand Exchange Tracker - Live item prices and market data for Old School RuneScape">
     
     <!-- Twitter Card Tags -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="OSRS Grand Exchange Tracker | Live Item Prices & Market Data">
     <meta name="twitter:description" content="Track OSRS Grand Exchange prices in real-time. Monitor item trends, price history, and market data.">
     <meta name="twitter:image" content="https://therealge.com/og-image.png">
+    <meta name="twitter:image:alt" content="OSRS Grand Exchange Tracker - Live item prices and market data for Old School RuneScape">
     
     <!-- Canonical URL -->
     <link rel="canonical" href="https://therealge.com/">
     
-    <!-- Preconnect for Performance -->
+    <!-- Apple Mobile Web App -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="TheRealGE">
+    <link rel="apple-touch-icon" href="/favicon.png">
+    
+    <!-- Preconnect & DNS Prefetch for Performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://oldschool.runescape.wiki" crossorigin>
+    <link rel="preconnect" href="https://prices.runescape.wiki" crossorigin>
+    <link rel="dns-prefetch" href="https://prices.runescape.wiki">
+    <link rel="dns-prefetch" href="https://oldschool.runescape.wiki">
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     
     <link rel="preload" as="style" href="styles.css?v=20260301-fbdel-005">
     <link rel="stylesheet" href="styles.css?v=20260301-fbdel-005">
@@ -109,6 +122,66 @@
         },
         "query-input": "required name=search_term_string"
       }
+    }
+    </script>
+
+    <!-- BreadcrumbList Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://therealge.com/"
+        }
+      ]
+    }
+    </script>
+
+    <!-- ItemList Schema for Rich Results -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "OSRS Grand Exchange Items",
+      "description": "Browse over 4,000 tradeable Old School RuneScape items with live Grand Exchange prices",
+      "numberOfItems": 4000,
+      "itemListOrder": "https://schema.org/ItemListUnordered",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Twisted bow",
+          "url": "https://therealge.com/twisted-bow"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Scythe of vitur",
+          "url": "https://therealge.com/scythe-of-vitur"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Abyssal whip",
+          "url": "https://therealge.com/abyssal-whip"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "Dragon claws",
+          "url": "https://therealge.com/dragon-claws"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "Bandos godsword",
+          "url": "https://therealge.com/bandos-godsword"
+        }
+      ]
     }
     </script>
 
@@ -315,7 +388,7 @@
     </header>
 
     <!-- Toolbar -->
-    <div class="toolbar">
+    <nav class="toolbar" aria-label="Item search and filters">
         <div class="toolbar-inner">
             <!-- Search -->
             <div class="search-container">
@@ -448,9 +521,7 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Loading State -->
+    </nav>
     <div class="loading-container" id="loadingContainer">
         <div class="loading-spinner"></div>
         <p class="loading-text">Loading Grand Exchange data...</p>
@@ -466,13 +537,13 @@
     </div>
 
     <!-- Items Container -->
-    <main class="main-content" id="mainContent" style="display: none;">
+    <main class="main-content" id="mainContent" style="display: none;" aria-label="Grand Exchange item listings">
       <div class="content-with-sidebar">
         <div class="items-area">
             <div class="items-grid" id="itemsContainer"></div>
         
             <!-- Pagination -->
-            <div class="pagination" id="pagination">
+            <div class="pagination" id="pagination" role="navigation" aria-label="Item pages">
             <button class="page-btn" id="prevPage" disabled>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="m15 18-6-6 6-6"/></svg>
                 Previous
@@ -660,7 +731,7 @@
         </div>
     </div>
 
-    <footer class="footer">
+    <footer class="footer" role="contentinfo">
         <div class="visitor-stats-bar">
             <div class="visitor-stat">
                 <span class="visitor-dot"></span>

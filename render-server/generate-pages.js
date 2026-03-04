@@ -49,7 +49,7 @@ function generateHtmlPage(item, prices, indexHtml) {
   const avgPrice = prices?.data?.[item.id]?.avgHighPrice || currentPrice;
   
   const title = `${item.name} | OSRS Price Tracker`;
-  const description = `Track OSRS ${item.name} prices. Current price: ${formatPrice(currentPrice)} gp. View price history, trends, and market data.`;
+  const description = `Track ${item.name} price on the OSRS Grand Exchange. Current price: ${formatPrice(currentPrice)} gp. View live price history, margins, volume, and market trends for Old School RuneScape.`;
   const imageUrl = `https://oldschool.runescape.wiki/images/${item.icon || 'Item_None.png'}`;
   
   // Use index.html as a base and inject item metadata into the <head>
@@ -65,38 +65,72 @@ function generateHtmlPage(item, prices, indexHtml) {
   // Insert metadata before </head>
   const metaTags = `
     <meta name="description" content="${escapeHtml(description)}">
-    <meta name="keywords" content="OSRS, Grand Exchange, ${escapeHtml(item.name)}, price, tracker">
+    <meta name="keywords" content="OSRS, Grand Exchange, ${escapeHtml(item.name)}, price, tracker, market data, price history">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     
     <!-- Open Graph Tags -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="${escapeHtml(title)}">
     <meta property="og:description" content="${escapeHtml(description)}">
     <meta property="og:image" content="${escapeHtml(imageUrl)}">
+    <meta property="og:image:alt" content="${escapeHtml(item.name)} - OSRS Grand Exchange item">
     <meta property="og:url" content="https://therealge.com/${slug}">
     <meta property="og:site_name" content="OSRS Grand Exchange Tracker">
+    <meta property="og:locale" content="en_US">
     
     <!-- Twitter Card Tags -->
-    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="${escapeHtml(title)}">
     <meta name="twitter:description" content="${escapeHtml(description)}">
     <meta name="twitter:image" content="${escapeHtml(imageUrl)}">
+    <meta name="twitter:image:alt" content="${escapeHtml(item.name)} - OSRS Grand Exchange item">
     
     <!-- Canonical URL -->
     <link rel="canonical" href="https://therealge.com/${slug}">
     
+    <!-- BreadcrumbList Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://therealge.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "${escapeHtml(item.name)}",
+          "item": "https://therealge.com/${slug}"
+        }
+      ]
+    }
+    </script>
+
+    <!-- Product Schema -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "Product",
       "name": "${escapeHtml(item.name)}",
-      "description": "${escapeHtml(description)}",
+      "description": "${escapeHtml(item.examine || description)}",
       "image": "${escapeHtml(imageUrl)}",
+      "url": "https://therealge.com/${slug}",
+      "brand": {
+        "@type": "Brand",
+        "name": "Old School RuneScape"
+      },
+      "category": "${item.members ? 'Members' : 'Free-to-Play'} OSRS Item",
       "offers": {
         "@type": "Offer",
         "priceCurrency": "GP",
-        "price": "${currentPrice}"
-      },
-      "url": "https://therealge.com/${slug}"
+        "price": "${currentPrice}",
+        "availability": "https://schema.org/InStock",
+        "url": "https://therealge.com/${slug}"
+      }
     }
     </script>
     `;
