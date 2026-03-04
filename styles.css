@@ -1721,6 +1721,10 @@ body.theme-transitioning *::after {
     gap: 12px;
     position: relative;
     overflow: hidden;
+    /* Limit style-recalc scope and skip off-screen paint/layout */
+    contain: layout style;
+    content-visibility: auto;
+    contain-intrinsic-size: 0 200px;
 }
 
 .item-card:hover {

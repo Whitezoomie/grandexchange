@@ -365,6 +365,8 @@
             lastUpdatedInterval = setInterval(updateLastUpdatedTimer, 1000);
 
             loadSavedFilters();
+            // Yield to the browser before the heavy filter+render pass
+            await new Promise(r => setTimeout(r, 0));
             applyFilters();
             updatePortfolioValue();
 
@@ -943,15 +945,18 @@
     function animateCardEntry() {
         if (!effectsEnabled) return;
         const cards = dom.itemsContainer.querySelectorAll('.item-card');
-        cards.forEach((card, i) => {
+        // Only animate the first 20 cards — animating 100 causes too much
+        // Style & Layout work on the main thread.
+        const limit = Math.min(cards.length, 20);
+        for (let i = 0; i < limit; i++) {
+            const card = cards[i];
             card.classList.add('card-enter');
             card.style.animationDelay = (i * 40) + 'ms';
-            card.addEventListener('animationend', function handler() {
+            card.addEventListener('animationend', function() {
                 card.classList.remove('card-enter');
                 card.style.animationDelay = '';
-                card.removeEventListener('animationend', handler);
             }, { once: true });
-        });
+        }
     }
 
     // ========================================
@@ -3194,26 +3199,33 @@
     }
 
     function init() {
+        // Critical path: run immediately
         initEvents();
         initTheme();
         initEffects();
-        initCursorSelector();
-        initPetCompanion();
-        initSeasonalTheme();
-        initGERadio();
         initCollapsibleSidebars();
-        initSpinWheel();
-        initVisitorCounter();
         loadData();
-        loadNewsFeed();
-        initFeedback();
-        initAdmin();
 
-        // Handle URL routing for item pages
+        // Handle URL routing for item pages (needed early)
         handleUrlRouting();
-
-        // Listen for back/forward button
         window.addEventListener('popstate', handleUrlRouting);
+
+        // Defer non-critical UI enhancements until the browser is idle
+        const scheduleIdle = window.requestIdleCallback
+            ? cb => window.requestIdleCallback(cb, { timeout: 2000 })
+            : cb => setTimeout(cb, 100);
+
+        scheduleIdle(() => {
+            initCursorSelector();
+            initPetCompanion();
+            initSeasonalTheme();
+            initGERadio();
+            initSpinWheel();
+            initVisitorCounter();
+            loadNewsFeed();
+            initFeedback();
+            initAdmin();
+        });
 
         // News refresh button
         const newsRefreshBtn = document.getElementById('newsRefreshBtn');
