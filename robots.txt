@@ -1,6 +1,6 @@
 # Robots.txt for OSRS Grand Exchange Tracker
 # https://therealge.com
-# Last updated: 2026-03-02
+# Last updated: 2026-03-04
 
 # Allow all search engine bots to crawl the site
 User-agent: *
@@ -25,6 +25,22 @@ Allow: /
 
 User-agent: DuckDuckBot
 Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+# Block AI training crawlers (high bandwidth, no SEO benefit)
+User-agent: GPTBot
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
 
 # Block bad bots
 User-agent: MJ12bot

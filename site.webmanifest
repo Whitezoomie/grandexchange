@@ -1,0 +1,34 @@
+{
+  "name": "OSRS Grand Exchange Tracker",
+  "short_name": "TheRealGE",
+  "description": "Live price tracker for Old School RuneScape Grand Exchange items. Monitor trends, price history, and market data for 4,000+ OSRS items.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f1117",
+  "theme_color": "#c8aa6e",
+  "lang": "en",
+  "scope": "/",
+  "categories": ["games", "utilities", "finance"],
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/coins_10000.ico",
+      "sizes": "any",
+      "type": "image/x-icon",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "label": "OSRS Grand Exchange Tracker - Live item prices and market data"
+    }
+  ]
+}
