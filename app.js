@@ -1032,7 +1032,7 @@
                         borderColor: '#2ecc71',
                         backgroundColor: 'rgba(46, 204, 113, 0.1)',
                         borderWidth: 1.5,
-                        pointRadius: 2,
+                        pointRadius: 1.5,
                         pointBackgroundColor: '#2ecc71',
                         pointBorderColor: '#2ecc71',
                         pointHoverRadius: 4,
@@ -1047,7 +1047,7 @@
                         borderColor: '#e74c3c',
                         backgroundColor: 'rgba(231, 76, 60, 0.1)',
                         borderWidth: 1.5,
-                        pointRadius: 2,
+                        pointRadius: 1.5,
                         pointBackgroundColor: '#e74c3c',
                         pointBorderColor: '#e74c3c',
                         pointHoverRadius: 4,
@@ -1089,7 +1089,6 @@
                                     const pctMargin = sellVal > 0 ? ((marginAfterTax / sellVal) * 100).toFixed(2) : '0.00';
                                     const lines = [];
                                     lines.push('');
-                                    lines.push('Raw Margin: ' + rawMargin.toLocaleString() + ' gp');
                                     lines.push('GE Tax (2%): -' + geTax.toLocaleString() + ' gp');
                                     lines.push('Margin after tax: ' + marginAfterTax.toLocaleString() + ' gp (' + pctMargin + '%)');
                                     return lines;
