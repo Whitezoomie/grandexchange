@@ -2523,6 +2523,7 @@ body.theme-transitioning *::after {
     padding: 24px;
     border-top: 1px solid var(--border);
     margin-top: 24px;
+    contain: layout style;
 }
 
 .footer p {
@@ -2553,6 +2554,7 @@ body.theme-transitioning *::after {
     gap: 28px;
     margin-bottom: 12px;
     flex-wrap: wrap;
+    min-height: 24px;
 }
 
 .visitor-stat {
