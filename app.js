@@ -963,6 +963,22 @@
 
             const avgBuyPrices = filtered.map(p => p.avgHighPrice || null);
             const avgSellPrices = filtered.map(p => p.avgLowPrice || null);
+
+            // Fill nulls by carrying last known value forward so there are no gaps
+            for (let i = 1; i < avgBuyPrices.length; i++) {
+                if (avgBuyPrices[i] === null) avgBuyPrices[i] = avgBuyPrices[i - 1];
+            }
+            for (let i = 1; i < avgSellPrices.length; i++) {
+                if (avgSellPrices[i] === null) avgSellPrices[i] = avgSellPrices[i - 1];
+            }
+            // Also fill backwards for any leading nulls
+            for (let i = avgBuyPrices.length - 2; i >= 0; i--) {
+                if (avgBuyPrices[i] === null) avgBuyPrices[i] = avgBuyPrices[i + 1];
+            }
+            for (let i = avgSellPrices.length - 2; i >= 0; i--) {
+                if (avgSellPrices[i] === null) avgSellPrices[i] = avgSellPrices[i + 1];
+            }
+
             const buyVolumes = filtered.map(p => p.highPriceVolume || 0);
             const sellVolumes = filtered.map(p => p.lowPriceVolume || 0);
 
@@ -979,6 +995,30 @@
         }
     }
 
+    // Crosshair vertical line plugin for price chart
+    const crosshairPlugin = {
+        id: 'crosshairLine',
+        afterDraw(chart) {
+            if (chart.tooltip && chart.tooltip._active && chart.tooltip._active.length) {
+                const activePoint = chart.tooltip._active[0];
+                const ctx = chart.ctx;
+                const x = activePoint.element.x;
+                const topY = chart.scales.y.top;
+                const bottomY = chart.scales.y.bottom;
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(x, topY);
+                ctx.lineTo(x, bottomY);
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+                ctx.setLineDash([5, 4]);
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+    };
+
     function renderPriceChart(labels, buyPrices, sellPrices) {
         const ctx = dom.priceChart.getContext('2d');
         priceChartInstance = new Chart(ctx, {
@@ -991,9 +1031,12 @@
                         data: buyPrices,
                         borderColor: '#2ecc71',
                         backgroundColor: 'rgba(46, 204, 113, 0.1)',
-                        borderWidth: 2,
-                        pointRadius: 0,
-                        pointHitRadius: 8,
+                        borderWidth: 1.5,
+                        pointRadius: 2,
+                        pointBackgroundColor: '#2ecc71',
+                        pointBorderColor: '#2ecc71',
+                        pointHoverRadius: 4,
+                        pointHitRadius: 10,
                         tension: 0.3,
                         fill: false,
                         spanGaps: true,
@@ -1003,15 +1046,19 @@
                         data: sellPrices,
                         borderColor: '#e74c3c',
                         backgroundColor: 'rgba(231, 76, 60, 0.1)',
-                        borderWidth: 2,
-                        pointRadius: 0,
-                        pointHitRadius: 8,
+                        borderWidth: 1.5,
+                        pointRadius: 2,
+                        pointBackgroundColor: '#e74c3c',
+                        pointBorderColor: '#e74c3c',
+                        pointHoverRadius: 4,
+                        pointHitRadius: 10,
                         tension: 0.3,
                         fill: false,
                         spanGaps: true,
                     }
                 ]
             },
+            plugins: [crosshairPlugin],
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -1027,7 +1074,31 @@
                         borderColor: '#2e3348',
                         borderWidth: 1,
                         callbacks: {
-                            label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y != null ? ctx.parsed.y.toLocaleString() + ' gp' : 'N/A'}`
+                            label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y != null ? ctx.parsed.y.toLocaleString() + ' gp' : 'N/A'}`,
+                            afterBody: (tooltipItems) => {
+                                let buyVal = null;
+                                let sellVal = null;
+                                for (const item of tooltipItems) {
+                                    if (item.dataset.label === 'Buy Price' && item.parsed && item.parsed.y != null) buyVal = item.parsed.y;
+                                    if (item.dataset.label === 'Sell Price' && item.parsed && item.parsed.y != null) sellVal = item.parsed.y;
+                                }
+                                if (buyVal != null && sellVal != null) {
+                                    const rawMargin = buyVal - sellVal;
+                                    const geTax = Math.min(5000000, Math.max(1, Math.floor(buyVal * 0.02)));
+                                    const marginAfterTax = rawMargin - geTax;
+                                    const pctMargin = sellVal > 0 ? ((marginAfterTax / sellVal) * 100).toFixed(2) : '0.00';
+                                    const lines = [];
+                                    lines.push('');
+                                    lines.push('Raw Margin: ' + rawMargin.toLocaleString() + ' gp');
+                                    lines.push('GE Tax (2%): -' + geTax.toLocaleString() + ' gp');
+                                    lines.push('Margin after tax: ' + marginAfterTax.toLocaleString() + ' gp (' + pctMargin + '%)');
+                                    return lines;
+                                }
+                                if (buyVal != null || sellVal != null) {
+                                    return ['', 'Margin: N/A (missing ' + (buyVal == null ? 'buy' : 'sell') + ' price)'];
+                                }
+                                return [];
+                            }
                         }
                     }
                 },
