@@ -3341,6 +3341,14 @@
         'ocean': 'Ocean Depths',
         'royal-purple': 'Royal Purple',
         'sunset': 'Sunset',
+        'arctic': 'Arctic',
+        'volcanic': 'Volcanic',
+        'void': 'Void Knight',
+        'desert': 'Desert',
+        'cosmic': 'Cosmic',
+        'toxic': 'Toxic',
+        'golden': 'Golden',
+        'midnight': 'Midnight',
     };
 
     function initTheme() {
@@ -3644,9 +3652,10 @@
             if (e.key === 'Escape') selector.classList.remove('open');
         });
 
-        // Collapsible sub-sections (Cursor Style & Pet Companion)
+        // Collapsible sub-sections (Cursor Style, Pet Companion & Theme)
         setupCollapsibleSection('cursorSectionToggle', 'cursorSectionBody');
         setupCollapsibleSection('petSectionToggle', 'petSectionBody');
+        setupCollapsibleSection('themeSectionToggle', 'themeSectionBody');
     }
 
     function setupCollapsibleSection(toggleId, bodyId) {
