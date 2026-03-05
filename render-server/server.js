@@ -228,15 +228,14 @@ const server = http.createServer(async (req, res) => {
             if (feedbackList.length > 500) feedbackList = feedbackList.slice(0, 500);
             
             // Save to Supabase
-            try {
-                await supabase.from('feedback').insert({
-                    id: entry.id,
-                    type: entry.type,
-                    name: entry.name,
-                    message: entry.message,
-                    created_at: entry.date
-                });
-            } catch (e) { console.error('Error saving feedback:', e.message); }
+            const { error: fbError } = await supabase.from('feedback').insert({
+                id: entry.id,
+                type: entry.type,
+                name: entry.name,
+                message: entry.message,
+                created_at: entry.date
+            });
+            if (fbError) console.error('SUPABASE FEEDBACK ERROR:', JSON.stringify(fbError));
 
             res.writeHead(201, headers);
             return res.end(JSON.stringify({ success: true }));
@@ -349,15 +348,14 @@ const server = http.createServer(async (req, res) => {
             if (highlightsData.pending.length > 100) highlightsData.pending = highlightsData.pending.slice(0, 100);
             
             // Save to Supabase
-            try {
-                await supabase.from('highlights_pending').insert({
-                    id: entry.id,
-                    player_name: entry.playerName,
-                    caption: entry.caption,
-                    image: entry.image,
-                    created_at: entry.date
-                });
-            } catch (e) { console.error('Error saving highlight:', e.message); }
+            const { error: hlError } = await supabase.from('highlights_pending').insert({
+                id: entry.id,
+                player_name: entry.playerName,
+                caption: entry.caption,
+                image: entry.image,
+                created_at: entry.date
+            });
+            if (hlError) console.error('SUPABASE HIGHLIGHT ERROR:', JSON.stringify(hlError));
 
             res.writeHead(201, headers);
             return res.end(JSON.stringify({ success: true }));
