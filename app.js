@@ -2943,243 +2943,6 @@
     }
 
     // ========================================
-    // Spin the Wheel
-    // ========================================
-
-    function initSpinWheel() {
-        const btn = document.getElementById('spinWheelBtn');
-        const overlay = document.getElementById('spinOverlay');
-        const closeBtn = document.getElementById('spinClose');
-        const goBtn = document.getElementById('spinGoBtn');
-        const reel = document.getElementById('spinReel');
-        const resultEl = document.getElementById('spinResult');
-        if (!btn || !overlay) return;
-
-        const soundToggle = document.getElementById('spinSoundToggle');
-        let spinSoundEnabled = localStorage.getItem('spin_sound') !== 'off';
-        if (soundToggle) {
-            soundToggle.checked = spinSoundEnabled;
-            soundToggle.addEventListener('change', () => {
-                spinSoundEnabled = soundToggle.checked;
-                localStorage.setItem('spin_sound', spinSoundEnabled ? 'on' : 'off');
-            });
-        }
-
-        let spinning = false;
-        let wheelItems = [];
-
-        function getTop20() {
-            return allItems
-                .filter(it => it.margin != null && it.margin > 0 && (it.volume || 0) >= 200)
-                .sort((a, b) => b.margin - a.margin)
-                .slice(0, 20);
-        }
-
-        function buildReelHTML(items, repeats) {
-            let html = '';
-            for (let r = 0; r < repeats; r++) {
-                for (const it of items) {
-                    const icon = getIconUrl(it.icon);
-                    html += `<div class="spin-reel-item">`
-                        + `<img src="${icon}" alt="" onerror="this.style.display='none'">`
-                        + `<span class="spin-item-name">${it.name}</span>`
-                        + `<span class="spin-item-margin">${formatGp(it.margin, true)}</span>`
-                        + `</div>`;
-                }
-            }
-            return html;
-        }
-
-        function openSpinWheel() {
-            wheelItems = getTop20();
-            if (wheelItems.length === 0) {
-                resultEl.innerHTML = '<p style="color:var(--text-muted)">No qualifying items found yet. Wait for data to load.</p>';
-                reel.innerHTML = '';
-                overlay.classList.add('active');
-                goBtn.disabled = true;
-                return;
-            }
-            // Shuffle for randomness
-            const shuffled = [...wheelItems].sort(() => Math.random() - 0.5);
-            wheelItems = shuffled;
-
-            const repeats = 8; // repeat the list many times for scrolling
-            reel.innerHTML = buildReelHTML(shuffled, repeats);
-            reel.style.transition = 'none';
-            reel.style.transform = 'translateY(0)';
-            resultEl.innerHTML = '';
-            goBtn.disabled = false;
-            spinning = false;
-            overlay.classList.add('active');
-        }
-
-        function closeSpinWheel() {
-            overlay.classList.remove('active');
-            spinning = false;
-        }
-
-        // Sample the cubic-bezier(0.15, 0.8, 0.3, 1) curve into a lookup table
-        // for accurate and glitch-free time->progress mapping
-        const BEZIER_SAMPLES = 200;
-        const bezierLUT = [];
-        (function buildBezierLUT() {
-            // cubic-bezier(0.15, 0.8, 0.3, 1) means:
-            // P1 = (0.15, 0.8), P2 = (0.3, 1.0)
-            for (let i = 0; i <= BEZIER_SAMPLES; i++) {
-                const t = i / BEZIER_SAMPLES;
-                const mt = 1 - t;
-                const xVal = 3 * mt * mt * t * 0.15 + 3 * mt * t * t * 0.3 + t * t * t;
-                const yVal = 3 * mt * mt * t * 0.8 + 3 * mt * t * t * 1.0 + t * t * t;
-                bezierLUT.push({ x: xVal, y: yVal });
-            }
-        })();
-
-        // Get eased progress (y) for a given time fraction (x) via LUT interpolation
-        function getEasedProgress(timeFraction) {
-            if (timeFraction <= 0) return 0;
-            if (timeFraction >= 1) return 1;
-            // Find the two surrounding samples
-            for (let i = 1; i < bezierLUT.length; i++) {
-                if (bezierLUT[i].x >= timeFraction) {
-                    const prev = bezierLUT[i - 1];
-                    const curr = bezierLUT[i];
-                    const ratio = (timeFraction - prev.x) / (curr.x - prev.x);
-                    return prev.y + ratio * (curr.y - prev.y);
-                }
-            }
-            return 1;
-        }
-
-        // Play a short click sound for each reel tick, scheduled to follow the easing curve
-        function getTimeFractionForProgress(progressFraction) {
-            if (progressFraction <= 0) return 0;
-            if (progressFraction >= 1) return 1;
-            for (let i = 1; i < bezierLUT.length; i++) {
-                const prev = bezierLUT[i - 1];
-                const curr = bezierLUT[i];
-                if (prev.y <= progressFraction && curr.y >= progressFraction) {
-                    const ratio = (progressFraction - prev.y) / (curr.y - prev.y || 1);
-                    return prev.x + ratio * (curr.x - prev.x);
-                }
-            }
-            return 1;
-        }
-
-        function playClickSequence(ticks, duration) {
-            if (!spinSoundEnabled) return;
-            try {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const now = audioContext.currentTime + 0.03; // small scheduling offset
-
-                // Build a short click buffer (noise with exponential decay)
-                const sr = audioContext.sampleRate;
-                const clickLen = Math.max(256, Math.floor(sr * 0.02));
-                const buffer = audioContext.createBuffer(1, clickLen, sr);
-                const data = buffer.getChannelData(0);
-                for (let i = 0; i < clickLen; i++) {
-                    const env = Math.exp(-8 * i / clickLen);
-                    data[i] = (Math.random() * 2 - 1) * env * 0.9;
-                }
-
-                for (let k = 0; k < ticks; k++) {
-                    const targetProgress = k / ticks;
-                    const timeFrac = getTimeFractionForProgress(targetProgress);
-                    const t = now + timeFrac * duration;
-
-                    const src = audioContext.createBufferSource();
-                    src.buffer = buffer;
-                    const g = audioContext.createGain();
-                    src.connect(g);
-                    g.connect(audioContext.destination);
-
-                    // Very short envelope for a crisp click
-                    g.gain.setValueAtTime(0.0001, t);
-                    g.gain.exponentialRampToValueAtTime(0.1, t + 0.001);
-                    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.03);
-
-                    src.start(t);
-                    src.stop(t + 0.04);
-                }
-            } catch (e) {
-                // ignore audio errors silently
-            }
-        }
-
-        function spin() {
-            if (spinning || wheelItems.length === 0) return;
-            spinning = true;
-            goBtn.disabled = true;
-            resultEl.innerHTML = '';
-
-            // Re-shuffle and rebuild the reel for a fresh spin each time
-            const shuffled = [...wheelItems].sort(() => Math.random() - 0.5);
-            wheelItems = shuffled;
-            const repeats = 8;
-            reel.innerHTML = buildReelHTML(shuffled, repeats);
-
-            // Reset position instantly (no transition)
-            reel.style.transition = 'none';
-            reel.style.transform = 'translateY(0)';
-            // Force reflow so the reset takes effect before animating
-            void reel.offsetHeight;
-
-            const itemHeight = 50;
-            const totalPerSet = wheelItems.length;
-            // Pick a random winner index
-            const winnerIdx = Math.floor(Math.random() * totalPerSet);
-            // We want to scroll through several full sets then land on the winner
-            const fullSets = 5; // scroll past 5 full sets
-            const targetItem = fullSets * totalPerSet + winnerIdx;
-            // Center the winner in the viewport (viewport is 100px = 2 items)
-            const offset = targetItem * itemHeight - (50 - itemHeight / 2);
-
-            // Play click sound synced to each item passing the pointer
-            const spinDuration = 4.0;
-            playClickSequence(targetItem, spinDuration);
-
-            // Apply cubic-bezier for realistic slow-down
-            reel.style.transition = `transform ${spinDuration}s cubic-bezier(0.15, 0.8, 0.3, 1)`;
-            reel.style.transform = `translateY(-${offset}px)`;
-
-            setTimeout(() => {
-                spinning = false;
-                goBtn.disabled = false;
-                const winner = wheelItems[winnerIdx];
-                showSpinResult(winner);
-            }, 4200);
-        }
-
-        function showSpinResult(item) {
-            const icon = getIconUrl(item.icon);
-            resultEl.innerHTML = `
-                <div class="spin-result-card" data-item-id="${item.id}" title="Click to view details">
-                    <img src="${icon}" alt="">
-                    <div class="spin-result-info">
-                        <div class="spin-result-name">${item.name}</div>
-                        <div class="spin-result-details">Margin: <span>${formatGp(item.margin, true)}</span> &bull; Volume: ${(item.volume || 0).toLocaleString()}</div>
-                    </div>
-                </div>`;
-            const card = resultEl.querySelector('.spin-result-card');
-            if (card) {
-                card.addEventListener('click', () => {
-                    closeSpinWheel();
-                    const full = allItems.find(i => i.id === item.id);
-                    if (full) openModal(full);
-                });
-            }
-        }
-
-        btn.addEventListener('click', openSpinWheel);
-        closeBtn.addEventListener('click', closeSpinWheel);
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) closeSpinWheel();
-        });
-        goBtn.addEventListener('click', spin);
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && overlay.classList.contains('active')) closeSpinWheel();
-        });
-    }
-
     // ========================================
     // Init
     // ========================================
@@ -3277,7 +3040,6 @@
             initPetCompanion();
             initSeasonalTheme();
             initGERadio();
-            initSpinWheel();
             initVisitorCounter();
             loadNewsFeed();
             initFeedback();
@@ -3349,32 +3111,25 @@
         const saved = localStorage.getItem('ge_theme') || 'dark';
         applyTheme(saved);
 
-        const selector = document.getElementById('themeSelector');
-        const toggle = document.getElementById('themeToggle');
-        const dropdown = document.getElementById('themeDropdown');
-
-        // Toggle dropdown on button click
-        toggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            // Close effects dropdown
-            var es = document.getElementById('effectsSelector');
-            if (es) es.classList.remove('open');
-            selector.classList.toggle('open');
-        });
+        const selector = document.getElementById('themeEffectsSelector');
+        const dropdown = document.getElementById('themeEffectsDropdown');
+        const themeOptions = document.getElementById('themeDropdownOptions');
 
         // Handle theme option clicks
-        dropdown.addEventListener('click', (e) => {
-            const option = e.target.closest('.theme-option');
-            if (!option) return;
-            const theme = option.getAttribute('data-theme');
-            if (theme) {
-                document.body.classList.add('theme-transitioning');
-                applyTheme(theme);
-                localStorage.setItem('ge_theme', theme);
-                setTimeout(() => document.body.classList.remove('theme-transitioning'), 500);
-                selector.classList.remove('open');
-            }
-        });
+        if (themeOptions) {
+            themeOptions.addEventListener('click', (e) => {
+                const option = e.target.closest('.theme-option');
+                if (!option) return;
+                const theme = option.getAttribute('data-theme');
+                if (theme) {
+                    document.body.classList.add('theme-transitioning');
+                    applyTheme(theme);
+                    localStorage.setItem('ge_theme', theme);
+                    setTimeout(() => document.body.classList.remove('theme-transitioning'), 500);
+                    selector.classList.remove('open');
+                }
+            });
+        }
 
         // Close dropdown when clicking outside
         document.addEventListener('click', (e) => {
@@ -3603,9 +3358,9 @@
     // ========================================
 
     function initEffects() {
-        const selector = document.getElementById('effectsSelector');
-        const toggle = document.getElementById('effectsToggle');
-        const dropdown = document.getElementById('effectsDropdown');
+        const selector = document.getElementById('themeEffectsSelector');
+        const toggle = document.getElementById('themeEffectsToggle');
+        const dropdown = document.getElementById('themeEffectsDropdown');
         const onOffBtn = document.getElementById('effectsOnOffBtn');
         const onOffLabel = document.getElementById('effectsOnOffLabel');
         const statusDot = document.getElementById('effectsStatusDot');
@@ -3625,9 +3380,6 @@
         // Toggle dropdown
         toggle.addEventListener('click', function(e) {
             e.stopPropagation();
-            // Close theme dropdown
-            var ts = document.getElementById('themeSelector');
-            if (ts) ts.classList.remove('open');
             selector.classList.toggle('open');
         });
 
@@ -3759,7 +3511,7 @@
     let petVelY = (Math.random() - 0.5) * 7;  // Velocity Y with random initial direction
 
     function initPetCompanion() {
-        const selector = document.getElementById('effectsSelector');
+        const selector = document.getElementById('themeEffectsSelector');
         const petList = document.getElementById('petList');
 
         if (!selector || !petList) return;

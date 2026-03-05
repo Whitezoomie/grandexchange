@@ -262,7 +262,7 @@
                 </div>
                 <!-- GE Radio (compact, header-inline) -->
                 <div class="ge-radio" id="geRadio">
-                    <button class="ge-radio-toggle" id="geRadioToggle" title="GE Radio — OSRS Soundtrack">
+                    <button class="ge-radio-toggle" id="geRadioToggle" title="GE Radio ï¿½ OSRS Soundtrack">
                         <svg class="ge-radio-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
                         <div class="ge-radio-bars" id="geRadioBars"><span></span><span></span><span></span></div>
                         <span class="ge-radio-label" id="geRadioLabel">GE Radio</span>
@@ -302,18 +302,15 @@
                     </div>
                 </div>
             </div>
-            <div class="header-actions">
-                <button class="header-action-btn spin-wheel-btn" id="spinWheelBtn" title="Spin the Wheel — Top 20 margin items">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="10"/><path d="M12 2v10l7 7"/><path d="M12 12L5 19"/><path d="M2 12h10"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
-                    <span>Spin the Wheel</span>
-                </button>
-                <div class="effects-selector" id="effectsSelector">
-                    <button class="header-action-btn" id="effectsToggle" title="Effects, Pet & Cursor">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"/><circle cx="12" cy="12" r="4"/></svg>
-                        <span id="effectsLabel">Effects</span>
-                        <svg class="effects-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="6 9 12 15 18 9"/></svg>
+                        <div class="header-actions">
+                <div class="theme-effects-selector" id="themeEffectsSelector">
+                    <button class="header-action-btn" id="themeEffectsToggle" title="Theme & Effects">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M12 2a7 7 0 0 0 0 14h.5a5.5 5.5 0 0 0 0-11H12V2z"/><circle cx="12" cy="12" r="10" stroke-dasharray="2 2"/></svg>
+                        <span id="themeEffectsLabel">Settings</span>
+                        <svg class="theme-effects-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
-                    <div class="effects-dropdown" id="effectsDropdown">
+                    <div class="theme-effects-dropdown" id="themeEffectsDropdown">
+                        <!-- Effects Section -->
                         <div class="effects-dropdown-section">
                             <div class="effects-dropdown-header">Visual Effects</div>
                             <button class="effects-toggle-option" id="effectsOnOffBtn">
@@ -342,44 +339,41 @@
                                 <div class="pet-list" id="petList"></div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div class="theme-selector" id="themeSelector">
-                    <button class="header-action-btn" id="themeToggle" title="Toggle Theme">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M12 2a7 7 0 0 0 0 14h.5a5.5 5.5 0 0 0 0-11H12V2z"/><circle cx="12" cy="12" r="10" stroke-dasharray="2 2"/></svg>
-                        <span id="themeLabel">Theme</span>
-                        <svg class="theme-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="6 9 12 15 18 9"/></svg>
-                    </button>
-                    <div class="theme-dropdown" id="themeDropdown">
-                        <div class="theme-dropdown-header">Choose Theme</div>
-                        <button class="theme-option" data-theme="dark">
-                            <span class="theme-swatch" style="background: linear-gradient(135deg, #0f1117, #22263a)"></span>
-                            <span class="theme-option-name">Dark</span>
-                        </button>
-                        <button class="theme-option" data-theme="light">
-                            <span class="theme-swatch" style="background: linear-gradient(135deg, #f5ebe0, #fdf8f0)"></span>
-                            <span class="theme-option-name">Light</span>
-                        </button>
-                        <button class="theme-option" data-theme="blood-moon">
-                            <span class="theme-swatch" style="background: linear-gradient(135deg, #1a0a0a, #3d1111)"></span>
-                            <span class="theme-option-name">Blood Moon</span>
-                        </button>
-                        <button class="theme-option" data-theme="dark-green">
-                            <span class="theme-swatch" style="background: linear-gradient(135deg, #0a1410, #132e1f)"></span>
-                            <span class="theme-option-name">Dark Forest</span>
-                        </button>
-                        <button class="theme-option" data-theme="ocean">
-                            <span class="theme-swatch" style="background: linear-gradient(135deg, #0a1628, #142d4f)"></span>
-                            <span class="theme-option-name">Ocean Depths</span>
-                        </button>
-                        <button class="theme-option" data-theme="royal-purple">
-                            <span class="theme-swatch" style="background: linear-gradient(135deg, #140a1e, #2a1540)"></span>
-                            <span class="theme-option-name">Royal Purple</span>
-                        </button>
-                        <button class="theme-option" data-theme="sunset">
-                            <span class="theme-swatch" style="background: linear-gradient(135deg, #1a1008, #3d2810)"></span>
-                            <span class="theme-option-name">Sunset</span>
-                        </button>
+                        <div class="effects-dropdown-divider"></div>
+                        <!-- Theme Section -->
+                        <div class="effects-dropdown-section">
+                            <div class="effects-dropdown-header">Theme</div>
+                        </div>
+                        <div class="theme-dropdown-options" id="themeDropdownOptions">
+                            <button class="theme-option" data-theme="dark">
+                                <span class="theme-swatch" style="background: linear-gradient(135deg, #0f1117, #22263a)"></span>
+                                <span class="theme-option-name">Dark</span>
+                            </button>
+                            <button class="theme-option" data-theme="light">
+                                <span class="theme-swatch" style="background: linear-gradient(135deg, #f5ebe0, #fdf8f0)"></span>
+                                <span class="theme-option-name">Light</span>
+                            </button>
+                            <button class="theme-option" data-theme="blood-moon">
+                                <span class="theme-swatch" style="background: linear-gradient(135deg, #1a0a0a, #3d1111)"></span>
+                                <span class="theme-option-name">Blood Moon</span>
+                            </button>
+                            <button class="theme-option" data-theme="dark-green">
+                                <span class="theme-swatch" style="background: linear-gradient(135deg, #0a1410, #132e1f)"></span>
+                                <span class="theme-option-name">Dark Forest</span>
+                            </button>
+                            <button class="theme-option" data-theme="ocean">
+                                <span class="theme-swatch" style="background: linear-gradient(135deg, #0a1628, #142d4f)"></span>
+                                <span class="theme-option-name">Ocean Depths</span>
+                            </button>
+                            <button class="theme-option" data-theme="royal-purple">
+                                <span class="theme-swatch" style="background: linear-gradient(135deg, #140a1e, #2a1540)"></span>
+                                <span class="theme-option-name">Royal Purple</span>
+                            </button>
+                            <button class="theme-option" data-theme="sunset">
+                                <span class="theme-swatch" style="background: linear-gradient(135deg, #1a1008, #3d2810)"></span>
+                                <span class="theme-option-name">Sunset</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -710,14 +704,7 @@
     </a>
 
     <!-- Spin the Wheel Overlay -->
-    <div class="spin-overlay" id="spinOverlay">
-        <div class="spin-container">
-            <button class="spin-close" id="spinClose" title="Close">&times;</button>
-            <h2 class="spin-title">Spin the Wheel</h2>
-            <p class="spin-subtitle">Top 20 highest-margin items (volume &ge; 200)</p>
-            <div class="spin-wheel-wrapper">
-                <div class="spin-pointer"></div>
-                <div class="spin-reel" id="spinReel"></div>
+    <div class="spin-reel" id="spinReel"></div>
             </div>
             <div class="spin-controls">
                 <label class="spin-sound-label">

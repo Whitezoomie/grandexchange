@@ -34,6 +34,3 @@ Disallow: /
 
 # Sitemap location
 Sitemap: https://therealge.com/sitemap.xml
-
-# Search Console
-Sitemap: https://therealge.com/sitemap-index.xml
