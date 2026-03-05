@@ -249,6 +249,20 @@ const server = http.createServer(async (req, res) => {
         return res.end(JSON.stringify({ success: true }));
     }
 
+    // --- Admin: reset all votes ---
+    if (path === '/admin/votes/reset' && req.method === 'POST') {
+        const token = (req.headers.authorization || '').replace('Bearer ', '');
+        if (!adminTokens.has(token)) {
+            res.writeHead(401, headers);
+            return res.end(JSON.stringify({ error: 'Unauthorized' }));
+        }
+        votesData = {};
+        Object.keys(ipVotes).forEach(k => delete ipVotes[k]);
+        saveVotes();
+        res.writeHead(200, headers);
+        return res.end(JSON.stringify({ success: true }));
+    }
+
     // --- Get approved highlights (public) ---
     if (path === '/highlights' && req.method === 'GET') {
         const approved = (highlightsData.approved || []).map(h => ({

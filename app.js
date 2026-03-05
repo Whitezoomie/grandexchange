@@ -2953,6 +2953,22 @@
                     loadAdminHighlights();
                     const hlRefreshBtn = document.getElementById('adminHighlightsRefresh');
                     if (hlRefreshBtn) hlRefreshBtn.onclick = loadAdminHighlights;
+                    const resetVotesBtn = document.getElementById('adminResetVotes');
+                    if (resetVotesBtn) resetVotesBtn.onclick = async function() {
+                        if (!confirm('Reset ALL flip votes? This cannot be undone.')) return;
+                        try {
+                            const r = await fetch(`${FEEDBACK_SERVER}/admin/votes/reset`, {
+                                method: 'POST',
+                                headers: { 'Authorization': 'Bearer ' + adminToken }
+                            });
+                            if (r.ok) {
+                                resetVotesBtn.textContent = 'Votes Reset!';
+                                setTimeout(() => { resetVotesBtn.textContent = 'Reset All Votes'; }, 2500);
+                            }
+                        } catch (e) {
+                            alert('Failed to reset votes.');
+                        }
+                    };
                 } else {
                     errorEl.textContent = 'Invalid credentials';
                 }

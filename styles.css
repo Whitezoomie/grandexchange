@@ -2420,6 +2420,14 @@ body.theme-transitioning *::after {
     margin-top: 0;
 }
 
+.admin-btn-danger {
+    background: #c0392b;
+    color: #fff;
+}
+.admin-btn-danger:hover {
+    background: #e74c3c;
+}
+
 .admin-error {
     margin-top: 10px;
     color: #e74c3c;
