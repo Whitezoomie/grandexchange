@@ -3139,8 +3139,11 @@
     // VISITOR COUNTER (WebSocket → Render)
     // ========================================
     function initVisitorCounter() {
-        // ── REPLACE with your Render service URL ──
-        const SERVER_URL = 'https://osrs-ge-counter.onrender.com/';
+        // Use the feedback server URL if present (keeps backend host consistent).
+        // FEEDBACK_SERVER is declared earlier in this file; fall back to the known service.
+        const SERVER_URL = (typeof FEEDBACK_SERVER !== 'undefined' && FEEDBACK_SERVER)
+            ? FEEDBACK_SERVER.replace(/\/$/, '') + '/'
+            : 'https://osrs-ge-server.onrender.com/';
         const WS_URL = SERVER_URL.replace('https://', 'wss://').replace('http://', 'ws://');
 
         const onlineCountEl = document.getElementById('onlineCount');
