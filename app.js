@@ -3051,6 +3051,14 @@
                 openDeathCoffer();
             });
         }
+
+        var heatmapBtn = document.getElementById('menuHeatmap');
+        if (heatmapBtn) {
+            heatmapBtn.addEventListener('click', function() {
+                menu.classList.remove('open');
+                openHeatmap();
+            });
+        }
     }
 
     // ========================================
@@ -3252,6 +3260,222 @@
         });
     }
 
+    // ========================================
+    // Market Heatmap
+    // ========================================
+
+    var _heatmapTooltipEl = null;
+
+    function _heatmapShowTip(text, e) {
+        if (!_heatmapTooltipEl) {
+            _heatmapTooltipEl = document.createElement('div');
+            _heatmapTooltipEl.className = 'heatmap-tooltip';
+            document.body.appendChild(_heatmapTooltipEl);
+        }
+        _heatmapTooltipEl.innerHTML = text;
+        _heatmapTooltipEl.style.display = 'block';
+        _heatmapMoveTip(e);
+    }
+
+    function _heatmapMoveTip(e) {
+        if (!_heatmapTooltipEl) return;
+        var x = e.clientX + 14;
+        var y = e.clientY - 10;
+        if (x + 280 > window.innerWidth) x = e.clientX - 294;
+        _heatmapTooltipEl.style.left = x + 'px';
+        _heatmapTooltipEl.style.top = y + 'px';
+    }
+
+    function _heatmapHideTip() {
+        if (_heatmapTooltipEl) _heatmapTooltipEl.style.display = 'none';
+    }
+
+    function _heatmapColor(marginPct, colorBy, volFraction) {
+        if (colorBy === 'volume') {
+            var l = Math.round(18 + volFraction * 38);
+            return 'hsl(210,68%,' + l + '%)';
+        }
+        if (marginPct >= 8)  return '#166534';
+        if (marginPct >= 4)  return '#15803d';
+        if (marginPct >= 2)  return '#65a30d';
+        if (marginPct >= 1)  return '#b45309';
+        if (marginPct >= 0)  return '#c2410c';
+        return '#991b1b';
+    }
+
+    function _heatmapMarginTextColor(marginPct) {
+        if (marginPct >= 2)  return '#86efac';
+        if (marginPct >= 0)  return '#fde68a';
+        return '#fca5a5';
+    }
+
+    function _updateHeatmapLegend(colorBy) {
+        var legend = document.getElementById('heatmapLegend');
+        if (!legend) return;
+        if (colorBy === 'volume') {
+            legend.innerHTML =
+                '<span class="heatmap-legend-label">Volume:</span>' +
+                '<span class="heatmap-legend-swatch" style="background:hsl(210,68%,56%)">Highest</span>' +
+                '<span class="heatmap-legend-swatch" style="background:hsl(210,68%,40%)">High</span>' +
+                '<span class="heatmap-legend-swatch" style="background:hsl(210,68%,28%)">Medium</span>' +
+                '<span class="heatmap-legend-swatch" style="background:hsl(210,68%,18%)">Low</span>';
+        } else {
+            legend.innerHTML =
+                '<span class="heatmap-legend-label">Margin:</span>' +
+                '<span class="heatmap-legend-swatch" style="background:#166534">&ge;8%</span>' +
+                '<span class="heatmap-legend-swatch" style="background:#15803d">4&ndash;8%</span>' +
+                '<span class="heatmap-legend-swatch" style="background:#65a30d">2&ndash;4%</span>' +
+                '<span class="heatmap-legend-swatch" style="background:#b45309">1&ndash;2%</span>' +
+                '<span class="heatmap-legend-swatch" style="background:#c2410c">0&ndash;1%</span>' +
+                '<span class="heatmap-legend-swatch" style="background:#991b1b">Negative</span>';
+        }
+    }
+
+    function renderHeatmap() {
+        var grid = document.getElementById('heatmapGrid');
+        var countEl = document.getElementById('heatmapItemCount');
+        if (!grid) return;
+
+        var colorBy    = (document.getElementById('heatmapColorBy')  || {}).value || 'margin';
+        var minPriceRaw = (document.getElementById('heatmapMinPrice') || {}).value || '';
+        var maxPriceRaw = (document.getElementById('heatmapMaxPrice') || {}).value || '';
+        var minVolRaw   = (document.getElementById('heatmapMinVol')   || {}).value || '';
+
+        var minPrice = parseCofferGp(minPriceRaw) || 0;
+        var maxPrice = parseCofferGp(maxPriceRaw) || Infinity;
+        var minVol   = parseCofferGp(minVolRaw)   || 0;
+
+        _updateHeatmapLegend(colorBy);
+
+        if (!allItems || allItems.length === 0) {
+            grid.innerHTML = '<div class="heatmap-empty">Data is still loading. Please try again.</div>';
+            return;
+        }
+
+        var items = allItems.filter(function(it) {
+            if (!it.buyPrice || !it.sellPrice) return false;
+            if (!it.volume || it.volume < 1) return false;
+            var mid = Math.floor((it.buyPrice + it.sellPrice) / 2);
+            if (mid < minPrice) return false;
+            if (mid > maxPrice) return false;
+            if (it.volume < minVol) return false;
+            return true;
+        });
+
+        // Sort by volume desc, cap at 200 items for performance
+        items.sort(function(a, b) { return (b.volume || 0) - (a.volume || 0); });
+        items = items.slice(0, 200);
+
+        if (countEl) countEl.textContent = items.length + ' items';
+
+        if (items.length === 0) {
+            grid.innerHTML = '<div class="heatmap-empty">No items match the current filters.</div>';
+            return;
+        }
+
+        var maxVol = items[0].volume || 1;
+        var logMaxVol = Math.log(maxVol + 1);
+
+        var html = items.map(function(item) {
+            var mid = Math.floor((item.buyPrice + item.sellPrice) / 2);
+            var marginPct = (mid > 0 && item.margin != null) ? (item.margin / mid * 100) : 0;
+            var volFraction = Math.log(item.volume + 1) / logMaxVol; // log scale for better distribution
+
+            var bg = _heatmapColor(marginPct, colorBy, volFraction);
+            var marginTextCol = _heatmapMarginTextColor(marginPct);
+
+            // Tile size: 68px (low volume) to 184px (highest volume)
+            var size = Math.round(68 + volFraction * 116);
+            var isSmall = size < 88;
+
+            var iconUrl = getIconUrl(item.icon);
+            var pctStr = (marginPct >= 0 ? '+' : '') + marginPct.toFixed(1) + '%';
+            var tipText =
+                item.name + '\n' +
+                'Mid Price: ' + formatGp(mid) + '\n' +
+                'Margin: ' + (item.margin != null ? formatGp(item.margin) : 'N/A') + ' (' + pctStr + ')\n' +
+                'Volume: ' + (item.volume ? item.volume.toLocaleString() : '0') + '/day\n' +
+                'Buy: ' + formatGp(item.buyPrice) + '  Sell: ' + formatGp(item.sellPrice);
+
+            return '<div class="heatmap-cell' + (isSmall ? ' small-tile' : '') + '"' +
+                ' style="width:' + size + 'px;height:' + size + 'px;background:' + bg + '"' +
+                ' data-item-id="' + item.id + '"' +
+                ' data-tip="' + tipText.replace(/"/g, '&quot;') + '">' +
+                '<img class="heatmap-cell-icon" src="' + iconUrl + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' +
+                '<div class="heatmap-cell-name">' + item.name + '</div>' +
+                '<div class="heatmap-cell-margin" style="color:' + marginTextCol + '">' + pctStr + '</div>' +
+                '</div>';
+        }).join('');
+
+        grid.innerHTML = html;
+
+        // Wire clicks and tooltips
+        grid.querySelectorAll('.heatmap-cell').forEach(function(cell) {
+            cell.addEventListener('click', function() {
+                var id = parseInt(cell.dataset.itemId, 10);
+                var item = allItems.find(function(it) { return it.id === id; });
+                if (item) {
+                    closeHeatmap();
+                    openModal(item);
+                }
+            });
+            cell.addEventListener('mouseenter', function(e) {
+                _heatmapShowTip(cell.dataset.tip.replace(/\n/g, '<br>'), e);
+            });
+            cell.addEventListener('mousemove', _heatmapMoveTip);
+            cell.addEventListener('mouseleave', _heatmapHideTip);
+        });
+    }
+
+    function openHeatmap() {
+        var overlay = document.getElementById('heatmapOverlay');
+        if (!overlay) return;
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        renderHeatmap();
+
+        var colorBy = document.getElementById('heatmapColorBy');
+        var minPrice = document.getElementById('heatmapMinPrice');
+        var maxPrice = document.getElementById('heatmapMaxPrice');
+        var minVol   = document.getElementById('heatmapMinVol');
+
+        function rerender() { renderHeatmap(); }
+
+        if (colorBy)  colorBy.onchange  = rerender;
+        if (minPrice) minPrice.oninput  = rerender;
+        if (maxPrice) maxPrice.oninput  = rerender;
+        if (minVol)   minVol.oninput    = rerender;
+    }
+
+    function closeHeatmap() {
+        var overlay = document.getElementById('heatmapOverlay');
+        if (!overlay) return;
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+        _heatmapHideTip();
+    }
+
+    function initHeatmap() {
+        var overlay  = document.getElementById('heatmapOverlay');
+        var closeBtn = document.getElementById('heatmapClose');
+
+        if (overlay) {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) closeHeatmap();
+            });
+        }
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeHeatmap);
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && overlay && overlay.classList.contains('active')) {
+                closeHeatmap();
+            }
+        });
+    }
+
     function init() {
         // Critical path: run immediately
         initEvents();
@@ -3259,6 +3483,7 @@
         initEffects();
         initHamburgerMenu();
         initDeathCoffer();
+        initHeatmap();
         initCollapsibleSidebars();
         loadData();
 

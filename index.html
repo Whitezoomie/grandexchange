@@ -314,6 +314,10 @@
                             <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M20 6h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zM10 4h4v2h-4V4zm10 16H4V8h16v12z"/></svg>
                             <span>Death's Coffer</span>
                         </button>
+                        <button class="hamburger-menu-item" id="menuHeatmap">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M3 3h4v4H3zm0 7h4v4H3zm0 7h4v4H3zm7-14h4v4h-4zm0 7h4v4h-4zm0 7h4v4h-4zm7-14h4v4h-4zm0 7h4v4h-4zm0 7h4v4h-4z"/></svg>
+                            <span>Market Heatmap</span>
+                        </button>
                     </div>
                 </div>
                 <div class="theme-effects-selector" id="themeEffectsSelector">
@@ -788,6 +792,57 @@
                 </div>
                 <div class="admin-feedback-list" id="adminFeedbackList">
                     <p class="admin-loading">Loading feedback...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Market Heatmap Overlay -->
+    <div class="heatmap-overlay" id="heatmapOverlay">
+        <div class="heatmap-panel">
+            <div class="heatmap-header">
+                <div class="heatmap-title-row">
+                    <h2 class="heatmap-title">Market Heatmap</h2>
+                    <span class="heatmap-item-count" id="heatmapItemCount">0 items</span>
+                </div>
+                <button class="heatmap-close" id="heatmapClose">&times;</button>
+            </div>
+            <div class="heatmap-divider"></div>
+            <p class="heatmap-desc">Items are sized by daily trade volume. Colour reflects margin percentage. Click any tile to view full item details.</p>
+            <div class="heatmap-controls-row">
+                <div class="heatmap-filter-row">
+                    <label class="heatmap-filter-label" for="heatmapColorBy">Colour By</label>
+                    <select id="heatmapColorBy" class="heatmap-select">
+                        <option value="margin">Margin %</option>
+                        <option value="volume">Volume</option>
+                    </select>
+                </div>
+                <div class="heatmap-filter-row">
+                    <label class="heatmap-filter-label" for="heatmapMinPrice">Min Price</label>
+                    <input type="text" id="heatmapMinPrice" class="heatmap-filter-input" placeholder="e.g. 1k, 1m" inputmode="numeric" autocomplete="off">
+                </div>
+                <div class="heatmap-filter-row">
+                    <label class="heatmap-filter-label" for="heatmapMaxPrice">Max Price</label>
+                    <input type="text" id="heatmapMaxPrice" class="heatmap-filter-input" placeholder="e.g. 50k, 1m" inputmode="numeric" autocomplete="off">
+                </div>
+                <div class="heatmap-filter-row">
+                    <label class="heatmap-filter-label" for="heatmapMinVol">Min Volume</label>
+                    <input type="text" id="heatmapMinVol" class="heatmap-filter-input" placeholder="e.g. 100, 5k" inputmode="numeric" autocomplete="off">
+                </div>
+            </div>
+            <div class="heatmap-legend" id="heatmapLegend">
+                <span class="heatmap-legend-label">Margin:</span>
+                <span class="heatmap-legend-swatch" style="background:#166534">&ge;8%</span>
+                <span class="heatmap-legend-swatch" style="background:#15803d">4&ndash;8%</span>
+                <span class="heatmap-legend-swatch" style="background:#65a30d">2&ndash;4%</span>
+                <span class="heatmap-legend-swatch" style="background:#b45309">1&ndash;2%</span>
+                <span class="heatmap-legend-swatch" style="background:#c2410c">0&ndash;1%</span>
+                <span class="heatmap-legend-swatch" style="background:#991b1b">Negative</span>
+            </div>
+            <div class="heatmap-grid" id="heatmapGrid">
+                <div class="heatmap-loading">
+                    <div class="loading-spinner small"></div>
+                    <span>Loading heatmap...</span>
                 </div>
             </div>
         </div>
