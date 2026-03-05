@@ -47,6 +47,55 @@
         "morrigan's javelin",
     ]);
 
+    // Items exempt from GE tax (2% tax does not apply)
+    const TAX_EXEMPT_ITEMS = new Set([
+        'ardougne teleport (tablet)',
+        'bass',
+        'bread',
+        'bronze arrow',
+        'bronze dart',
+        'cake',
+        'camelot teleport (tablet)',
+        'chisel',
+        'civitas illa fortis teleport (tablet)',
+        'cooked chicken',
+        'cooked meat',
+        'energy potion',
+        'falador teleport (tablet)',
+        'games necklace',
+        'gardening trowel',
+        'glassblowing pipe',
+        'hammer',
+        'herring',
+        'iron arrow',
+        'iron dart',
+        'kourend castle teleport (tablet)',
+        'lobster',
+        'lumbridge teleport (tablet)',
+        'mackerel',
+        'meat pie',
+        'mind rune',
+        'needle',
+        'old school bond',
+        'pestle and mortar',
+        'pike',
+        'rake',
+        'ring of dueling',
+        'salmon',
+        'saw',
+        'secateurs',
+        'seed dibber',
+        'shears',
+        'shrimps',
+        'spade',
+        'steel arrow',
+        'steel dart',
+        'teleport to house (tablet)',
+        'tuna',
+        'varrock teleport (tablet)',
+        'watering can',
+    ]);
+
     // Custom items not in the API (e.g. Deadman reward store)
     const CUSTOM_ITEMS = [
         { id: 'dm_annihilation_scroll', name: 'Annihilation weapon scroll', examine: 'A scroll that can be used to unlock the Annihilation weapon.', icon: 'Annihilation_weapon_scroll.png', members: true, value: 0, highalch: 0, lowalch: 0, limit: 5 },
@@ -403,7 +452,7 @@
             const price = prices[item.id] || {};
             const buyPrice = price.high || null;  // instant buy = someone's sell offer
             const sellPrice = price.low || null;   // instant sell = someone's buy offer
-            const tax = buyPrice ? Math.min(Math.floor(buyPrice * 0.02), 5000000) : 0;
+            const tax = (buyPrice && !TAX_EXEMPT_ITEMS.has((item.name || '').toLowerCase())) ? Math.min(Math.floor(buyPrice * 0.02), 5000000) : 0;
             const margin = (buyPrice && sellPrice) ? buyPrice - sellPrice - tax : null;
 
             return {
