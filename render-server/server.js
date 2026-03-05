@@ -1,83 +1,111 @@
 // ============================================
 // OSRS GE Tracker — Visitor Counter + Feedback Server
-// Deploy this on Render.com (free)
+// Deploy this on Render.com with Supabase (persistent database)
 // ============================================
 
 const http = require('http');
 const { WebSocketServer } = require('ws');
 const crypto = require('crypto');
-const fs = require('fs');
+const { createClient } = require('@supabase/supabase-js');
 
 const PORT = process.env.PORT || 10000;
-const DATA_FILE = '/tmp/visitors.json';
-const FEEDBACK_FILE = '/tmp/feedback.json';
-const VOTES_FILE = '/tmp/votes.json';
-const HIGHLIGHTS_FILE = '/tmp/highlights.json';
+
+// --- Supabase initialization ---
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_KEY) {
+    console.error('ERROR: SUPABASE_URL and SUPABASE_KEY environment variables are required');
+    process.exit(1);
+}
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // --- Admin credentials (hashed server-side — never sent to client) ---
 const ADMIN_USER = 'Whitezoomie';
 const ADMIN_PASS_HASH = crypto.createHash('sha256').update('Da2008Da!!@@##').digest('hex');
 
-// --- Load persisted data ---
+// --- Initialize data with Supabase ---
 let totalVisitors = 0;
-try {
-    if (fs.existsSync(DATA_FILE)) {
-        const raw = fs.readFileSync(DATA_FILE, 'utf8');
-        totalVisitors = JSON.parse(raw).total || 0;
-    }
-} catch (e) {
-    totalVisitors = 0;
-}
-
 let feedbackList = [];
-try {
-    if (fs.existsSync(FEEDBACK_FILE)) {
-        feedbackList = JSON.parse(fs.readFileSync(FEEDBACK_FILE, 'utf8'));
-    }
-} catch (e) {
-    feedbackList = [];
-}
-
-// votes: { [itemId]: { up: N, down: N } }
 let votesData = {};
-try {
-    if (fs.existsSync(VOTES_FILE)) {
-        votesData = JSON.parse(fs.readFileSync(VOTES_FILE, 'utf8'));
-    }
-} catch (e) {
-    votesData = {};
-}
-
-// In-memory per-IP vote tracking: { 'itemId_ip': 'up'|'down' }
-// Resets on server restart — prevents rapid re-voting without heavy DB overhead
 const ipVotes = {};
-
-// highlights: { pending: [], approved: [] }
 let highlightsData = { pending: [], approved: [] };
-try {
-    if (fs.existsSync(HIGHLIGHTS_FILE)) {
-        const hRaw = JSON.parse(fs.readFileSync(HIGHLIGHTS_FILE, 'utf8'));
-        highlightsData.pending  = hRaw.pending  || [];
-        highlightsData.approved = hRaw.approved || [];
+
+// Load data from Supabase on startup
+async function initializeData() {
+    try {
+        // Load total visitors
+        const { data: visitData } = await supabase.from('visitors').select('total').single();
+        if (visitData) totalVisitors = visitData.total || 0;
+
+        // Load feedback
+        const { data: fData } = await supabase.from('feedback').select('*').order('created_at', { ascending: false });
+        feedbackList = (fData || []).map(f => ({
+            id: f.id,
+            type: f.type,
+            name: f.name,
+            message: f.message,
+            date: f.created_at,
+        }));
+
+        // Load votes
+        const { data: vData } = await supabase.from('votes').select('*');
+        votesData = {};
+        (vData || []).forEach(v => {
+            votesData[v.item_id] = { up: v.up_votes, down: v.down_votes };
+        });
+
+        // Load highlights
+        const { data: hPending } = await supabase.from('highlights_pending').select('*').order('created_at', { ascending: false });
+        const { data: hApproved } = await supabase.from('highlights_approved').select('*').order('approved_date', { ascending: false });
+        
+        highlightsData.pending = (hPending || []).map(h => ({
+            id: h.id,
+            playerName: h.player_name,
+            caption: h.caption,
+            image: h.image,
+            date: h.created_at,
+        }));
+
+        highlightsData.approved = (hApproved || []).map(h => ({
+            id: h.id,
+            playerName: h.player_name,
+            caption: h.caption,
+            image: h.image,
+            date: h.created_at,
+            approvedDate: h.approved_date,
+        }));
+
+        console.log('Data loaded from Supabase');
+    } catch (e) {
+        console.error('Error initializing data:', e.message);
+        // Continue with empty data — tables may not exist yet
     }
-} catch (e) {
-    highlightsData = { pending: [], approved: [] };
 }
 
-function saveTotal() {
-    try { fs.writeFileSync(DATA_FILE, JSON.stringify({ total: totalVisitors })); } catch (e) {}
+// --- Database saving functions (async) ---
+async function saveTotal() {
+    try {
+        const { data } = await supabase.from('visitors').select('*').single();
+        if (data) {
+            await supabase.from('visitors').update({ total: totalVisitors }).eq('id', data.id);
+        } else {
+            await supabase.from('visitors').insert({ total: totalVisitors });
+        }
+    } catch (e) { console.error('Error saving total:', e.message); }
 }
 
-function saveFeedback() {
-    try { fs.writeFileSync(FEEDBACK_FILE, JSON.stringify(feedbackList)); } catch (e) {}
+async function saveFeedback() {
+    // Feedback is saved individually — this is a no-op
 }
 
-function saveVotes() {
-    try { fs.writeFileSync(VOTES_FILE, JSON.stringify(votesData)); } catch (e) {}
+async function saveVotes() {
+    // Votes are saved individually — this is a no-op
 }
 
-function saveHighlights() {
-    try { fs.writeFileSync(HIGHLIGHTS_FILE, JSON.stringify(highlightsData)); } catch (e) {}
+async function saveHighlights() {
+    // Highlights are saved individually — this is a no-op
 }
 
 // --- Simple session tokens for admin ---
@@ -160,7 +188,16 @@ const server = http.createServer(async (req, res) => {
                 ipVotes[key] = vote;
             }
 
-            saveVotes();
+            // Update database
+            try {
+                const { data: existing } = await supabase.from('votes').select('*').eq('item_id', itemId).single();
+                if (existing) {
+                    await supabase.from('votes').update({ up_votes: entry.up, down_votes: entry.down }).eq('item_id', itemId);
+                } else {
+                    await supabase.from('votes').insert({ item_id: itemId, up_votes: entry.up, down_votes: entry.down });
+                }
+            } catch (e) { console.error('Error saving vote:', e.message); }
+
             res.writeHead(200, headers);
             return res.end(JSON.stringify({ up: entry.up, down: entry.down, userVote: ipVotes[key] || null }));
         } catch (e) {
@@ -189,7 +226,18 @@ const server = http.createServer(async (req, res) => {
             };
             feedbackList.unshift(entry);
             if (feedbackList.length > 500) feedbackList = feedbackList.slice(0, 500);
-            saveFeedback();
+            
+            // Save to Supabase
+            try {
+                await supabase.from('feedback').insert({
+                    id: entry.id,
+                    type: entry.type,
+                    name: entry.name,
+                    message: entry.message,
+                    created_at: entry.date
+                });
+            } catch (e) { console.error('Error saving feedback:', e.message); }
+
             res.writeHead(201, headers);
             return res.end(JSON.stringify({ success: true }));
         } catch (e) {
@@ -243,7 +291,10 @@ const server = http.createServer(async (req, res) => {
         const idx = feedbackList.findIndex(f => f.id === id);
         if (idx !== -1) {
             feedbackList.splice(idx, 1);
-            saveFeedback();
+            // Delete from Supabase
+            try {
+                await supabase.from('feedback').delete().eq('id', id);
+            } catch (e) { console.error('Error deleting feedback:', e.message); }
         }
         res.writeHead(200, headers);
         return res.end(JSON.stringify({ success: true }));
@@ -258,7 +309,12 @@ const server = http.createServer(async (req, res) => {
         }
         votesData = {};
         Object.keys(ipVotes).forEach(k => delete ipVotes[k]);
-        saveVotes();
+        
+        // Delete all votes from Supabase
+        try {
+            await supabase.from('votes').delete().gte('id', 0); // Delete all rows
+        } catch (e) { console.error('Error resetting votes:', e.message); }
+
         res.writeHead(200, headers);
         return res.end(JSON.stringify({ success: true }));
     }
@@ -291,7 +347,18 @@ const server = http.createServer(async (req, res) => {
             };
             highlightsData.pending.unshift(entry);
             if (highlightsData.pending.length > 100) highlightsData.pending = highlightsData.pending.slice(0, 100);
-            saveHighlights();
+            
+            // Save to Supabase
+            try {
+                await supabase.from('highlights_pending').insert({
+                    id: entry.id,
+                    player_name: entry.playerName,
+                    caption: entry.caption,
+                    image: entry.image,
+                    created_at: entry.date
+                });
+            } catch (e) { console.error('Error saving highlight:', e.message); }
+
             res.writeHead(201, headers);
             return res.end(JSON.stringify({ success: true }));
         } catch (e) {
@@ -319,7 +386,19 @@ const server = http.createServer(async (req, res) => {
             entry.approvedDate = new Date().toISOString();
             highlightsData.approved.unshift(entry);
             if (highlightsData.approved.length > 50) highlightsData.approved = highlightsData.approved.slice(0, 50);
-            saveHighlights();
+            
+            // Move from pending to approved in Supabase
+            try {
+                await supabase.from('highlights_pending').delete().eq('id', id);
+                await supabase.from('highlights_approved').insert({
+                    id: entry.id,
+                    player_name: entry.playerName,
+                    caption: entry.caption,
+                    image: entry.image,
+                    created_at: entry.date,
+                    approved_date: entry.approvedDate
+                });
+            } catch (e) { console.error('Error approving highlight:', e.message); }
         }
         res.writeHead(200, headers);
         return res.end(JSON.stringify({ success: true }));
@@ -331,9 +410,15 @@ const server = http.createServer(async (req, res) => {
         if (!adminTokens.has(token)) { res.writeHead(401, headers); return res.end(JSON.stringify({ error: 'Unauthorized' })); }
         const id = path.split('/').pop();
         const pi = (highlightsData.pending  || []).findIndex(h => h.id === id);
-        if (pi !== -1) { highlightsData.pending.splice(pi, 1);  saveHighlights(); }
+        if (pi !== -1) { 
+            highlightsData.pending.splice(pi, 1);
+            try { await supabase.from('highlights_pending').delete().eq('id', id); } catch (e) {}
+        }
         const ai = (highlightsData.approved || []).findIndex(h => h.id === id);
-        if (ai !== -1) { highlightsData.approved.splice(ai, 1); saveHighlights(); }
+        if (ai !== -1) { 
+            highlightsData.approved.splice(ai, 1);
+            try { await supabase.from('highlights_approved').delete().eq('id', id); } catch (e) {}
+        }
         res.writeHead(200, headers);
         return res.end(JSON.stringify({ success: true }));
     }
@@ -361,12 +446,12 @@ wss.on('connection', (ws) => {
     broadcast();
 
     // Listen for a message from the client indicating a new visitor
-    ws.once('message', (raw) => {
+    ws.once('message', async (raw) => {
         try {
             const msg = JSON.parse(raw);
             if (msg.type === 'new_visitor') {
                 totalVisitors++;
-                saveTotal();
+                await saveTotal();
                 broadcast();
             }
         } catch (e) {}
@@ -393,6 +478,7 @@ wss.on('connection', (ws) => {
     ws.on('close', () => clearInterval(keepAlive));
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
     console.log(`Visitor counter server running on port ${PORT}`);
+    await initializeData();
 });

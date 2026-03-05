@@ -12,6 +12,7 @@
     "node": "22.x"
   },
   "dependencies": {
-    "ws": "^8.16.0"
+    "ws": "^8.16.0",
+    "@supabase/supabase-js": "^2.38.4"
   }
 }
