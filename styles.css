@@ -3202,8 +3202,8 @@ body.theme-transitioning *::after {
 /* Collapsible body */
 .effects-section-body {
     overflow: hidden;
-    max-height: 50vh;
-    transition: max-height 0.25s ease;
+    max-height: 2000px;
+    transition: max-height 0.35s ease;
 }
 .effects-section-body.collapsed {
     max-height: 0;
@@ -3251,7 +3251,8 @@ body.theme-transitioning *::after {
     background: var(--loss);
 }
 /* Cursor list in effects dropdown */
-.effects-dropdown .cursor-list {
+.effects-dropdown .cursor-list,
+.theme-effects-dropdown .cursor-list {
     overflow-y: auto;
     overflow-x: hidden;
     overscroll-behavior: contain;
@@ -3259,17 +3260,21 @@ body.theme-transitioning *::after {
     scrollbar-width: thin;
     scrollbar-color: var(--border-light) transparent;
 }
-.effects-dropdown .cursor-list::-webkit-scrollbar {
+.effects-dropdown .cursor-list::-webkit-scrollbar,
+.theme-effects-dropdown .cursor-list::-webkit-scrollbar {
     width: 6px;
 }
-.effects-dropdown .cursor-list::-webkit-scrollbar-track {
+.effects-dropdown .cursor-list::-webkit-scrollbar-track,
+.theme-effects-dropdown .cursor-list::-webkit-scrollbar-track {
     background: transparent;
 }
-.effects-dropdown .cursor-list::-webkit-scrollbar-thumb {
+.effects-dropdown .cursor-list::-webkit-scrollbar-thumb,
+.theme-effects-dropdown .cursor-list::-webkit-scrollbar-thumb {
     background: var(--border-light);
     border-radius: 3px;
 }
-.effects-dropdown .cursor-list::-webkit-scrollbar-thumb:hover {
+.effects-dropdown .cursor-list::-webkit-scrollbar-thumb:hover,
+.theme-effects-dropdown .cursor-list::-webkit-scrollbar-thumb:hover {
     background: var(--accent);
 }
 .cursor-option {
@@ -3320,7 +3325,8 @@ body.theme-transitioning *::after {
     text-align: left;
 }
 
-.effects-dropdown .pet-list {
+.effects-dropdown .pet-list,
+.theme-effects-dropdown .pet-list {
     overflow-y: auto;
     overflow-x: hidden;
     overscroll-behavior: contain;
@@ -3330,17 +3336,21 @@ body.theme-transitioning *::after {
     scrollbar-width: thin;
     scrollbar-color: var(--border-light) transparent;
 }
-.effects-dropdown .pet-list::-webkit-scrollbar {
+.effects-dropdown .pet-list::-webkit-scrollbar,
+.theme-effects-dropdown .pet-list::-webkit-scrollbar {
     width: 6px;
 }
-.effects-dropdown .pet-list::-webkit-scrollbar-track {
+.effects-dropdown .pet-list::-webkit-scrollbar-track,
+.theme-effects-dropdown .pet-list::-webkit-scrollbar-track {
     background: transparent;
 }
-.effects-dropdown .pet-list::-webkit-scrollbar-thumb {
+.effects-dropdown .pet-list::-webkit-scrollbar-thumb,
+.theme-effects-dropdown .pet-list::-webkit-scrollbar-thumb {
     background: var(--border-light);
     border-radius: 3px;
 }
-.effects-dropdown .pet-list::-webkit-scrollbar-thumb:hover {
+.effects-dropdown .pet-list::-webkit-scrollbar-thumb:hover,
+.theme-effects-dropdown .pet-list::-webkit-scrollbar-thumb:hover {
     background: var(--accent);
 }
 .pet-option {
