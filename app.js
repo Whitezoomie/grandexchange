@@ -745,19 +745,7 @@
         $('modalGeTax').textContent = item.tax ? formatGp(item.tax) : '-';
 
         // Details
-        $('modalHighAlch').textContent = formatGp(item.highalch);
         $('modalLimit').textContent = item.limit ? item.limit.toLocaleString() : 'Unknown';
-
-        // High Alch Profit
-        if (item.highalch && item.buyPrice) {
-            const profit = item.highalch - item.buyPrice - 1; // nature rune ~1gp estimate placeholder
-            const profitEl = $('modalAlchProfit');
-            profitEl.textContent = formatGp(profit, true);
-            profitEl.style.color = profit > 0 ? 'var(--green)' : profit < 0 ? 'var(--red)' : '';
-        } else {
-            $('modalAlchProfit').textContent = '-';
-            $('modalAlchProfit').style.color = '';
-        }
 
         // Buy Limit Profit
         if (item.limit && item.margin != null) {
