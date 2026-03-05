@@ -3018,11 +3018,247 @@
         setTimeout(connect, 2000);
     }
 
+    // ========================================
+    // Hamburger Menu
+    // ========================================
+
+    function initHamburgerMenu() {
+        const menu = document.getElementById('hamburgerMenu');
+        const toggle = document.getElementById('hamburgerToggle');
+        const dropdown = document.getElementById('hamburgerDropdown');
+        const cofferBtn = document.getElementById('menuDeathCoffer');
+
+        if (!menu || !toggle || !dropdown) return;
+
+        toggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            menu.classList.toggle('open');
+        });
+
+        dropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!menu.contains(e.target)) {
+                menu.classList.remove('open');
+            }
+        });
+
+        if (cofferBtn) {
+            cofferBtn.addEventListener('click', function() {
+                menu.classList.remove('open');
+                openDeathCoffer();
+            });
+        }
+    }
+
+    // ========================================
+    // Death's Coffer
+    // ========================================
+
+    // Death's Coffer pays 105% of the item's GE market price.
+    // Eligible items: tradeable on GE, worth >= 10,000 GP (mid-price).
+    // Ineligible: untradeable items, bonds, Deadman/Leagues reward items.
+    // Profit opportunity: buy at buyPrice, sacrifice for 105% of GE mid-price.
+    // Source: https://oldschool.runescape.wiki/w/Death%27s_Coffer
+
+    // IDs/name-prefixes of items that cannot be used in Death's Coffer
+    var COFFER_INELIGIBLE_IDS = new Set(CUSTOM_ITEMS.map(function(ci) { return ci.id; }));
+
+    function getDeathCofferItems() {
+        if (!allItems || allItems.length === 0) return [];
+
+        return allItems.filter(function(item) {
+            // Exclude custom/Deadman/ineligible items
+            if (COFFER_INELIGIBLE_IDS.has(item.id)) return false;
+            // Must have both a live buy price and sell price
+            if (!item.buyPrice || !item.sellPrice) return false;
+            // GE mid-price must be >= 10,000 GP (requirement per wiki)
+            var midPrice = Math.floor((item.buyPrice + item.sellPrice) / 2);
+            if (midPrice < 10000) return false;
+            // Coffer pays 105% of GE mid-price
+            var cofferValue = Math.floor(midPrice * 1.05);
+            // Only show where you profit: buy on GE cheaper than coffer pays
+            return item.buyPrice < cofferValue;
+        }).map(function(item) {
+            var midPrice = Math.floor((item.buyPrice + item.sellPrice) / 2);
+            var cofferValue = Math.floor(midPrice * 1.05);
+            var savings = cofferValue - item.buyPrice;
+            return {
+                id: item.id,
+                name: item.name,
+                icon: item.icon,
+                buyPrice: item.buyPrice,
+                sellPrice: item.sellPrice,
+                midPrice: midPrice,
+                cofferValue: cofferValue,
+                savings: savings,
+                volume: item.volume || 0
+            };
+        });
+    }
+
+    function parseCofferGp(str) {
+        if (!str) return null;
+        str = str.trim().toLowerCase().replace(/,/g, '');
+        var m;
+        if ((m = str.match(/^([\d.]+)b$/))) return Math.round(parseFloat(m[1]) * 1e9);
+        if ((m = str.match(/^([\d.]+)m$/))) return Math.round(parseFloat(m[1]) * 1e6);
+        if ((m = str.match(/^([\d.]+)k$/))) return Math.round(parseFloat(m[1]) * 1e3);
+        var n = parseFloat(str);
+        return isNaN(n) ? null : Math.round(n);
+    }
+
+    function renderCofferList(sortBy) {
+        var items = getDeathCofferItems();
+        var listEl = document.getElementById('cofferList');
+        var countEl = document.getElementById('cofferItemCount');
+        var maxBuyInput = document.getElementById('cofferMaxBuy');
+
+        if (!listEl) return;
+
+        // Apply max buy price filter
+        if (maxBuyInput && maxBuyInput.value.trim()) {
+            var maxBuy = parseCofferGp(maxBuyInput.value);
+            if (maxBuy !== null) {
+                items = items.filter(function(item) { return item.buyPrice <= maxBuy; });
+            }
+        }
+
+        // Apply min volume filter
+        var minVolInput = document.getElementById('cofferMinVol');
+        if (minVolInput && minVolInput.value.trim()) {
+            var minVol = parseCofferGp(minVolInput.value);
+            if (minVol !== null) {
+                items = items.filter(function(item) { return item.volume >= minVol; });
+            }
+        }
+
+        // Sort
+        sortBy = sortBy || 'savings-desc';
+        items.sort(function(a, b) {
+            switch (sortBy) {
+                case 'savings-desc': return b.savings - a.savings;
+                case 'savings-asc': return a.savings - b.savings;
+                case 'price-asc': return a.buyPrice - b.buyPrice;
+                case 'price-desc': return b.buyPrice - a.buyPrice;
+                case 'name-asc': return a.name.localeCompare(b.name);
+                case 'name-desc': return b.name.localeCompare(a.name);
+                default: return b.savings - a.savings;
+            }
+        });
+
+        if (countEl) countEl.textContent = items.length + ' items';
+
+        if (items.length === 0) {
+            listEl.innerHTML = '<div class="coffer-empty">No items found. Data may still be loading.</div>';
+            return;
+        }
+
+        var html = '<table class="coffer-table"><thead><tr>' +
+            '<th>Item</th>' +
+            '<th>Buy Price</th>' +
+            '<th>Coffer Value</th>' +
+            '<th>Savings</th>' +
+            '</tr></thead><tbody>';
+
+        items.forEach(function(item) {
+            var iconUrl = getIconUrl(item.icon);
+            html += '<tr data-item-id="' + item.id + '">' +
+                '<td><div class="coffer-item-cell">' +
+                    '<img class="coffer-item-icon" src="' + iconUrl + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' +
+                    '<span class="coffer-item-name">' + item.name + '</span>' +
+                '</div></td>' +
+                '<td>' + formatGp(item.buyPrice) + '</td>' +
+                '<td class="coffer-coffer-val">' + formatGp(item.cofferValue) + '</td>' +
+                '<td class="coffer-savings">+' + formatGp(item.savings) + '</td>' +
+            '</tr>';
+        });
+
+        html += '</tbody></table>';
+        listEl.innerHTML = html;
+
+        // Click rows: close coffer, open item modal
+        listEl.querySelectorAll('tr[data-item-id]').forEach(function(row) {
+            row.addEventListener('click', function() {
+                var itemId = parseInt(row.getAttribute('data-item-id'), 10);
+                var item = allItems.find(function(i) { return i.id === itemId; });
+                if (item) {
+                    closeDeathCoffer();
+                    openModal(item);
+                }
+            });
+        });
+    }
+
+    function openDeathCoffer() {
+        var overlay = document.getElementById('cofferOverlay');
+        if (!overlay) return;
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        renderCofferList();
+
+        var sortSelect = document.getElementById('cofferSortBy');
+        if (sortSelect) {
+            sortSelect.onchange = function() {
+                renderCofferList(sortSelect.value);
+            };
+        }
+
+        var maxBuyInput = document.getElementById('cofferMaxBuy');
+        if (maxBuyInput) {
+            maxBuyInput.oninput = function() {
+                var sortVal = sortSelect ? sortSelect.value : 'savings-desc';
+                renderCofferList(sortVal);
+            };
+        }
+
+        var minVolInput = document.getElementById('cofferMinVol');
+        if (minVolInput) {
+            minVolInput.oninput = function() {
+                var sortVal = sortSelect ? sortSelect.value : 'savings-desc';
+                renderCofferList(sortVal);
+            };
+        }
+    }
+
+    function closeDeathCoffer() {
+        var overlay = document.getElementById('cofferOverlay');
+        if (!overlay) return;
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    function initDeathCoffer() {
+        var overlay = document.getElementById('cofferOverlay');
+        var closeBtn = document.getElementById('cofferClose');
+
+        if (overlay) {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) closeDeathCoffer();
+            });
+        }
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeDeathCoffer);
+        }
+
+        // Close on Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && overlay && overlay.classList.contains('active')) {
+                closeDeathCoffer();
+            }
+        });
+    }
+
     function init() {
         // Critical path: run immediately
         initEvents();
         initTheme();
         initEffects();
+        initHamburgerMenu();
+        initDeathCoffer();
         initCollapsibleSidebars();
         loadData();
 

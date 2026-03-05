@@ -521,6 +521,334 @@ body {
     flex-shrink: 0;
 }
 
+/* ===== HAMBURGER MENU ===== */
+.hamburger-menu {
+    position: relative;
+}
+
+.hamburger-btn {
+    padding: 7px 10px !important;
+}
+
+.hamburger-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0px;
+    min-width: 200px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    z-index: 200;
+    padding: 6px;
+    animation: themeDropdownIn 0.15s ease-out;
+}
+
+.hamburger-menu.open .hamburger-dropdown {
+    display: block;
+}
+
+.hamburger-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all var(--transition);
+    white-space: nowrap;
+}
+
+.hamburger-menu-item:hover {
+    background: var(--bg-hover);
+    color: var(--accent);
+}
+
+.hamburger-menu-item svg {
+    flex-shrink: 0;
+    color: var(--text-secondary);
+    transition: color var(--transition);
+}
+
+.hamburger-menu-item:hover svg {
+    color: var(--accent);
+}
+
+/* ===== DEATH'S COFFER OVERLAY ===== */
+.coffer-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.88);
+    z-index: 1000;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 20px;
+    overflow-y: auto;
+    backdrop-filter: blur(2px);
+}
+
+.coffer-overlay.active {
+    display: flex;
+}
+
+.coffer-panel {
+    width: 100%;
+    max-width: 900px;
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 24px;
+    animation: modalIn 0.25s ease-out;
+    max-height: calc(100vh - 80px);
+    display: flex;
+    flex-direction: column;
+}
+
+.coffer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.coffer-title-row {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+}
+
+.coffer-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin: 0;
+}
+
+.coffer-item-count {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.coffer-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.6rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    line-height: 1;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition);
+}
+
+.coffer-close:hover {
+    color: var(--red);
+    background: rgba(255, 80, 80, 0.1);
+}
+
+.coffer-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 12px 0;
+}
+
+.coffer-desc {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    margin: 0 0 16px;
+    line-height: 1.5;
+}
+
+.coffer-link {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.coffer-link:hover {
+    text-decoration: underline;
+}
+
+.coffer-sort-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.coffer-controls-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.coffer-filter-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.coffer-filter-input {
+    padding: 6px 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    font-family: inherit;
+    width: 130px;
+    transition: border-color var(--transition);
+}
+
+.coffer-filter-input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.coffer-filter-input::placeholder {
+    color: var(--text-muted, var(--text-secondary));
+}
+
+.coffer-sort-label {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.coffer-sort-select {
+    padding: 6px 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.coffer-list {
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-light) transparent;
+}
+
+.coffer-loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+    padding: 40px 0;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.coffer-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.coffer-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--bg-main);
+}
+
+.coffer-table th {
+    text-align: left;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.coffer-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-light);
+    font-size: 0.82rem;
+    color: var(--text-primary);
+    vertical-align: middle;
+}
+
+.coffer-table tbody tr {
+    transition: background var(--transition);
+    cursor: pointer;
+}
+
+.coffer-table tbody tr:hover {
+    background: var(--bg-hover);
+}
+
+.coffer-item-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.coffer-item-icon {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.05);
+    flex-shrink: 0;
+}
+
+.coffer-item-name {
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 220px;
+}
+
+.coffer-savings {
+    color: var(--green);
+    font-weight: 600;
+}
+
+.coffer-coffer-val {
+    color: var(--accent);
+}
+
+.coffer-empty {
+    text-align: center;
+    padding: 40px 0;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+@media (max-width: 600px) {
+    .coffer-panel {
+        padding: 16px;
+    }
+    .coffer-title {
+        font-size: 1.2rem;
+    }
+    .coffer-item-name {
+        max-width: 120px;
+    }
+    .coffer-table th:nth-child(3),
+    .coffer-table td:nth-child(3) {
+        display: none;
+    }
+}
+
 /* ===== THEME SELECTOR DROPDOWN ===== */
 .theme-selector,
 .theme-effects-selector {
