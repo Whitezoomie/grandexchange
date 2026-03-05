@@ -732,10 +732,11 @@
 
         // Margin (after 2% GE tax)
         const marginVal = item.margin;
+        const isTaxExempt = TAX_EXEMPT_ITEMS.has((item.name || '').toLowerCase());
         $('modalMargin').textContent = formatGp(marginVal, true);
         if (item.buyPrice && item.sellPrice && item.sellPrice > 0) {
             const pct = ((marginVal / item.sellPrice) * 100).toFixed(1);
-            $('modalMarginPct').textContent = `${pct}% margin (after tax)`;
+            $('modalMarginPct').textContent = `${pct}% margin${isTaxExempt ? '' : ' (after tax)'}`;
         } else {
             $('modalMarginPct').textContent = '-';
         }
@@ -1204,8 +1205,15 @@
                                     const pctMargin = sellVal > 0 ? ((marginAfterTax / sellVal) * 100).toFixed(2) : '0.00';
                                     const lines = [];
                                     lines.push('');
-                                    lines.push('GE Tax (2%): -' + geTax.toLocaleString() + ' gp');
-                                    lines.push('Margin after tax: ' + marginAfterTax.toLocaleString() + ' gp (' + pctMargin + '%)');
+                                    // Check if current modal item is tax-exempt
+                                    const currentItem = allItems.find(i => i.id === currentModalItemId);
+                                    const isTaxExempt = currentItem && TAX_EXEMPT_ITEMS.has((currentItem.name || '').toLowerCase());
+                                    if (!isTaxExempt) {
+                                        lines.push('GE Tax (2%): -' + geTax.toLocaleString() + ' gp');
+                                        lines.push('Margin after tax: ' + marginAfterTax.toLocaleString() + ' gp (' + pctMargin + '%)');
+                                    } else {
+                                        lines.push('Margin: ' + marginAfterTax.toLocaleString() + ' gp (' + pctMargin + '%)');
+                                    }
                                     return lines;
                                 }
                                 if (buyVal != null || sellVal != null) {
