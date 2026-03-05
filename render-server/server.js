@@ -88,10 +88,11 @@ function generateToken() {
 }
 
 // --- Parse JSON body helper ---
-function parseBody(req) {
+function parseBody(req, maxBytes) {
+    maxBytes = maxBytes || 1e6;
     return new Promise((resolve, reject) => {
         let body = '';
-        req.on('data', chunk => { body += chunk; if (body.length > 1e6) req.destroy(); });
+        req.on('data', chunk => { body += chunk; if (body.length > maxBytes) req.destroy(); });
         req.on('end', () => { try { resolve(JSON.parse(body)); } catch (e) { reject(e); } });
         req.on('error', reject);
     });
@@ -261,7 +262,7 @@ const server = http.createServer(async (req, res) => {
     // --- Submit a highlight (public) ---
     if (path === '/highlights/submit' && req.method === 'POST') {
         try {
-            const data = await parseBody(req);
+            const data = await parseBody(req, 12e6); // 12 MB — base64 images can be large
             const playerName = String(data.playerName || '').trim().slice(0, 30);
             const caption    = String(data.caption    || '').trim().slice(0, 120);
             const image      = String(data.image      || '').slice(0, 700000); // ~500KB max
