@@ -811,9 +811,12 @@
                 <div class="admin-feedback-list" id="adminFeedbackList">
                     <p class="admin-loading">Loading feedback...</p>
                 </div>
-                <div class="admin-section-label admin-section-label-mt">
-                    &#128248; Pending Highlights
-                    <button class="admin-btn admin-btn-sm" id="adminHighlightsRefresh">Refresh</button>
+                <div class="admin-section-label admin-section-label-mt" style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                    <div>&#128248; Pending Highlights</div>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <button class="admin-btn admin-btn-sm" id="adminHighlightsRefresh">Refresh Pending</button>
+                        <button class="admin-btn admin-btn-sm" id="adminShowApproved">Manage Approved</button>
+                    </div>
                 </div>
                 <div class="admin-highlights-list" id="adminHighlightsList">
                     <p class="admin-loading">Loading...</p>
@@ -997,6 +1000,82 @@
         document.body.appendChild(s);
       })();
     </script>
+        <!-- Image preview modal for Player Highlights -->
+        <style>
+        .highlight-image-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:1200}
+        .highlight-image-modal.open{display:flex}
+        .himodal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px)}
+        .himodal-content{position:relative;max-width:92vw;max-height:88vh;padding:14px;border-radius:10px;background:linear-gradient(180deg,#0b0d0f, #0f1317);box-shadow:0 8px 30px rgba(0,0,0,.6);display:flex;flex-direction:column;align-items:center;gap:10px}
+        .himodal-content img{max-width:100%;max-height:70vh;border-radius:6px;object-fit:contain}
+        .himodal-close{position:absolute;top:8px;right:8px;background:transparent;border:0;color:#b6f26b;font-size:26px;line-height:1;cursor:pointer}
+        .himodal-caption{color:#bcd9b3;font-size:14px;opacity:.95;max-width:90vw;text-align:center}
+        @media (max-width:480px){.himodal-content{padding:8px}.himodal-close{font-size:22px}}
+        </style>
+
+        <div class="highlight-image-modal" id="highlightImageModal" aria-hidden="true">
+                <div class="himodal-backdrop" id="himodalBackdrop"></div>
+                <div class="himodal-content" role="dialog" aria-modal="true">
+                        <button class="himodal-close" id="himodalClose" aria-label="Close">&times;</button>
+                        <img src="" alt="" id="himodalImg">
+                        <div class="himodal-caption" id="himodalCaption"></div>
+                </div>
+        </div>
+
+        <script>
+        (function(){
+            var grid = document.getElementById('highlightGrid');
+            var modal = document.getElementById('highlightImageModal');
+            var backdrop = document.getElementById('himodalBackdrop');
+            var closeBtn = document.getElementById('himodalClose');
+            var imgEl = document.getElementById('himodalImg');
+            var captionEl = document.getElementById('himodalCaption');
+
+            function openModal(src, alt){
+                imgEl.src = src || '';
+                imgEl.alt = alt || '';
+                captionEl.textContent = alt || '';
+                modal.classList.add('open');
+                modal.setAttribute('aria-hidden','false');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeModal(){
+                modal.classList.remove('open');
+                modal.setAttribute('aria-hidden','true');
+                imgEl.src = '';
+                captionEl.textContent = '';
+                document.body.style.overflow = '';
+            }
+
+            // Delegate clicks inside the highlight grid to detect image clicks
+            if(grid){
+                grid.addEventListener('click', function(e){
+                    var tgt = e.target;
+                    var img = tgt.closest ? tgt.closest('img') : null;
+                    if(!img) return;
+                    // make sure image is inside the grid
+                    if(!grid.contains(img)) return;
+                    // use data-full for full-size image if provided
+                    var full = img.dataset && img.dataset.full ? img.dataset.full : img.src;
+                    var caption = img.alt || (img.dataset && img.dataset.caption) || '';
+                    openModal(full, caption);
+                });
+            }
+
+            // Close handlers
+            backdrop.addEventListener('click', closeModal);
+            closeBtn.addEventListener('click', closeModal);
+            document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeModal(); });
+
+            // Allow clicking on the image itself to toggle zoom (fit/contain)
+            imgEl.addEventListener('click', function(){
+                if(imgEl.style.objectFit === 'contain' || !imgEl.style.objectFit){
+                    imgEl.style.objectFit = 'contain';
+                    // no-op currently; placeholder for future zoom
+                }
+            });
+        })();
+        </script>
 </body>
 </html>
 

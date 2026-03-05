@@ -2953,6 +2953,8 @@
                     loadAdminHighlights();
                     const hlRefreshBtn = document.getElementById('adminHighlightsRefresh');
                     if (hlRefreshBtn) hlRefreshBtn.onclick = loadAdminHighlights;
+                    const showApprovedBtn = document.getElementById('adminShowApproved');
+                    if (showApprovedBtn) showApprovedBtn.onclick = loadAdminApprovedHighlights;
                     const resetVotesBtn = document.getElementById('adminResetVotes');
                     if (resetVotesBtn) resetVotesBtn.onclick = async function() {
                         if (!confirm('Reset ALL flip votes? This cannot be undone.')) return;
@@ -3103,6 +3105,56 @@
             });
         } catch (e) {
             list.innerHTML = '<p class="admin-loading">Failed to load highlights.</p>';
+        }
+    }
+
+    // Load approved highlights (for management / deletion)
+    async function loadAdminApprovedHighlights() {
+        const list = document.getElementById('adminHighlightsList');
+        if (!list || !adminToken) return;
+        list.innerHTML = '<p class="admin-loading">Loading approved highlights...</p>';
+        try {
+            // Public endpoint returns approved highlights
+            const res = await fetch(`${FEEDBACK_SERVER}/highlights`);
+            if (!res.ok) throw new Error();
+            const items = await res.json();
+            if (!items.length) {
+                list.innerHTML = '<p class="admin-loading">No approved highlights.</p>';
+                return;
+            }
+            const esc = s => String(s || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            list.innerHTML = items.map(h => {
+                const d = new Date(h.approvedDate || h.date);
+                const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                return `<div class="admin-hl-card" data-id="${h.id}">
+                    <img class="admin-hl-img" src="${esc(h.image)}" alt="" onerror="this.style.display='none'">
+                    <div class="admin-hl-body">
+                        <div class="admin-hl-name">${esc(h.playerName)}</div>
+                        ${h.caption ? `<div class="admin-hl-caption">${esc(h.caption)}</div>` : ''}
+                        <div class="admin-hl-date">${dateStr}</div>
+                        <div class="admin-hl-actions">
+                            <button class="admin-hl-delete-approved" data-id="${h.id}">Remove</button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            // Wire delete buttons for approved items
+            list.querySelectorAll('.admin-hl-delete-approved').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const id = btn.getAttribute('data-id');
+                    if (!confirm('Remove this approved highlight? This cannot be undone.')) return;
+                    try {
+                        await fetch(`${FEEDBACK_SERVER}/admin/highlights/${id}`, {
+                            method: 'DELETE',
+                            headers: { 'Authorization': `Bearer ${adminToken}` },
+                        });
+                        loadAdminApprovedHighlights();
+                    } catch (e) {}
+                });
+            });
+        } catch (e) {
+            list.innerHTML = '<p class="admin-loading">Failed to load approved highlights.</p>';
         }
     }
 
