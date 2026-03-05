@@ -12,6 +12,7 @@ const PORT = process.env.PORT || 10000;
 const DATA_FILE = '/tmp/visitors.json';
 const FEEDBACK_FILE = '/tmp/feedback.json';
 const VOTES_FILE = '/tmp/votes.json';
+const HIGHLIGHTS_FILE = '/tmp/highlights.json';
 
 // --- Admin credentials (hashed server-side — never sent to client) ---
 const ADMIN_USER = 'Whitezoomie';
@@ -51,6 +52,18 @@ try {
 // Resets on server restart — prevents rapid re-voting without heavy DB overhead
 const ipVotes = {};
 
+// highlights: { pending: [], approved: [] }
+let highlightsData = { pending: [], approved: [] };
+try {
+    if (fs.existsSync(HIGHLIGHTS_FILE)) {
+        const hRaw = JSON.parse(fs.readFileSync(HIGHLIGHTS_FILE, 'utf8'));
+        highlightsData.pending  = hRaw.pending  || [];
+        highlightsData.approved = hRaw.approved || [];
+    }
+} catch (e) {
+    highlightsData = { pending: [], approved: [] };
+}
+
 function saveTotal() {
     try { fs.writeFileSync(DATA_FILE, JSON.stringify({ total: totalVisitors })); } catch (e) {}
 }
@@ -61,6 +74,10 @@ function saveFeedback() {
 
 function saveVotes() {
     try { fs.writeFileSync(VOTES_FILE, JSON.stringify(votesData)); } catch (e) {}
+}
+
+function saveHighlights() {
+    try { fs.writeFileSync(HIGHLIGHTS_FILE, JSON.stringify(highlightsData)); } catch (e) {}
 }
 
 // --- Simple session tokens for admin ---
@@ -227,6 +244,81 @@ const server = http.createServer(async (req, res) => {
             feedbackList.splice(idx, 1);
             saveFeedback();
         }
+        res.writeHead(200, headers);
+        return res.end(JSON.stringify({ success: true }));
+    }
+
+    // --- Get approved highlights (public) ---
+    if (path === '/highlights' && req.method === 'GET') {
+        const approved = (highlightsData.approved || []).map(h => ({
+            id: h.id, playerName: h.playerName, caption: h.caption,
+            image: h.image, date: h.date, approvedDate: h.approvedDate
+        }));
+        res.writeHead(200, headers);
+        return res.end(JSON.stringify(approved));
+    }
+
+    // --- Submit a highlight (public) ---
+    if (path === '/highlights/submit' && req.method === 'POST') {
+        try {
+            const data = await parseBody(req);
+            const playerName = String(data.playerName || '').trim().slice(0, 30);
+            const caption    = String(data.caption    || '').trim().slice(0, 120);
+            const image      = String(data.image      || '').slice(0, 700000); // ~500KB max
+            if (!playerName || !image) {
+                res.writeHead(400, headers);
+                return res.end(JSON.stringify({ error: 'Player name and image are required' }));
+            }
+            const entry = {
+                id: crypto.randomBytes(8).toString('hex'),
+                playerName, caption, image,
+                date: new Date().toISOString(),
+            };
+            highlightsData.pending.unshift(entry);
+            if (highlightsData.pending.length > 100) highlightsData.pending = highlightsData.pending.slice(0, 100);
+            saveHighlights();
+            res.writeHead(201, headers);
+            return res.end(JSON.stringify({ success: true }));
+        } catch (e) {
+            res.writeHead(400, headers);
+            return res.end(JSON.stringify({ error: 'Invalid request' }));
+        }
+    }
+
+    // --- Admin: get pending highlights ---
+    if (path === '/admin/highlights/pending' && req.method === 'GET') {
+        const token = (req.headers.authorization || '').replace('Bearer ', '');
+        if (!adminTokens.has(token)) { res.writeHead(401, headers); return res.end(JSON.stringify({ error: 'Unauthorized' })); }
+        res.writeHead(200, headers);
+        return res.end(JSON.stringify(highlightsData.pending || []));
+    }
+
+    // --- Admin: approve a highlight ---
+    if (path.match(/^\/admin\/highlights\/[a-f0-9]+\/approve$/) && req.method === 'POST') {
+        const token = (req.headers.authorization || '').replace('Bearer ', '');
+        if (!adminTokens.has(token)) { res.writeHead(401, headers); return res.end(JSON.stringify({ error: 'Unauthorized' })); }
+        const id  = path.split('/')[3];
+        const idx = (highlightsData.pending || []).findIndex(h => h.id === id);
+        if (idx !== -1) {
+            const [entry] = highlightsData.pending.splice(idx, 1);
+            entry.approvedDate = new Date().toISOString();
+            highlightsData.approved.unshift(entry);
+            if (highlightsData.approved.length > 50) highlightsData.approved = highlightsData.approved.slice(0, 50);
+            saveHighlights();
+        }
+        res.writeHead(200, headers);
+        return res.end(JSON.stringify({ success: true }));
+    }
+
+    // --- Admin: deny / delete a highlight ---
+    if (path.match(/^\/admin\/highlights\/[a-f0-9]+$/) && req.method === 'DELETE') {
+        const token = (req.headers.authorization || '').replace('Bearer ', '');
+        if (!adminTokens.has(token)) { res.writeHead(401, headers); return res.end(JSON.stringify({ error: 'Unauthorized' })); }
+        const id = path.split('/').pop();
+        const pi = (highlightsData.pending  || []).findIndex(h => h.id === id);
+        if (pi !== -1) { highlightsData.pending.splice(pi, 1);  saveHighlights(); }
+        const ai = (highlightsData.approved || []).findIndex(h => h.id === id);
+        if (ai !== -1) { highlightsData.approved.splice(ai, 1); saveHighlights(); }
         res.writeHead(200, headers);
         return res.end(JSON.stringify({ success: true }));
     }

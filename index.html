@@ -318,6 +318,10 @@
                             <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M3 3h4v4H3zm0 7h4v4H3zm0 7h4v4H3zm7-14h4v4h-4zm0 7h4v4h-4zm0 7h4v4h-4zm7-14h4v4h-4zm0 7h4v4h-4zm0 7h4v4h-4z"/></svg>
                             <span>Market Heatmap</span>
                         </button>
+                        <button class="hamburger-menu-item" id="menuHighlight">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+                            <span>Player Highlights</span>
+                        </button>
                     </div>
                 </div>
                 <div class="theme-effects-selector" id="themeEffectsSelector">
@@ -799,13 +803,90 @@
             </div>
             <div class="admin-panel" id="adminPanel" style="display:none">
                 <div class="admin-panel-header">
-                    <h3>Feedback Inbox</h3>
+                    <h3>Site Management</h3>
                     <button class="admin-btn admin-btn-sm" id="adminLogout">Logout</button>
                 </div>
+                <div class="admin-section-label">&#128161; Feedback Inbox</div>
                 <div class="admin-feedback-list" id="adminFeedbackList">
                     <p class="admin-loading">Loading feedback...</p>
                 </div>
+                <div class="admin-section-label admin-section-label-mt">
+                    &#128248; Pending Highlights
+                    <button class="admin-btn admin-btn-sm" id="adminHighlightsRefresh">Refresh</button>
+                </div>
+                <div class="admin-highlights-list" id="adminHighlightsList">
+                    <p class="admin-loading">Loading...</p>
+                </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Player Highlight Gallery Overlay -->
+    <div class="highlight-overlay" id="highlightOverlay">
+        <div class="highlight-panel">
+            <div class="highlight-header">
+                <div class="highlight-title-row">
+                    <h2 class="highlight-title">Player Highlights</h2>
+                    <span class="highlight-count" id="highlightCount">0 players</span>
+                </div>
+                <button class="highlight-close" id="highlightClose">&times;</button>
+            </div>
+            <div class="highlight-divider"></div>
+            <div class="highlight-toolbar">
+                <p class="highlight-desc">Community OSRS players showing off their characters. Submit yours for a chance to be featured!</p>
+                <button class="highlight-submit-open-btn" id="highlightOpenSubmit">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Submit Your Character
+                </button>
+            </div>
+            <div class="highlight-grid" id="highlightGrid">
+                <div class="highlight-loading">
+                    <div class="loading-spinner small"></div>
+                    <span>Loading highlights...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Player Highlight Submit Overlay -->
+    <div class="highlight-submit-overlay" id="highlightSubmitOverlay">
+        <div class="highlight-submit-panel">
+            <div class="highlight-header">
+                <h2 class="highlight-title">Submit Your Character</h2>
+                <button class="highlight-close" id="highlightSubmitClose">&times;</button>
+            </div>
+            <div class="highlight-divider"></div>
+            <form class="highlight-form" id="highlightForm" autocomplete="off">
+                <div class="highlight-field">
+                    <label class="highlight-label" for="highlightPlayerName">Player Name <span class="highlight-req">*</span></label>
+                    <input type="text" id="highlightPlayerName" class="highlight-input" placeholder="Your RSN" maxlength="30" autocomplete="off">
+                </div>
+                <div class="highlight-field">
+                    <label class="highlight-label" for="highlightCaption">Caption <span class="highlight-opt">(optional)</span></label>
+                    <input type="text" id="highlightCaption" class="highlight-input" placeholder="e.g. Just got my fire cape!" maxlength="120" autocomplete="off">
+                </div>
+                <div class="highlight-field">
+                    <label class="highlight-label">Screenshot <span class="highlight-req">*</span></label>
+                    <div class="highlight-drop-zone" id="highlightDropZone">
+                        <div class="highlight-drop-inner" id="highlightDropInner">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="36" height="36"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            <p>Drop image here, <label for="highlightFileInput" class="highlight-file-label">browse files</label>, or press Ctrl+V to paste</p>
+                            <p class="highlight-drop-hint">PNG &bull; JPG &bull; WebP &mdash; max 8 MB</p>
+                        </div>
+                        <input type="file" id="highlightFileInput" accept="image/*" style="display:none">
+                        <img class="highlight-preview" id="highlightPreview" alt="Preview" style="display:none">
+                        <button type="button" class="highlight-clear-img" id="highlightClearImg" style="display:none" title="Remove image">&times;</button>
+                    </div>
+                    <div class="highlight-url-row">
+                        <span class="highlight-url-label">or enter an image URL:</span>
+                        <input type="text" id="highlightUrlInput" class="highlight-input highlight-url-input" placeholder="https://i.imgur.com/..." autocomplete="off">
+                    </div>
+                </div>
+                <div class="highlight-submit-row">
+                    <button type="submit" class="highlight-submit-form-btn" id="highlightSubmitBtn">Submit for Review</button>
+                    <span class="highlight-status" id="highlightStatus"></span>
+                </div>
+            </form>
         </div>
     </div>
 

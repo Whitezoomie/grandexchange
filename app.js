@@ -2918,6 +2918,7 @@
                 loginSection.style.display = 'none';
                 panelSection.style.display = 'block';
                 loadAdminFeedback();
+                loadAdminHighlights();
             } else {
                 loginSection.style.display = 'block';
                 panelSection.style.display = 'none';
@@ -2949,6 +2950,9 @@
                     loginSection.style.display = 'none';
                     panelSection.style.display = 'block';
                     loadAdminFeedback();
+                    loadAdminHighlights();
+                    const hlRefreshBtn = document.getElementById('adminHighlightsRefresh');
+                    if (hlRefreshBtn) hlRefreshBtn.onclick = loadAdminHighlights;
                 } else {
                     errorEl.textContent = 'Invalid credentials';
                 }
@@ -3021,6 +3025,68 @@
             });
         } catch (e) {
             list.innerHTML = '<p class="admin-loading">Failed to load feedback.</p>';
+        }
+    }
+
+    async function loadAdminHighlights() {
+        const list = document.getElementById('adminHighlightsList');
+        if (!list || !adminToken) return;
+        list.innerHTML = '<p class="admin-loading">Loading...</p>';
+        try {
+            const res = await fetch(`${FEEDBACK_SERVER}/admin/highlights/pending`, {
+                headers: { 'Authorization': `Bearer ${adminToken}` },
+            });
+            if (!res.ok) throw new Error();
+            const items = await res.json();
+            if (!items.length) {
+                list.innerHTML = '<p class="admin-loading">No pending highlights.</p>';
+                return;
+            }
+            const esc = s => String(s || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            list.innerHTML = items.map(h => {
+                const d = new Date(h.date);
+                const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                return `<div class="admin-hl-card" data-id="${h.id}">
+                    <img class="admin-hl-img" src="${esc(h.image)}" alt="" onerror="this.style.display='none'">
+                    <div class="admin-hl-body">
+                        <div class="admin-hl-name">${esc(h.playerName)}</div>
+                        ${h.caption ? `<div class="admin-hl-caption">${esc(h.caption)}</div>` : ''}
+                        <div class="admin-hl-date">${dateStr}</div>
+                        <div class="admin-hl-actions">
+                            <button class="admin-hl-approve" data-id="${h.id}">Approve</button>
+                            <button class="admin-hl-deny"    data-id="${h.id}">Deny</button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            list.querySelectorAll('.admin-hl-approve').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const id = btn.getAttribute('data-id');
+                    try {
+                        await fetch(`${FEEDBACK_SERVER}/admin/highlights/${id}/approve`, {
+                            method: 'POST',
+                            headers: { 'Authorization': `Bearer ${adminToken}` },
+                        });
+                        loadAdminHighlights();
+                    } catch (e) {}
+                });
+            });
+
+            list.querySelectorAll('.admin-hl-deny').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const id = btn.getAttribute('data-id');
+                    try {
+                        await fetch(`${FEEDBACK_SERVER}/admin/highlights/${id}`, {
+                            method: 'DELETE',
+                            headers: { 'Authorization': `Bearer ${adminToken}` },
+                        });
+                        loadAdminHighlights();
+                    } catch (e) {}
+                });
+            });
+        } catch (e) {
+            list.innerHTML = '<p class="admin-loading">Failed to load highlights.</p>';
         }
     }
 
@@ -3163,6 +3229,14 @@
             heatmapBtn.addEventListener('click', function() {
                 menu.classList.remove('open');
                 openHeatmap();
+            });
+        }
+
+        var highlightBtn = document.getElementById('menuHighlight');
+        if (highlightBtn) {
+            highlightBtn.addEventListener('click', function() {
+                menu.classList.remove('open');
+                openHighlightGallery();
             });
         }
     }
@@ -3582,6 +3656,249 @@
         });
     }
 
+    // ========================================
+    // Player Highlights
+    // ========================================
+
+    var _hlImageData = null;
+
+    function _compressImage(src, callback) {
+        var img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = function() {
+            var MAX = 720;
+            var w = img.naturalWidth, h = img.naturalHeight;
+            if (w > MAX || h > MAX) {
+                if (w >= h) { h = Math.round(h * MAX / w); w = MAX; }
+                else        { w = Math.round(w * MAX / h); h = MAX; }
+            }
+            var canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            callback(canvas.toDataURL('image/jpeg', 0.78));
+        };
+        img.onerror = function() { callback(null); };
+        img.src = src;
+    }
+
+    function _setHLImage(dataUrl) {
+        _hlImageData = dataUrl;
+        var preview  = document.getElementById('highlightPreview');
+        var inner    = document.getElementById('highlightDropInner');
+        var clearBtn = document.getElementById('highlightClearImg');
+        if (!preview) return;
+        if (dataUrl) {
+            preview.src = dataUrl;
+            preview.style.display = 'block';
+            if (inner)    inner.style.display    = 'none';
+            if (clearBtn) clearBtn.style.display = 'flex';
+        } else {
+            preview.src = '';
+            preview.style.display = 'none';
+            if (inner)    inner.style.display    = 'flex';
+            if (clearBtn) clearBtn.style.display = 'none';
+        }
+    }
+
+    function _processHLFile(file) {
+        if (!file || !file.type.startsWith('image/')) return;
+        if (file.size > 8 * 1024 * 1024) { alert('Image must be under 8 MB.'); return; }
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            _compressImage(e.target.result, function(dataUrl) {
+                _setHLImage(dataUrl || e.target.result);
+            });
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function loadApprovedHighlights() {
+        var grid    = document.getElementById('highlightGrid');
+        var countEl = document.getElementById('highlightCount');
+        if (!grid) return;
+        grid.innerHTML = '<div class="highlight-loading"><div class="loading-spinner small"></div><span>Loading...</span></div>';
+        fetch(FEEDBACK_SERVER + '/highlights')
+            .then(function(r) { return r.ok ? r.json() : []; })
+            .then(function(data) {
+                if (countEl) countEl.textContent = data.length + ' player' + (data.length === 1 ? '' : 's');
+                if (!data.length) {
+                    grid.innerHTML = '<div class="highlight-empty">No highlights yet \u2014 be the first to submit!</div>';
+                    return;
+                }
+                var esc = function(s) { return String(s || '').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
+                grid.innerHTML = data.map(function(h) {
+                    var d = new Date(h.approvedDate || h.date);
+                    var dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    return '<div class="highlight-card">' +
+                        '<img class="highlight-card-img" src="' + esc(h.image) + '" alt="' + esc(h.playerName) + '" loading="lazy" onerror="this.style.display=\'none\'">' +
+                        '<div class="highlight-card-body">' +
+                            '<div class="highlight-card-name">' + esc(h.playerName) + '</div>' +
+                            (h.caption ? '<div class="highlight-card-caption">' + esc(h.caption) + '</div>' : '') +
+                            '<div class="highlight-card-date">' + dateStr + '</div>' +
+                        '</div>' +
+                        '</div>';
+                }).join('');
+            })
+            .catch(function() {
+                grid.innerHTML = '<div class="highlight-empty">Could not load highlights. Try again later.</div>';
+            });
+    }
+
+    function openHighlightGallery() {
+        var overlay = document.getElementById('highlightOverlay');
+        if (!overlay) return;
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        loadApprovedHighlights();
+    }
+
+    function closeHighlightGallery() {
+        var overlay = document.getElementById('highlightOverlay');
+        if (!overlay) return;
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    function openHighlightSubmit() {
+        closeHighlightGallery();
+        var overlay = document.getElementById('highlightSubmitOverlay');
+        if (!overlay) return;
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeHighlightSubmit() {
+        var overlay = document.getElementById('highlightSubmitOverlay');
+        if (!overlay) return;
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    function initHighlight() {
+        var galleryOverlay = document.getElementById('highlightOverlay');
+        var galleryClose   = document.getElementById('highlightClose');
+        var openSubmitBtn  = document.getElementById('highlightOpenSubmit');
+        var submitOverlay  = document.getElementById('highlightSubmitOverlay');
+        var submitClose    = document.getElementById('highlightSubmitClose');
+        var dropZone       = document.getElementById('highlightDropZone');
+        var fileInput      = document.getElementById('highlightFileInput');
+        var clearBtn       = document.getElementById('highlightClearImg');
+        var urlInput       = document.getElementById('highlightUrlInput');
+        var form           = document.getElementById('highlightForm');
+        var statusEl       = document.getElementById('highlightStatus');
+        var submitBtn      = document.getElementById('highlightSubmitBtn');
+
+        if (galleryOverlay) galleryOverlay.addEventListener('click', function(e) { if (e.target === galleryOverlay) closeHighlightGallery(); });
+        if (galleryClose)   galleryClose.addEventListener('click', closeHighlightGallery);
+        if (submitOverlay)  submitOverlay.addEventListener('click', function(e) { if (e.target === submitOverlay) closeHighlightSubmit(); });
+        if (submitClose)    submitClose.addEventListener('click', closeHighlightSubmit);
+        if (openSubmitBtn)  openSubmitBtn.addEventListener('click', openHighlightSubmit);
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key !== 'Escape') return;
+            if (submitOverlay  && submitOverlay.classList.contains('active'))  closeHighlightSubmit();
+            else if (galleryOverlay && galleryOverlay.classList.contains('active')) closeHighlightGallery();
+        });
+
+        // Drop zone interactions
+        if (dropZone) {
+            dropZone.addEventListener('click', function(e) {
+                if (e.target === clearBtn || (clearBtn && clearBtn.contains(e.target))) return;
+                if (!_hlImageData && fileInput) fileInput.click();
+            });
+            dropZone.addEventListener('dragover',  function(e) { e.preventDefault(); dropZone.classList.add('drag-over'); });
+            dropZone.addEventListener('dragleave', function()  { dropZone.classList.remove('drag-over'); });
+            dropZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                dropZone.classList.remove('drag-over');
+                var file = e.dataTransfer.files[0];
+                if (file) _processHLFile(file);
+            });
+        }
+
+        if (fileInput) {
+            fileInput.addEventListener('change', function() {
+                if (fileInput.files[0]) _processHLFile(fileInput.files[0]);
+                fileInput.value = '';
+            });
+        }
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                _setHLImage(null);
+                if (urlInput) urlInput.value = '';
+            });
+        }
+
+        if (urlInput) {
+            function applyUrl() {
+                var val = urlInput.value.trim();
+                if (val && (val.startsWith('http://') || val.startsWith('https://'))) _setHLImage(val);
+            }
+            urlInput.addEventListener('blur', applyUrl);
+            urlInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); applyUrl(); } });
+        }
+
+        // Clipboard paste
+        document.addEventListener('paste', function(e) {
+            if (!submitOverlay || !submitOverlay.classList.contains('active')) return;
+            var items = e.clipboardData && e.clipboardData.items;
+            if (!items) return;
+            for (var i = 0; i < items.length; i++) {
+                if (items[i].type.startsWith('image/')) {
+                    var file = items[i].getAsFile();
+                    if (file) { _processHLFile(file); break; }
+                }
+            }
+        });
+
+        // Form submit
+        if (form) {
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                var playerName = (document.getElementById('highlightPlayerName').value || '').trim();
+                var caption    = (document.getElementById('highlightCaption').value    || '').trim();
+                if (!playerName) {
+                    statusEl.className = 'highlight-status error';
+                    statusEl.textContent = 'Player name is required.';
+                    return;
+                }
+                if (!_hlImageData) {
+                    statusEl.className = 'highlight-status error';
+                    statusEl.textContent = 'Please add a screenshot.';
+                    return;
+                }
+                submitBtn.disabled = true;
+                statusEl.className = 'highlight-status';
+                statusEl.textContent = 'Submitting...';
+                try {
+                    var res = await fetch(FEEDBACK_SERVER + '/highlights/submit', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ playerName: playerName, caption: caption, image: _hlImageData }),
+                    });
+                    if (res.ok) {
+                        statusEl.className = 'highlight-status success';
+                        statusEl.textContent = 'Submitted! Awaiting admin approval.';
+                        form.reset();
+                        _setHLImage(null);
+                        setTimeout(function() { closeHighlightSubmit(); statusEl.textContent = ''; }, 2500);
+                    } else {
+                        var err = await res.json().catch(function() { return {}; });
+                        statusEl.className = 'highlight-status error';
+                        statusEl.textContent = err.error || 'Submission failed. Try again.';
+                    }
+                } catch (ex) {
+                    statusEl.className = 'highlight-status error';
+                    statusEl.textContent = 'Connection failed. Try again later.';
+                } finally {
+                    submitBtn.disabled = false;
+                }
+            });
+        }
+    }
+
     function init() {
         // Critical path: run immediately
         initEvents();
@@ -3590,6 +3907,7 @@
         initHamburgerMenu();
         initDeathCoffer();
         initHeatmap();
+        initHighlight();
         initCollapsibleSidebars();
         loadData();
 
