@@ -3116,7 +3116,11 @@ body.theme-transitioning *::after {
     right: 0;
     width: 260px;
     max-height: 60vh;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-light) transparent;
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: var(--radius);
@@ -3133,6 +3137,23 @@ body.theme-transitioning *::after {
 @keyframes effectsDropdownIn {
     from { opacity: 0; transform: translateY(-6px); }
     to   { opacity: 1; transform: translateY(0); }
+}
+.effects-dropdown::-webkit-scrollbar,
+.theme-effects-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+.effects-dropdown::-webkit-scrollbar-track,
+.theme-effects-dropdown::-webkit-scrollbar-track {
+    background: transparent;
+}
+.effects-dropdown::-webkit-scrollbar-thumb,
+.theme-effects-dropdown::-webkit-scrollbar-thumb {
+    background: var(--border-light);
+    border-radius: 3px;
+}
+.effects-dropdown::-webkit-scrollbar-thumb:hover,
+.theme-effects-dropdown::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
 }
 .effects-dropdown-section {
     display: flex;
