@@ -21,6 +21,28 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// --- Retry helper for Supabase operations (handles DNS/network blips on Render) ---
+async function sbRetry(fn, retries = 5, delayMs = 2000) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const result = await fn();
+            if (result && result.error && result.error.message && result.error.message.includes('fetch failed')) {
+                throw new Error(result.error.message);
+            }
+            return result;
+        } catch (e) {
+            const isNetwork = e.message && (e.message.includes('ENOTFOUND') || e.message.includes('fetch failed'));
+            if (isNetwork && i < retries - 1) {
+                console.log(`Supabase DNS retry ${i + 1}/${retries - 1} in ${delayMs}ms...`);
+                await new Promise(r => setTimeout(r, delayMs));
+                delayMs *= 2; // exponential backoff
+            } else {
+                throw e;
+            }
+        }
+    }
+}
+
 // --- Admin credentials (hashed server-side — never sent to client) ---
 const ADMIN_USER = 'Whitezoomie';
 const ADMIN_PASS_HASH = crypto.createHash('sha256').update('Da2008Da!!@@##').digest('hex');
@@ -189,14 +211,14 @@ const server = http.createServer(async (req, res) => {
             }
 
             // Update database
-            try {
+            sbRetry(async () => {
                 const { data: existing } = await supabase.from('votes').select('*').eq('item_id', itemId).single();
                 if (existing) {
                     await supabase.from('votes').update({ up_votes: entry.up, down_votes: entry.down }).eq('item_id', itemId);
                 } else {
                     await supabase.from('votes').insert({ item_id: itemId, up_votes: entry.up, down_votes: entry.down });
                 }
-            } catch (e) { console.error('Error saving vote:', e.message); }
+            }).catch(e => console.error('Error saving vote:', e.message));
 
             res.writeHead(200, headers);
             return res.end(JSON.stringify({ up: entry.up, down: entry.down, userVote: ipVotes[key] || null }));
@@ -228,13 +250,13 @@ const server = http.createServer(async (req, res) => {
             if (feedbackList.length > 500) feedbackList = feedbackList.slice(0, 500);
             
             // Save to Supabase
-            const { error: fbError } = await supabase.from('feedback').insert({
+            const { error: fbError } = await sbRetry(() => supabase.from('feedback').insert({
                 id: entry.id,
                 type: entry.type,
                 name: entry.name,
                 message: entry.message,
                 created_at: entry.date
-            });
+            })).catch(e => ({ error: e }));
             if (fbError) console.error('SUPABASE FEEDBACK ERROR:', JSON.stringify(fbError));
 
             res.writeHead(201, headers);
@@ -348,13 +370,13 @@ const server = http.createServer(async (req, res) => {
             if (highlightsData.pending.length > 100) highlightsData.pending = highlightsData.pending.slice(0, 100);
             
             // Save to Supabase
-            const { error: hlError } = await supabase.from('highlights_pending').insert({
+            const { error: hlError } = await sbRetry(() => supabase.from('highlights_pending').insert({
                 id: entry.id,
                 player_name: entry.playerName,
                 caption: entry.caption,
                 image: entry.image,
                 created_at: entry.date
-            });
+            })).catch(e => ({ error: e }));
             if (hlError) console.error('SUPABASE HIGHLIGHT ERROR:', JSON.stringify(hlError));
 
             res.writeHead(201, headers);
