@@ -791,6 +791,15 @@
         currentModalItemId = item.id;
         dom.modalFavBtn.classList.toggle('is-fav', isFavorite(item.id));
 
+        // Load flip sentiment votes
+        loadFlipVote(item.id);
+
+        // Wire vote buttons
+        var voteUpBtn   = document.getElementById('flipVoteUp');
+        var voteDownBtn = document.getElementById('flipVoteDown');
+        if (voteUpBtn)   { voteUpBtn.onclick   = function() { submitFlipVote(item.id, 'up');   }; }
+        if (voteDownBtn) { voteDownBtn.onclick  = function() { submitFlipVote(item.id, 'down'); }; }
+
         // Load price & volume history
         loadHistory(item.id, '5m');
         // Reset active tab
@@ -2732,6 +2741,115 @@
                 playTrack(idx);
             }
         });
+    }
+
+    // ========================================
+    // ========================================
+    // Flip Sentiment Voting
+    // ========================================
+
+    const VOTE_STORAGE_KEY = 'ge_flip_votes'; // localStorage: { itemId: 'up'|'down' }
+
+    function getLocalVotes() {
+        try { return JSON.parse(localStorage.getItem(VOTE_STORAGE_KEY) || '{}'); } catch (e) { return {}; }
+    }
+
+    function setLocalVote(itemId, vote) {
+        const v = getLocalVotes();
+        if (vote === null) delete v[itemId]; else v[itemId] = vote;
+        try { localStorage.setItem(VOTE_STORAGE_KEY, JSON.stringify(v)); } catch (e) {}
+    }
+
+    function renderFlipVote(data, itemId) {
+        var upCount   = data.up   || 0;
+        var downCount = data.down || 0;
+        var total     = upCount + downCount;
+        var userVote  = data.userVote || getLocalVotes()[itemId] || null;
+
+        var upEl    = document.getElementById('flipVoteUpCount');
+        var downEl  = document.getElementById('flipVoteDownCount');
+        var barUp   = document.getElementById('flipVoteBarUp');
+        var barDown = document.getElementById('flipVoteBarDown');
+        var metaEl  = document.getElementById('flipVoteMeta');
+        var btnUp   = document.getElementById('flipVoteUp');
+        var btnDown = document.getElementById('flipVoteDown');
+
+        if (!upEl) return;
+
+        upEl.textContent   = upCount;
+        downEl.textContent = downCount;
+
+        var upPct   = total > 0 ? (upCount / total * 100) : 50;
+        var downPct = total > 0 ? (downCount / total * 100) : 50;
+        barUp.style.width   = upPct + '%';
+        barDown.style.width = downPct + '%';
+
+        btnUp.classList.toggle('voted', userVote === 'up');
+        btnDown.classList.toggle('voted', userVote === 'down');
+
+        if (total === 0) {
+            metaEl.textContent = 'No votes yet — be the first!';
+        } else {
+            var pct = total > 0 ? Math.round(upCount / total * 100) : 0;
+            metaEl.textContent = total + ' vote' + (total === 1 ? '' : 's') + ' — ' + pct + '% say good flip';
+        }
+    }
+
+    function loadFlipVote(itemId) {
+        // Reset UI while loading
+        renderFlipVote({ up: 0, down: 0, userVote: getLocalVotes()[itemId] || null }, itemId);
+
+        fetch(FEEDBACK_SERVER + '/votes/' + itemId)
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(data) {
+                if (data) {
+                    // Server vote takes precedence for display; sync local
+                    if (data.userVote) setLocalVote(itemId, data.userVote);
+                    renderFlipVote(data, itemId);
+                }
+            })
+            .catch(function() {}); // silently fail if server is sleeping
+    }
+
+    function submitFlipVote(itemId, vote) {
+        // Optimistic UI update immediately
+        var localVotes = getLocalVotes();
+        var prev = localVotes[itemId] || null;
+        var newVote = (prev === vote) ? null : vote; // toggle off if same
+
+        var upEl   = document.getElementById('flipVoteUpCount');
+        var downEl = document.getElementById('flipVoteDownCount');
+        var curUp   = parseInt(upEl   ? upEl.textContent   : '0', 10) || 0;
+        var curDown = parseInt(downEl ? downEl.textContent : '0', 10) || 0;
+
+        if (prev === vote) {
+            // undo
+            if (vote === 'up')   curUp   = Math.max(0, curUp   - 1);
+            if (vote === 'down') curDown = Math.max(0, curDown - 1);
+        } else {
+            if (prev === 'up')   curUp   = Math.max(0, curUp   - 1);
+            if (prev === 'down') curDown = Math.max(0, curDown - 1);
+            if (vote === 'up')   curUp++;
+            if (vote === 'down') curDown++;
+        }
+
+        setLocalVote(itemId, newVote);
+        renderFlipVote({ up: curUp, down: curDown, userVote: newVote }, itemId);
+
+        // Sync with server
+        fetch(FEEDBACK_SERVER + '/votes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ itemId: String(itemId), vote: vote })
+        })
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(data) {
+                if (data) {
+                    setLocalVote(itemId, data.userVote);
+                    renderFlipVote(data, itemId);
+                }
+            })
+            .catch(function() {}); // keep optimistic result if server offline
     }
 
     // ========================================

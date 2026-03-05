@@ -11,6 +11,7 @@ const fs = require('fs');
 const PORT = process.env.PORT || 10000;
 const DATA_FILE = '/tmp/visitors.json';
 const FEEDBACK_FILE = '/tmp/feedback.json';
+const VOTES_FILE = '/tmp/votes.json';
 
 // --- Admin credentials (hashed server-side — never sent to client) ---
 const ADMIN_USER = 'Whitezoomie';
@@ -36,12 +37,30 @@ try {
     feedbackList = [];
 }
 
+// votes: { [itemId]: { up: N, down: N } }
+let votesData = {};
+try {
+    if (fs.existsSync(VOTES_FILE)) {
+        votesData = JSON.parse(fs.readFileSync(VOTES_FILE, 'utf8'));
+    }
+} catch (e) {
+    votesData = {};
+}
+
+// In-memory per-IP vote tracking: { 'itemId_ip': 'up'|'down' }
+// Resets on server restart — prevents rapid re-voting without heavy DB overhead
+const ipVotes = {};
+
 function saveTotal() {
     try { fs.writeFileSync(DATA_FILE, JSON.stringify({ total: totalVisitors })); } catch (e) {}
 }
 
 function saveFeedback() {
     try { fs.writeFileSync(FEEDBACK_FILE, JSON.stringify(feedbackList)); } catch (e) {}
+}
+
+function saveVotes() {
+    try { fs.writeFileSync(VOTES_FILE, JSON.stringify(votesData)); } catch (e) {}
 }
 
 // --- Simple session tokens for admin ---
@@ -83,6 +102,53 @@ const server = http.createServer(async (req, res) => {
     if (path === '/' && req.method === 'GET') {
         res.writeHead(200, headers);
         return res.end(JSON.stringify({ online: clients.size, total: totalVisitors }));
+    }
+
+    // --- Get votes for an item ---
+    if (path.startsWith('/votes/') && req.method === 'GET') {
+        const itemId = path.split('/').pop();
+        const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
+        const entry = votesData[itemId] || { up: 0, down: 0 };
+        const userVote = ipVotes[itemId + '_' + ip] || null;
+        res.writeHead(200, headers);
+        return res.end(JSON.stringify({ up: entry.up, down: entry.down, userVote }));
+    }
+
+    // --- Submit a vote ---
+    if (path === '/votes' && req.method === 'POST') {
+        try {
+            const data = await parseBody(req);
+            const itemId = String(data.itemId || '').slice(0, 20);
+            const vote = data.vote === 'up' ? 'up' : data.vote === 'down' ? 'down' : null;
+            if (!itemId || !vote) {
+                res.writeHead(400, headers);
+                return res.end(JSON.stringify({ error: 'Invalid request' }));
+            }
+            const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
+            const key = itemId + '_' + ip;
+            const prev = ipVotes[key] || null;
+
+            if (!votesData[itemId]) votesData[itemId] = { up: 0, down: 0 };
+            const entry = votesData[itemId];
+
+            if (prev === vote) {
+                // Toggle off (undo vote)
+                entry[vote] = Math.max(0, entry[vote] - 1);
+                delete ipVotes[key];
+            } else {
+                // Remove old vote if switching
+                if (prev) entry[prev] = Math.max(0, entry[prev] - 1);
+                entry[vote]++;
+                ipVotes[key] = vote;
+            }
+
+            saveVotes();
+            res.writeHead(200, headers);
+            return res.end(JSON.stringify({ up: entry.up, down: entry.down, userVote: ipVotes[key] || null }));
+        } catch (e) {
+            res.writeHead(400, headers);
+            return res.end(JSON.stringify({ error: 'Invalid request' }));
+        }
     }
 
     // --- Submit feedback (public, no auth) ---
