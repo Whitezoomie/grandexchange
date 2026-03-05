@@ -2844,7 +2844,7 @@
     // Feedback Form + Admin Panel
     // ========================================
 
-    const FEEDBACK_SERVER = 'https://osrs-ge-counter.onrender.com';
+    const FEEDBACK_SERVER = 'https://osrs-ge-server.onrender.com';
 
     function initFeedback() {
         const form = document.getElementById('feedbackForm');
