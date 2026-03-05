@@ -1,45 +1,43 @@
 // ============================================
 // OSRS GE Tracker — Visitor Counter + Feedback Server
-// Deploy this on Render.com with Supabase (persistent database)
+// Deploy on Render.com with Supabase PostgreSQL (direct connection)
 // ============================================
 
 const http = require('http');
 const { WebSocketServer } = require('ws');
 const crypto = require('crypto');
-const { createClient } = require('@supabase/supabase-js');
+const { Pool } = require('pg');
 
 const PORT = process.env.PORT || 10000;
 
-// --- Supabase initialization ---
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_KEY;
+// --- PostgreSQL connection (Supabase direct) ---
+const DATABASE_URL = process.env.DATABASE_URL;
 
-if (!SUPABASE_URL || !SUPABASE_KEY) {
-    console.error('ERROR: SUPABASE_URL and SUPABASE_KEY environment variables are required');
+if (!DATABASE_URL) {
+    console.error('ERROR: DATABASE_URL environment variable is required');
     process.exit(1);
 }
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const pool = new Pool({
+    connectionString: DATABASE_URL,
+    ssl: { rejectUnauthorized: false },
+    max: 5,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 10000,
+});
 
-// --- Retry helper for Supabase operations (handles DNS/network blips on Render) ---
-async function sbRetry(fn, retries = 5, delayMs = 2000) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const result = await fn();
-            if (result && result.error && result.error.message && result.error.message.includes('fetch failed')) {
-                throw new Error(result.error.message);
-            }
-            return result;
-        } catch (e) {
-            const isNetwork = e.message && (e.message.includes('ENOTFOUND') || e.message.includes('fetch failed'));
-            if (isNetwork && i < retries - 1) {
-                console.log(`Supabase DNS retry ${i + 1}/${retries - 1} in ${delayMs}ms...`);
-                await new Promise(r => setTimeout(r, delayMs));
-                delayMs *= 2; // exponential backoff
-            } else {
-                throw e;
-            }
-        }
+pool.on('error', (err) => {
+    console.error('Unexpected pool error:', err.message);
+});
+
+// --- DB helper: run a query with error handling ---
+async function dbQuery(text, params) {
+    try {
+        const result = await pool.query(text, params);
+        return result;
+    } catch (e) {
+        console.error('DB ERROR:', e.message, '| Query:', text.slice(0, 80));
+        return null;
     }
 }
 
@@ -47,87 +45,77 @@ async function sbRetry(fn, retries = 5, delayMs = 2000) {
 const ADMIN_USER = 'Whitezoomie';
 const ADMIN_PASS_HASH = crypto.createHash('sha256').update('Da2008Da!!@@##').digest('hex');
 
-// --- Initialize data with Supabase ---
+// --- Initialize data with PostgreSQL ---
 let totalVisitors = 0;
 let feedbackList = [];
 let votesData = {};
 const ipVotes = {};
 let highlightsData = { pending: [], approved: [] };
 
-// Load data from Supabase on startup
+// Load data from PostgreSQL on startup
 async function initializeData() {
     try {
+        // Test connection first
+        const testRes = await dbQuery('SELECT NOW()');
+        if (!testRes) {
+            console.error('Cannot connect to PostgreSQL — running with in-memory data only');
+            return;
+        }
+        console.log('PostgreSQL connected successfully');
+
         // Load total visitors
-        const { data: visitData } = await supabase.from('visitors').select('total').single();
-        if (visitData) totalVisitors = visitData.total || 0;
+        const vRes = await dbQuery('SELECT total FROM visitors LIMIT 1');
+        if (vRes && vRes.rows.length > 0) totalVisitors = vRes.rows[0].total || 0;
 
         // Load feedback
-        const { data: fData } = await supabase.from('feedback').select('*').order('created_at', { ascending: false });
-        feedbackList = (fData || []).map(f => ({
-            id: f.id,
-            type: f.type,
-            name: f.name,
-            message: f.message,
-            date: f.created_at,
-        }));
+        const fRes = await dbQuery('SELECT * FROM feedback ORDER BY created_at DESC LIMIT 500');
+        if (fRes) {
+            feedbackList = fRes.rows.map(f => ({
+                id: f.id, type: f.type, name: f.name,
+                message: f.message, date: f.created_at,
+            }));
+        }
 
         // Load votes
-        const { data: vData } = await supabase.from('votes').select('*');
-        votesData = {};
-        (vData || []).forEach(v => {
-            votesData[v.item_id] = { up: v.up_votes, down: v.down_votes };
-        });
+        const voRes = await dbQuery('SELECT * FROM votes');
+        if (voRes) {
+            votesData = {};
+            voRes.rows.forEach(v => {
+                votesData[v.item_id] = { up: v.up_votes, down: v.down_votes };
+            });
+        }
 
         // Load highlights
-        const { data: hPending } = await supabase.from('highlights_pending').select('*').order('created_at', { ascending: false });
-        const { data: hApproved } = await supabase.from('highlights_approved').select('*').order('approved_date', { ascending: false });
-        
-        highlightsData.pending = (hPending || []).map(h => ({
-            id: h.id,
-            playerName: h.player_name,
-            caption: h.caption,
-            image: h.image,
-            date: h.created_at,
-        }));
+        const hpRes = await dbQuery('SELECT * FROM highlights_pending ORDER BY created_at DESC');
+        if (hpRes) {
+            highlightsData.pending = hpRes.rows.map(h => ({
+                id: h.id, playerName: h.player_name, caption: h.caption,
+                image: h.image, date: h.created_at,
+            }));
+        }
 
-        highlightsData.approved = (hApproved || []).map(h => ({
-            id: h.id,
-            playerName: h.player_name,
-            caption: h.caption,
-            image: h.image,
-            date: h.created_at,
-            approvedDate: h.approved_date,
-        }));
+        const haRes = await dbQuery('SELECT * FROM highlights_approved ORDER BY approved_date DESC');
+        if (haRes) {
+            highlightsData.approved = haRes.rows.map(h => ({
+                id: h.id, playerName: h.player_name, caption: h.caption,
+                image: h.image, date: h.created_at, approvedDate: h.approved_date,
+            }));
+        }
 
-        console.log('Data loaded from Supabase');
+        console.log(`Data loaded: ${totalVisitors} visitors, ${feedbackList.length} feedback, ${Object.keys(votesData).length} votes, ${highlightsData.pending.length} pending / ${highlightsData.approved.length} approved highlights`);
     } catch (e) {
         console.error('Error initializing data:', e.message);
-        // Continue with empty data — tables may not exist yet
     }
 }
 
-// --- Database saving functions (async) ---
+// --- Database saving functions ---
 async function saveTotal() {
-    try {
-        const { data } = await supabase.from('visitors').select('*').single();
-        if (data) {
-            await supabase.from('visitors').update({ total: totalVisitors }).eq('id', data.id);
-        } else {
-            await supabase.from('visitors').insert({ total: totalVisitors });
-        }
-    } catch (e) { console.error('Error saving total:', e.message); }
-}
-
-async function saveFeedback() {
-    // Feedback is saved individually — this is a no-op
-}
-
-async function saveVotes() {
-    // Votes are saved individually — this is a no-op
-}
-
-async function saveHighlights() {
-    // Highlights are saved individually — this is a no-op
+    const exists = await dbQuery('SELECT id FROM visitors LIMIT 1');
+    if (exists && exists.rows.length > 0) {
+        await dbQuery('UPDATE visitors SET total = $1, updated_at = NOW() WHERE id = $2', [totalVisitors, exists.rows[0].id]);
+    } else {
+        await dbQuery('INSERT INTO visitors (total) VALUES ($1)', [totalVisitors]);
+    }
 }
 
 // --- Simple session tokens for admin ---
@@ -211,14 +199,11 @@ const server = http.createServer(async (req, res) => {
             }
 
             // Update database
-            sbRetry(async () => {
-                const { data: existing } = await supabase.from('votes').select('*').eq('item_id', itemId).single();
-                if (existing) {
-                    await supabase.from('votes').update({ up_votes: entry.up, down_votes: entry.down }).eq('item_id', itemId);
-                } else {
-                    await supabase.from('votes').insert({ item_id: itemId, up_votes: entry.up, down_votes: entry.down });
-                }
-            }).catch(e => console.error('Error saving vote:', e.message));
+            dbQuery(
+                `INSERT INTO votes (item_id, up_votes, down_votes) VALUES ($1, $2, $3)
+                 ON CONFLICT (item_id) DO UPDATE SET up_votes = $2, down_votes = $3, updated_at = NOW()`,
+                [itemId, entry.up, entry.down]
+            ).catch(e => console.error('Error saving vote:', e.message));
 
             res.writeHead(200, headers);
             return res.end(JSON.stringify({ up: entry.up, down: entry.down, userVote: ipVotes[key] || null }));
@@ -249,15 +234,12 @@ const server = http.createServer(async (req, res) => {
             feedbackList.unshift(entry);
             if (feedbackList.length > 500) feedbackList = feedbackList.slice(0, 500);
             
-            // Save to Supabase
-            const { error: fbError } = await sbRetry(() => supabase.from('feedback').insert({
-                id: entry.id,
-                type: entry.type,
-                name: entry.name,
-                message: entry.message,
-                created_at: entry.date
-            })).catch(e => ({ error: e }));
-            if (fbError) console.error('SUPABASE FEEDBACK ERROR:', JSON.stringify(fbError));
+            // Save to database
+            const result = await dbQuery(
+                'INSERT INTO feedback (id, type, name, message, created_at) VALUES ($1, $2, $3, $4, $5)',
+                [entry.id, entry.type, entry.name, entry.message, entry.date]
+            );
+            if (!result) console.error('FAILED to save feedback to DB');
 
             res.writeHead(201, headers);
             return res.end(JSON.stringify({ success: true }));
@@ -312,10 +294,8 @@ const server = http.createServer(async (req, res) => {
         const idx = feedbackList.findIndex(f => f.id === id);
         if (idx !== -1) {
             feedbackList.splice(idx, 1);
-            // Delete from Supabase
-            try {
-                await supabase.from('feedback').delete().eq('id', id);
-            } catch (e) { console.error('Error deleting feedback:', e.message); }
+            // Delete from database
+            await dbQuery('DELETE FROM feedback WHERE id = $1', [id]);
         }
         res.writeHead(200, headers);
         return res.end(JSON.stringify({ success: true }));
@@ -331,10 +311,8 @@ const server = http.createServer(async (req, res) => {
         votesData = {};
         Object.keys(ipVotes).forEach(k => delete ipVotes[k]);
         
-        // Delete all votes from Supabase
-        try {
-            await supabase.from('votes').delete().gte('id', 0); // Delete all rows
-        } catch (e) { console.error('Error resetting votes:', e.message); }
+        // Delete all votes from database
+        await dbQuery('DELETE FROM votes');
 
         res.writeHead(200, headers);
         return res.end(JSON.stringify({ success: true }));
@@ -369,15 +347,16 @@ const server = http.createServer(async (req, res) => {
             highlightsData.pending.unshift(entry);
             if (highlightsData.pending.length > 100) highlightsData.pending = highlightsData.pending.slice(0, 100);
             
-            // Save to Supabase
-            const { error: hlError } = await sbRetry(() => supabase.from('highlights_pending').insert({
-                id: entry.id,
-                player_name: entry.playerName,
-                caption: entry.caption,
-                image: entry.image,
-                created_at: entry.date
-            })).catch(e => ({ error: e }));
-            if (hlError) console.error('SUPABASE HIGHLIGHT ERROR:', JSON.stringify(hlError));
+            // Save to database
+            const result = await dbQuery(
+                'INSERT INTO highlights_pending (id, player_name, caption, image, created_at) VALUES ($1, $2, $3, $4, $5)',
+                [entry.id, entry.playerName, entry.caption, entry.image, entry.date]
+            );
+            if (result) {
+                console.log('Highlight saved to DB:', entry.id, entry.playerName);
+            } else {
+                console.error('FAILED to save highlight to DB');
+            }
 
             res.writeHead(201, headers);
             return res.end(JSON.stringify({ success: true }));
@@ -407,18 +386,12 @@ const server = http.createServer(async (req, res) => {
             highlightsData.approved.unshift(entry);
             if (highlightsData.approved.length > 50) highlightsData.approved = highlightsData.approved.slice(0, 50);
             
-            // Move from pending to approved in Supabase
-            try {
-                await supabase.from('highlights_pending').delete().eq('id', id);
-                await supabase.from('highlights_approved').insert({
-                    id: entry.id,
-                    player_name: entry.playerName,
-                    caption: entry.caption,
-                    image: entry.image,
-                    created_at: entry.date,
-                    approved_date: entry.approvedDate
-                });
-            } catch (e) { console.error('Error approving highlight:', e.message); }
+            // Move from pending to approved in database
+            await dbQuery('DELETE FROM highlights_pending WHERE id = $1', [id]);
+            await dbQuery(
+                'INSERT INTO highlights_approved (id, player_name, caption, image, created_at, approved_date) VALUES ($1, $2, $3, $4, $5, $6)',
+                [entry.id, entry.playerName, entry.caption, entry.image, entry.date, entry.approvedDate]
+            );
         }
         res.writeHead(200, headers);
         return res.end(JSON.stringify({ success: true }));
@@ -432,12 +405,12 @@ const server = http.createServer(async (req, res) => {
         const pi = (highlightsData.pending  || []).findIndex(h => h.id === id);
         if (pi !== -1) { 
             highlightsData.pending.splice(pi, 1);
-            try { await supabase.from('highlights_pending').delete().eq('id', id); } catch (e) {}
+            await dbQuery('DELETE FROM highlights_pending WHERE id = $1', [id]);
         }
         const ai = (highlightsData.approved || []).findIndex(h => h.id === id);
         if (ai !== -1) { 
             highlightsData.approved.splice(ai, 1);
-            try { await supabase.from('highlights_approved').delete().eq('id', id); } catch (e) {}
+            await dbQuery('DELETE FROM highlights_approved WHERE id = $1', [id]);
         }
         res.writeHead(200, headers);
         return res.end(JSON.stringify({ success: true }));
