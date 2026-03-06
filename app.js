@@ -3737,7 +3737,7 @@
         var img = new Image();
         img.crossOrigin = 'anonymous';
         img.onload = function() {
-            var MAX = 720;
+            var MAX = 1300;
             var w = img.naturalWidth, h = img.naturalHeight;
             if (w > MAX || h > MAX) {
                 if (w >= h) { h = Math.round(h * MAX / w); w = MAX; }
@@ -3776,6 +3776,9 @@
         if (file.size > 8 * 1024 * 1024) { alert('Image must be under 8 MB.'); return; }
         var reader = new FileReader();
         reader.onload = function(e) {
+            // Restore previous behavior: compress/resize client-side to a
+            // reasonable maximum to limit upload size and keep consistent
+            // thumbnails. This avoids sending huge base64 blobs to the server.
             _compressImage(e.target.result, function(dataUrl) {
                 _setHLImage(dataUrl || e.target.result);
             });

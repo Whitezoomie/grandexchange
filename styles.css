@@ -2575,7 +2575,11 @@ body.theme-transitioning *::after {
 .admin-hl-img {
     width: 72px;
     height: 72px;
-    object-fit: cover;
+    /* Show the full image inside the admin thumbnail (letterbox) so
+       uploads preserved at original resolution are visible without
+       cropping the bottom of tall screenshots. */
+    object-fit: contain;
+    object-position: center center;
     border-radius: 6px;
     flex-shrink: 0;
     background: var(--bg-card);

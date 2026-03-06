@@ -334,8 +334,19 @@ const server = http.createServer(async (req, res) => {
             const data = await parseBody(req, 12e6); // 12 MB — base64 images can be large
             const playerName = String(data.playerName || '').trim().slice(0, 30);
             const caption    = String(data.caption    || '').trim().slice(0, 120);
-            const image      = String(data.image      || '').slice(0, 700000); // ~500KB max
-            if (!playerName || !image) {
+            const imageRaw   = String(data.image || '');
+            // Allow up to ~11 MB of base64 data (covers ~8 MB binary images).
+            // Reject larger payloads to avoid excessive DB/storage use.
+            if (!imageRaw) {
+                res.writeHead(400, headers);
+                return res.end(JSON.stringify({ error: 'Player name and image are required' }));
+            }
+            if (imageRaw.length > 11e6) {
+                res.writeHead(413, headers);
+                return res.end(JSON.stringify({ error: 'Image too large' }));
+            }
+            const image = imageRaw;
+            if (!playerName) {
                 res.writeHead(400, headers);
                 return res.end(JSON.stringify({ error: 'Player name and image are required' }));
             }
