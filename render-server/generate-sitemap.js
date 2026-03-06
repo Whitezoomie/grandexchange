@@ -44,9 +44,16 @@ function escapeXml(str) {
   xml += `  <url>\n    <loc>https://therealge.com/</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n    <image:image>\n      <image:loc>https://therealge.com/og-image.png</image:loc>\n      <image:title>OSRS Grand Exchange Tracker</image:title>\n      <image:caption>Live item prices and market data for Old School RuneScape</image:caption>\n    </image:image>\n  </url>\n`;
 
   // Item pages
+  const seenSlugs = new Set();
+  // Count the homepage
+  let urlCount = 1;
+
   for (const item of filtered) {
     const slug = slugify(item.name);
     if (!slug) continue;
+    if (seenSlugs.has(slug)) continue;
+    seenSlugs.add(slug);
+    urlCount++;
     const imageUrl = `https://oldschool.runescape.wiki/images/${item.icon || 'Item_None.png'}`;
     xml += `  <url>\n    <loc>https://therealge.com/${slug}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.7</priority>\n    <image:image>\n      <image:loc>${escapeXml(imageUrl)}</image:loc>\n      <image:title>${escapeXml(item.name)}</image:title>\n      <image:caption>OSRS ${escapeXml(item.name)} - Grand Exchange price tracker</image:caption>\n    </image:image>\n  </url>\n`;
   }
@@ -54,6 +61,10 @@ function escapeXml(str) {
   // Custom items
   for (const item of customItems) {
     const slug = slugify(item.name);
+    if (!slug) continue;
+    if (seenSlugs.has(slug)) continue;
+    seenSlugs.add(slug);
+    urlCount++;
     const imageUrl = `https://oldschool.runescape.wiki/images/${item.icon}`;
     xml += `  <url>\n    <loc>https://therealge.com/${slug}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.7</priority>\n    <image:image>\n      <image:loc>${escapeXml(imageUrl)}</image:loc>\n      <image:title>${escapeXml(item.name)}</image:title>\n      <image:caption>OSRS ${escapeXml(item.name)} - Grand Exchange price tracker</image:caption>\n    </image:image>\n  </url>\n`;
   }
@@ -62,5 +73,5 @@ function escapeXml(str) {
 
   const outputPath = path.join(__dirname, '..', 'sitemap.xml');
   fs.writeFileSync(outputPath, xml);
-  console.log('Generated sitemap with ' + (filtered.length + customItems.length + 1) + ' URLs (with image extensions)');
+  console.log('Generated sitemap with ' + urlCount + ' unique URLs (with image extensions)');
 })();
