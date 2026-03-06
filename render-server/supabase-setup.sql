@@ -55,5 +55,11 @@ CREATE TABLE IF NOT EXISTS highlights_approved (
 -- Create index on approved_date for ordering
 CREATE INDEX IF NOT EXISTS highlights_approved_approved_date_idx ON highlights_approved(approved_date DESC);
 
+-- Highlight of the day (stores the approved highlight id that is featured)
+CREATE TABLE IF NOT EXISTS highlight_of_day (
+    id TEXT PRIMARY KEY,
+    set_date TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
 -- Enable Row Level Security for extra security (optional but recommended)
 -- Note: You can configure RLS policies through the Supabase dashboard
