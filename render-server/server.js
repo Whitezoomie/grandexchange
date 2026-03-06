@@ -95,10 +95,14 @@ async function initializeData() {
         }
 
         const haRes = await dbQuery('SELECT * FROM highlights_approved ORDER BY approved_date DESC');
+        // Load the current Highlight of the Day (if any)
+        const hodRes = await dbQuery('SELECT id FROM highlight_of_day LIMIT 1');
+        const hodId = (hodRes && hodRes.rows && hodRes.rows.length) ? hodRes.rows[0].id : null;
         if (haRes) {
             highlightsData.approved = haRes.rows.map(h => ({
                 id: h.id, playerName: h.player_name, caption: h.caption,
                 image: h.image, date: h.created_at, approvedDate: h.approved_date,
+                highlightOfDay: (h.id === hodId) || false,
             }));
         }
 
@@ -322,7 +326,8 @@ const server = http.createServer(async (req, res) => {
     if (path === '/highlights' && req.method === 'GET') {
         const approved = (highlightsData.approved || []).map(h => ({
             id: h.id, playerName: h.playerName, caption: h.caption,
-            image: h.image, date: h.date, approvedDate: h.approvedDate
+            image: h.image, date: h.date, approvedDate: h.approvedDate,
+            highlightOfDay: !!h.highlightOfDay
         }));
         res.writeHead(200, headers);
         return res.end(JSON.stringify(approved));
@@ -420,11 +425,57 @@ const server = http.createServer(async (req, res) => {
         }
         const ai = (highlightsData.approved || []).findIndex(h => h.id === id);
         if (ai !== -1) { 
+            // If deleted highlight was highlightOfDay, clear the selection
+            const wasHod = !!highlightsData.approved[ai].highlightOfDay;
             highlightsData.approved.splice(ai, 1);
             await dbQuery('DELETE FROM highlights_approved WHERE id = $1', [id]);
+            if (wasHod) {
+                await dbQuery('DELETE FROM highlight_of_day');
+            }
         }
         res.writeHead(200, headers);
         return res.end(JSON.stringify({ success: true }));
+    }
+
+    // --- Admin: get/set Highlight of the Day ---
+    if (path === '/admin/highlight-of-day' && req.method === 'GET') {
+        const token = (req.headers.authorization || '').replace('Bearer ', '');
+        if (!adminTokens.has(token)) { res.writeHead(401, headers); return res.end(JSON.stringify({ error: 'Unauthorized' })); }
+        const hodRes2 = await dbQuery('SELECT id FROM highlight_of_day LIMIT 1');
+        const hodId2 = (hodRes2 && hodRes2.rows && hodRes2.rows.length) ? hodRes2.rows[0].id : null;
+        res.writeHead(200, headers);
+        return res.end(JSON.stringify({ id: hodId2 }));
+    }
+
+    if (path === '/admin/highlight-of-day' && req.method === 'POST') {
+        const token = (req.headers.authorization || '').replace('Bearer ', '');
+        if (!adminTokens.has(token)) { res.writeHead(401, headers); return res.end(JSON.stringify({ error: 'Unauthorized' })); }
+        try {
+            const data = await parseBody(req);
+            const id = data && data.id ? String(data.id) : null;
+
+            // Clear existing selection first
+            await dbQuery('DELETE FROM highlight_of_day');
+
+            if (id) {
+                // Ensure the id exists in approved list before setting
+                const exists = (highlightsData.approved || []).some(h => h.id === id);
+                if (!exists) {
+                    res.writeHead(400, headers);
+                    return res.end(JSON.stringify({ error: 'Invalid highlight id' }));
+                }
+                await dbQuery('INSERT INTO highlight_of_day (id, set_date) VALUES ($1, NOW())', [id]);
+            }
+
+            // Update in-memory flags
+            (highlightsData.approved || []).forEach(h => { h.highlightOfDay = (id && h.id === id) || false; });
+
+            res.writeHead(200, headers);
+            return res.end(JSON.stringify({ success: true, id: id || null }));
+        } catch (e) {
+            res.writeHead(400, headers);
+            return res.end(JSON.stringify({ error: 'Invalid request' }));
+        }
     }
 
     // Fallback

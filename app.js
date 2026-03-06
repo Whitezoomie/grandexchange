@@ -3129,11 +3129,12 @@
                 return `<div class="admin-hl-card" data-id="${h.id}">
                     <img class="admin-hl-img" src="${esc(h.image)}" alt="" onerror="this.style.display='none'">
                     <div class="admin-hl-body">
-                        <div class="admin-hl-name">${esc(h.playerName)}</div>
+                        <div class="admin-hl-name">${esc(h.playerName)} ${h.highlightOfDay ? '<span style="color:#ffb86b;margin-left:8px;font-weight:600">(Highlight of the Day)</span>' : ''}</div>
                         ${h.caption ? `<div class="admin-hl-caption">${esc(h.caption)}</div>` : ''}
                         <div class="admin-hl-date">${dateStr}</div>
                         <div class="admin-hl-actions">
-                            <button class="admin-hl-delete-approved" data-id="${h.id}">Remove</button>
+                            <button class="admin-btn admin-btn-sm admin-btn-danger admin-hl-delete-approved" data-id="${h.id}">Remove</button>
+                            <button class="admin-btn admin-btn-sm admin-hl-set-hod" data-id="${h.id}">${h.highlightOfDay ? 'Unset HOD' : 'Set as Highlight of the Day'}</button>
                         </div>
                     </div>
                 </div>`;
@@ -3148,6 +3149,21 @@
                         await fetch(`${FEEDBACK_SERVER}/admin/highlights/${id}`, {
                             method: 'DELETE',
                             headers: { 'Authorization': `Bearer ${adminToken}` },
+                        });
+                        loadAdminApprovedHighlights();
+                    } catch (e) {}
+                });
+            });
+            // Wire set/unset highlight-of-day buttons
+            list.querySelectorAll('.admin-hl-set-hod').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const id = btn.getAttribute('data-id');
+                    const set = !btn.textContent.includes('Unset');
+                    try {
+                        await fetch(`${FEEDBACK_SERVER}/admin/highlight-of-day`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+                            body: JSON.stringify({ id: set ? id : null })
                         });
                         loadAdminApprovedHighlights();
                     } catch (e) {}
