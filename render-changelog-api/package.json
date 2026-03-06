@@ -1,0 +1,15 @@
+{
+  "name": "render-changelog-api",
+  "version": "1.0.0",
+  "description": "Tiny API to manage site changelog using Supabase (for Render)",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "body-parser": "^1.20.2"
+  }
+}

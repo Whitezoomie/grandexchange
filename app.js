@@ -29,6 +29,223 @@
             .replace(/^-+|-+$/g, '');
     }
 
+    // ========================================
+    // Website Changelog (localStorage, editable in site-management mode)
+    // ========================================
+
+    const CHANGELOG_KEY = 'site_changelog_v1';
+    // Feature gate: changelog integration is disabled by default to avoid runtime issues.
+    // Enable by setting `window.ENABLE_CHANGELOG = true` before loading app.js.
+    const CHANGELOG_ENABLED = !!window.ENABLE_CHANGELOG;
+    const CHANGELOG_API_BASE = CHANGELOG_ENABLED ? (window.CHANGELOG_API_BASE || null) : null;
+    const CHANGELOG_API_SECRET = CHANGELOG_ENABLED ? (window.CHANGELOG_API_SECRET || null) : null;
+
+    function loadChangelog() {
+        try {
+            const raw = localStorage.getItem(CHANGELOG_KEY);
+            const arr = raw ? JSON.parse(raw) : [];
+            return arr.sort((a, b) => b.date - a.date);
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function saveChangelog(entries) {
+        try {
+            localStorage.setItem(CHANGELOG_KEY, JSON.stringify(entries || []));
+        } catch (e) { /* ignore */ }
+    }
+
+    // If a remote API is configured, fetch latest entries and store locally
+    async function syncChangelogFromApi() {
+        if (!CHANGELOG_ENABLED || !CHANGELOG_API_BASE) return;
+        try {
+            const res = await fetch(CHANGELOG_API_BASE.replace(/\/$/, '') + '/changelog');
+            if (!res.ok) throw new Error('fetch failed');
+            const data = await res.json();
+            if (Array.isArray(data)) {
+                saveChangelog(data);
+            }
+        } catch (e) {
+            // ignore network errors; keep local copy
+        }
+    }
+
+    async function postChangelogToApi(title, content) {
+        if (!CHANGELOG_ENABLED || !CHANGELOG_API_BASE) throw new Error('No API configured');
+        const url = CHANGELOG_API_BASE.replace(/\/$/, '') + '/changelog';
+        const headers = { 'Content-Type': 'application/json' };
+        if (CHANGELOG_API_SECRET) headers['x-api-secret'] = CHANGELOG_API_SECRET;
+        const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify({ title, content }) });
+        if (!res.ok) throw new Error('Failed to post');
+        return await res.json();
+    }
+
+    async function deleteChangelogFromApi(id) {
+        if (!CHANGELOG_ENABLED || !CHANGELOG_API_BASE) throw new Error('No API configured');
+        const url = CHANGELOG_API_BASE.replace(/\/$/, '') + '/changelog/' + encodeURIComponent(id);
+        const headers = {};
+        if (CHANGELOG_API_SECRET) headers['x-api-secret'] = CHANGELOG_API_SECRET;
+        const res = await fetch(url, { method: 'DELETE', headers });
+        if (!res.ok) throw new Error('Failed to delete');
+        return await res.json();
+    }
+
+    function openChangelog() {
+        if (!CHANGELOG_ENABLED) return;
+        renderChangelogModal();
+        const modal = document.getElementById('changelogModal');
+        if (modal) {
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function closeChangelog() {
+        if (!CHANGELOG_ENABLED) return;
+        const modal = document.getElementById('changelogModal');
+        if (modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+            setTimeout(() => {
+                if (modal.parentElement) modal.parentElement.removeChild(modal);
+            }, 200);
+        }
+    }
+
+    function renderChangelogModal() {
+        if (!CHANGELOG_ENABLED) return;
+        // If modal already present, refresh body
+        if (document.getElementById('changelogModal')) {
+            const body = document.getElementById('changelogBody');
+            if (body) renderChangelogBody(body);
+            return;
+        }
+
+        const modal = document.createElement('div');
+        modal.id = 'changelogModal';
+        modal.className = 'changelog-modal';
+        modal.innerHTML = `
+            <div class="changelog-card">
+                <div class="changelog-header">
+                    <h3>Website Changelog</h3>
+                    <button id="changelogClose" class="btn-close" title="Close">✕</button>
+                </div>
+                <div id="changelogBody" class="changelog-body"></div>
+                <div id="changelogEditor" class="changelog-editor" style="display:none"></div>
+            </div>`;
+
+        document.body.appendChild(modal);
+
+        // Inject minimal styles for modal if not present
+        if (!document.getElementById('changelogStyles')) {
+            const s = document.createElement('style');
+            s.id = 'changelogStyles';
+            s.textContent = `
+                .changelog-modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:1000}
+                .changelog-modal .changelog-card{width:90%;max-width:820px;background:var(--bg-card,#0f1720);color:var(--text-primary,#e6eef8);border-radius:8px;padding:16px;box-shadow:0 8px 24px rgba(2,6,23,0.6)}
+                .changelog-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+                .changelog-body{max-height:60vh;overflow:auto;padding:6px}
+                .changelog-entry{border-bottom:1px solid rgba(255,255,255,0.04);padding:10px 0}
+                .changelog-entry h4{margin:0 0 6px 0;font-size:0.98rem}
+                .changelog-meta{font-size:0.82rem;color:rgba(156,160,176,0.9);margin-bottom:6px}
+                .changelog-editor{margin-top:12px}
+                .changelog-editor input,.changelog-editor textarea{width:100%;box-sizing:border-box;padding:8px;margin:6px 0;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:var(--bg-input,#0b1220);color:var(--text-primary)}
+                .changelog-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+                .changelog-actions button{padding:8px 10px;border-radius:6px;border:none;cursor:pointer}
+                .changelog-card button.btn-close{background:none;border:0;color:inherit;font-size:18px;cursor:pointer}
+            `;
+            document.head.appendChild(s);
+        }
+
+        document.getElementById('changelogClose').addEventListener('click', closeChangelog);
+
+        // Render content and optionally editor if in site-management mode
+        renderChangelogBody(document.getElementById('changelogBody'));
+
+        const isMgmt = document.body.classList.contains('site-management') || document.body.getAttribute('data-site-management') === 'true';
+            if (isMgmt) {
+                const editor = document.getElementById('changelogEditor');
+                editor.style.display = '';
+                editor.innerHTML = `
+                <input id="chgTitle" placeholder="Entry title (e.g. v1.2.3)">
+                <textarea id="chgContent" rows="6" placeholder="Describe changes..."></textarea>
+                <div class="changelog-actions"><button id="addChgBtn">Add Entry</button></div>
+            `;
+                document.getElementById('addChgBtn').addEventListener('click', async function() {
+                    const t = document.getElementById('chgTitle').value.trim();
+                    const c = document.getElementById('chgContent').value.trim();
+                    if (!c) return alert('Please enter content for the changelog entry.');
+                    try {
+                        if (CHANGELOG_API_BASE) {
+                            // try posting to API, then sync local copy
+                            await postChangelogToApi(t || '', c);
+                            await syncChangelogFromApi();
+                        } else {
+                            const entries = loadChangelog();
+                            const entry = { id: Date.now(), date: Date.now(), title: t || '', content: c };
+                            entries.unshift(entry);
+                            saveChangelog(entries);
+                        }
+                        renderChangelogBody(document.getElementById('changelogBody'));
+                        document.getElementById('chgTitle').value = '';
+                        document.getElementById('chgContent').value = '';
+                    } catch (err) {
+                        alert('Failed to add changelog entry: ' + err.message);
+                    }
+                });
+            }
+
+        // Close on Escape
+        document.addEventListener('keydown', function escHandler(e) {
+            if (e.key === 'Escape') {
+                closeChangelog();
+                document.removeEventListener('keydown', escHandler);
+            }
+        });
+    }
+
+    function renderChangelogBody(container) {
+        if (!CHANGELOG_ENABLED) {
+            container.innerHTML = '<div class="feed-loading"><span>Changelog unavailable.</span></div>';
+            return;
+        }
+        const entries = loadChangelog();
+        if (!entries || entries.length === 0) {
+            container.innerHTML = '<div class="feed-loading"><span>No updates yet.</span></div>';
+            return;
+        }
+        container.innerHTML = '';
+        entries.forEach(e => {
+            const div = document.createElement('div'); div.className = 'changelog-entry';
+            const h = document.createElement('h4'); h.textContent = e.title || new Date(e.date).toLocaleDateString();
+            const meta = document.createElement('div'); meta.className = 'changelog-meta'; meta.textContent = new Date(e.date).toLocaleString();
+            const p = document.createElement('div'); p.innerHTML = (e.content || '').split('\n').map(ln => '<div>' + escapeHtml(ln) + '</div>').join('');
+            div.appendChild(h); div.appendChild(meta); div.appendChild(p);
+            const isMgmt = document.body.classList.contains('site-management') || document.body.getAttribute('data-site-management') === 'true';
+            if (isMgmt) {
+                const del = document.createElement('button'); del.textContent = 'Delete'; del.style.marginLeft = '8px';
+                del.addEventListener('click', async function() {
+                    if (!confirm('Delete this changelog entry?')) return;
+                    try {
+                        if (CHANGELOG_API_BASE) {
+                            await deleteChangelogFromApi(e.id);
+                            await syncChangelogFromApi();
+                        } else {
+                            const arr = loadChangelog().filter(it => it.id !== e.id);
+                            saveChangelog(arr);
+                        }
+                        renderChangelogBody(container);
+                    } catch (err) {
+                        alert('Failed to delete changelog entry: ' + err.message);
+                    }
+                });
+                div.appendChild(del);
+            }
+            container.appendChild(div);
+        });
+    }
+
     function findItemBySlug(slug) {
         return allItems.find(item => slugify(item.name) === slug);
     }
@@ -2919,6 +3136,7 @@
                 panelSection.style.display = 'block';
                 loadAdminFeedback();
                 loadAdminHighlights();
+                initAdminChangelog();
             } else {
                 loginSection.style.display = 'block';
                 panelSection.style.display = 'none';
@@ -2951,6 +3169,7 @@
                     panelSection.style.display = 'block';
                     loadAdminFeedback();
                     loadAdminHighlights();
+                        initAdminChangelog();
                     const hlRefreshBtn = document.getElementById('adminHighlightsRefresh');
                     if (hlRefreshBtn) hlRefreshBtn.onclick = loadAdminHighlights;
                     const showApprovedBtn = document.getElementById('adminShowApproved');
@@ -3011,6 +3230,84 @@
                 list.innerHTML = '<p class="admin-loading">No feedback yet.</p>';
                 return;
             }
+
+                // Admin changelog management UI
+                function initAdminChangelog() {
+                    const container = document.getElementById('adminChangelog');
+                    if (!container) return;
+                    function render() {
+                        const entries = loadChangelog();
+                        container.innerHTML = '';
+                        const editorWrap = document.createElement('div');
+                        editorWrap.style.marginBottom = '12px';
+                        editorWrap.innerHTML = `
+                            <input id="adminChgTitle" placeholder="Entry title (optional)" style="width:100%;padding:8px;border-radius:6px;margin-bottom:6px;border:1px solid rgba(255,255,255,0.06);background:var(--bg-input,#07101a);color:var(--text-primary);">
+                            <textarea id="adminChgContent" rows="4" placeholder="Describe changes..." style="width:100%;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:var(--bg-input,#07101a);color:var(--text-primary);"></textarea>
+                            <div style="text-align:right;margin-top:6px"><button id="adminAddChg" class="admin-btn">Add Entry</button></div>
+                        `;
+                        container.appendChild(editorWrap);
+
+                        const list = document.createElement('div');
+                        if (!entries.length) {
+                            list.innerHTML = '<p class="admin-loading">No changelog entries yet.</p>';
+                        } else {
+                            entries.forEach(e => {
+                                const card = document.createElement('div');
+                                card.className = 'admin-chg-card';
+                                card.style.padding = '8px 0';
+                                card.style.borderBottom = '1px solid rgba(255,255,255,0.04)';
+                                const title = document.createElement('div'); title.style.fontWeight = '600'; title.textContent = e.title || new Date(e.date).toLocaleDateString();
+                                const meta = document.createElement('div'); meta.style.fontSize = '12px'; meta.style.color = 'rgba(156,160,176,0.9)'; meta.textContent = new Date(e.date).toLocaleString();
+                                const content = document.createElement('div'); content.style.marginTop = '6px'; content.innerHTML = (e.content || '').split('\n').map(ln => '<div>' + escapeHtml(ln) + '</div>').join('');
+                                const controls = document.createElement('div'); controls.style.marginTop = '6px'; controls.style.textAlign = 'right';
+                                const del = document.createElement('button'); del.className = 'admin-btn admin-btn-sm admin-btn-danger'; del.textContent = 'Delete';
+                                del.addEventListener('click', async function() {
+                                    if (!confirm('Delete this changelog entry?')) return;
+                                    try {
+                                        if (CHANGELOG_API_BASE) {
+                                            await deleteChangelogFromApi(e.id);
+                                            await syncChangelogFromApi();
+                                        } else {
+                                            const arr = loadChangelog().filter(it => it.id !== e.id);
+                                            saveChangelog(arr);
+                                        }
+                                        render();
+                                    } catch (err) {
+                                        alert('Failed to delete changelog entry: ' + err.message);
+                                    }
+                                });
+                                controls.appendChild(del);
+                                card.appendChild(title); card.appendChild(meta); card.appendChild(content); card.appendChild(controls);
+                                list.appendChild(card);
+                            });
+                        }
+                        container.appendChild(list);
+
+                        document.getElementById('adminAddChg').addEventListener('click', async function() {
+                            const t = document.getElementById('adminChgTitle').value.trim();
+                            const c = document.getElementById('adminChgContent').value.trim();
+                            if (!c) return alert('Please enter content for the changelog entry.');
+                            try {
+                                if (CHANGELOG_API_BASE) {
+                                    await postChangelogToApi(t || '', c);
+                                    await syncChangelogFromApi();
+                                } else {
+                                    const entries = loadChangelog();
+                                    const entry = { id: Date.now(), date: Date.now(), title: t || '', content: c };
+                                    entries.unshift(entry);
+                                    saveChangelog(entries);
+                                }
+                                document.getElementById('adminChgTitle').value = '';
+                                document.getElementById('adminChgContent').value = '';
+                                render();
+                            } catch (err) {
+                                alert('Failed to add changelog entry: ' + err.message);
+                            }
+                        });
+                    }
+                    // If API available, sync first
+                    (async () => { if (CHANGELOG_API_BASE) await syncChangelogFromApi(); render(); })();
+                }
 
             list.innerHTML = feedback.map(fb => {
                 const d = new Date(fb.date);
@@ -3324,6 +3621,13 @@
             highlightBtn.addEventListener('click', function() {
                 menu.classList.remove('open');
                 openHighlightGallery();
+            });
+        }
+        var changelogBtn = document.getElementById('menuChangelog');
+        if (changelogBtn) {
+            changelogBtn.addEventListener('click', function() {
+                menu.classList.remove('open');
+                openChangelog();
             });
         }
     }
