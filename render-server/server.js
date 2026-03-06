@@ -63,6 +63,12 @@ async function initializeData() {
         }
         console.log('PostgreSQL connected successfully');
 
+        // Ensure the highlight_of_day table exists to avoid runtime errors
+        await dbQuery(`CREATE TABLE IF NOT EXISTS highlight_of_day (
+            id TEXT PRIMARY KEY,
+            set_date TIMESTAMP WITH TIME ZONE DEFAULT now()
+        )`);
+
         // Load total visitors
         const vRes = await dbQuery('SELECT total FROM visitors LIMIT 1');
         if (vRes && vRes.rows.length > 0) totalVisitors = vRes.rows[0].total || 0;
