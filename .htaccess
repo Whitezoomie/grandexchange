@@ -87,16 +87,17 @@ FileETag MTime Size
   
   # Remove trailing slashes (except for directories)
   RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule ^(.+)/$ /$1 [R=301,L]
+  RewriteRule ^(.+)/$ /\$1 [R=301,L]
   
-  # Redirect .html URLs to clean URLs (301 permanent)
-  RewriteCond %{THE_REQUEST} \s/+([a-z0-9\-]+)\.html[\s\?] [NC]
+  # Redirect .html URLs to clean URLs (only for EXTERNAL requests)
+  RewriteCond %{ENV:REDIRECT_STATUS} ^$
+  RewriteCond %{THE_REQUEST} \s/+([^?\s]+)\.html[\s\?] [NC]
   RewriteRule ^ /%1 [R=301,L]
   
   # Serve clean URLs by mapping to .html files
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule ^([a-z0-9\-]+)/?$ /$1.html [L]
+  RewriteRule ^([a-zA-Z0-9\-]+)/?$ /\$1.html [L]
 </IfModule>
 
 # Disable directory listing
