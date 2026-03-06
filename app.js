@@ -3133,8 +3133,8 @@
                         ${h.caption ? `<div class="admin-hl-caption">${esc(h.caption)}</div>` : ''}
                         <div class="admin-hl-date">${dateStr}</div>
                         <div class="admin-hl-actions">
-                            <button class="admin-hl-delete-approved" data-id="${h.id}">Remove</button>
-                            <button class="admin-hl-set-hod" data-id="${h.id}">${h.highlightOfDay ? 'Unset HOD' : 'Set as Highlight of the Day'}</button>
+                            <button class="admin-btn admin-btn-sm admin-btn-danger admin-hl-delete-approved" data-id="${h.id}">Remove</button>
+                            <button class="admin-btn admin-btn-sm admin-hl-set-hod" data-id="${h.id}">${h.highlightOfDay ? 'Unset HOD' : 'Set as Highlight of the Day'}</button>
                         </div>
                     </div>
                 </div>`;
