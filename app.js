@@ -218,6 +218,8 @@
         backToTop: $('backToTop'),
     };
 
+    
+
     // ========================================
     // Favorites (localStorage)
     // ========================================
@@ -830,12 +832,15 @@
             sortBy: dom.sortBy.value,
         };
         localStorage.setItem('ge_saved_filters', JSON.stringify(filters));
-        dom.saveFilters.textContent = 'Saved!';
-        dom.saveFilters.classList.add('saved');
-        setTimeout(() => {
-            dom.saveFilters.textContent = 'Save Filters';
-            dom.saveFilters.classList.remove('saved');
-        }, 1500);
+        if (dom.saveFilters) {
+            dom.saveFilters.textContent = 'Saved!';
+            dom.saveFilters.classList.add('saved');
+            setTimeout(() => {
+                dom.saveFilters.textContent = 'Reset Filters';
+                dom.saveFilters.classList.remove('saved');
+                dom.saveFilters.dataset.mode = 'reset';
+            }, 700);
+        }
     }
 
     function loadSavedFilters() {
@@ -875,6 +880,11 @@
         if (budgetInp) budgetInp.value = '';
         if (budgetBtn) { budgetBtn.classList.remove('active'); budgetBtn.textContent = 'Go'; }
         localStorage.removeItem('ge_saved_filters');
+        // If save button exists, ensure it returns to save mode
+        if (dom.saveFilters) {
+            dom.saveFilters.textContent = 'Save Filters';
+            dom.saveFilters.dataset.mode = 'save';
+        }
         applyFilters();
     }
 
@@ -1501,13 +1511,26 @@
             }
         });
 
-        // Save Filters
-        dom.saveFilters.addEventListener('click', saveFiltersToStorage);
+        // Hide the separate reset button (we'll reuse the save button as a toggle)
+        if (dom.resetFilters) dom.resetFilters.style.display = 'none';
 
-        // Reset
-        dom.resetFilters.addEventListener('click', () => {
-            resetAllFilters();
-        });
+        // Initialize save button mode based on whether saved filters exist
+        const hasSaved = !!localStorage.getItem('ge_saved_filters');
+        if (dom.saveFilters) {
+            dom.saveFilters.dataset.mode = hasSaved ? 'reset' : 'save';
+            dom.saveFilters.textContent = hasSaved ? 'Reset Filters' : 'Save Filters';
+            dom.saveFilters.addEventListener('click', () => {
+                const mode = dom.saveFilters.dataset.mode || 'save';
+                if (mode === 'save') {
+                    saveFiltersToStorage();
+                } else {
+                    resetAllFilters();
+                    // ensure button returns to save mode
+                    dom.saveFilters.textContent = 'Save Filters';
+                    dom.saveFilters.dataset.mode = 'save';
+                }
+            });
+        }
 
         // Logo home reset
         document.getElementById('logoHome').addEventListener('click', () => {

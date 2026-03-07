@@ -1831,6 +1831,71 @@ body.theme-transitioning *::after {
     color: var(--red);
 }
 
+/* Split-button for Save Filters + menu */
+.split-btn {
+    display: inline-flex;
+    align-items: stretch;
+    gap: 0;
+    position: relative;
+}
+
+.split-btn .save-filters-btn {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.split-toggle {
+    padding: 8px 10px;
+    background: transparent;
+    border: 1px solid var(--accent);
+    border-left: none;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    color: var(--accent);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.split-toggle:hover {
+    background: var(--accent);
+    color: #0f1117;
+}
+
+.split-menu {
+    position: absolute;
+    margin-top: 6px;
+    right: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    box-shadow: 0 6px 20px rgba(12,14,18,0.25);
+    border-radius: var(--radius-sm);
+    display: none;
+    min-width: 140px;
+    z-index: 40;
+    overflow: hidden;
+}
+
+.split-menu.open {
+    display: block;
+}
+
+.split-menu .split-menu-item {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    text-align: left;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.split-menu .split-menu-item:hover {
+    background: var(--muted-bg);
+    color: var(--text-primary);
+}
+
 /* Favorites Filter Toggle */
 .filter-toggle {
     display: flex;
