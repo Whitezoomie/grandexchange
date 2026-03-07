@@ -4185,6 +4185,21 @@ body.theme-transitioning *::after {
         grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     }
 
+    /* Improve touch targets and card density on tablet */
+    .item-card {
+        padding: 14px;
+    }
+
+    .item-icon {
+        width: 44px;
+        height: 44px;
+    }
+
+    .card-fav-btn {
+        width: 36px;
+        height: 36px;
+    }
+
     .list-view .item-card {
         flex-direction: column;
         align-items: flex-start;
@@ -4206,6 +4221,11 @@ body.theme-transitioning *::after {
     .modal-prices {
         grid-template-columns: 1fr;
     }
+
+    /* Modal becomes full-width-ish on tablet for easier interaction */
+    .modal {
+        max-width: 720px;
+    }
 }
 
 @media (max-width: 500px) {
@@ -4225,8 +4245,19 @@ body.theme-transitioning *::after {
         grid-template-columns: 1fr;
     }
 
+    /* Make modal fullscreen-like on phones for readability */
+    .modal-overlay {
+        padding: 12px;
+        align-items: flex-start;
+        overflow-y: auto;
+    }
+
     .modal {
-        margin: 12px;
+        margin: 6px 0;
+        width: 100%;
+        max-width: 100%;
+        border-radius: 8px;
+        max-height: calc(100vh - 20px);
     }
 
     .logo-text h1,
@@ -4242,6 +4273,29 @@ body.theme-transitioning *::after {
     .page-btn {
         padding: 8px 14px;
         font-size: 0.82rem;
+    }
+
+    /* Mobile-specific card/tap improvements */
+    .item-card {
+        padding: 12px;
+        gap: 8px;
+    }
+
+    .item-name { font-size: 0.98rem; }
+
+    .card-fav-btn {
+        width: 40px;
+        height: 40px;
+    }
+
+    .price-box .value { font-size: 1rem; }
+
+    .price-box .label, .margin-label, .volume-label { font-size: 0.68rem; }
+
+    /* Ensure charts and canvases are touch-friendly */
+    .price-chart-container, .volume-chart-container, canvas {
+        width: 100% !important;
+        height: auto !important;
     }
 }
 
