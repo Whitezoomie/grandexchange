@@ -4800,7 +4800,7 @@
         } catch (err) {
             feedEl.innerHTML = `
                 <div class="news-error">
-                    <p>Could not load news feed.</p>
+                    <p>Please wait...</p>
                     <a href="https://oldschool.runescape.com" target="_blank" rel="noopener" class="news-error-link">Visit oldschool.runescape.com \u2192</a>
                 </div>`;
         }
