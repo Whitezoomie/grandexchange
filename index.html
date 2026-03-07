@@ -462,47 +462,7 @@
                     </select>
                 </div>
 
-                <div class="filter-group">
-                    <label>Min Price</label>
-                    <input type="text" id="minPrice" placeholder="0 or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
-                </div>
-
-                <div class="filter-group">
-                    <label>Max Price</label>
-                    <input type="text" id="maxPrice" placeholder="No limit or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
-                </div>
-
-                <div class="filter-group">
-                    <label>Min Margin</label>
-                    <input type="text" id="minMargin" placeholder="0 or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
-                </div>
-
-                <div class="filter-group">
-                    <label>Max Margin</label>
-                    <input type="text" id="maxMargin" placeholder="No limit or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
-                </div>
-
-                <div class="filter-group">
-                    <label>Min Volume</label>
-                    <input type="text" id="minVolume" placeholder="0 or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
-                </div>
-
-                <div class="filter-group">
-                    <label>Max Volume</label>
-                    <input type="text" id="maxVolume" placeholder="No limit or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
-                </div>
-
-                <div class="filter-group">
-                    <label>Min Buy Limit</label>
-                    <input type="text" id="minBuyLimit" placeholder="0 or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
-                </div>
-
-                <div class="filter-group">
-                    <label>Max Buy Limit</label>
-                    <input type="text" id="maxBuyLimit" placeholder="No limit or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
-                </div>
-
-                <div class="filter-group">
+                <div class="filter-group" id="sortBy-moved">
                     <label>Sort By</label>
                     <select id="sortBy">
                         <option value="popular-desc" selected>Most Popular</option>
@@ -519,6 +479,52 @@
                         <option value="traded-asc">Least Recently Traded</option>
                     </select>
                 </div>
+
+                
+
+                
+
+                <div class="filter-group">
+                    <label>Min Price</label>
+                    <input type="text" id="minPrice" placeholder="0, 10k, 1m.." inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Max Price</label>
+                    <input type="text" id="maxPrice" placeholder="0, 10k, 1m.." inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Min Margin</label>
+                    <input type="text" id="minMargin" placeholder="0, 10k, 1m.." inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Max Margin</label>
+                    <input type="text" id="maxMargin" placeholder="0, 10k, 1m.." inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Min Volume</label>
+                    <input type="text" id="minVolume" placeholder="0, 10k, 1m.." inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Max Volume</label>
+                    <input type="text" id="maxVolume" placeholder="0, 10k, 1m.." inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Min Buy Limit</label>
+                    <input type="text" id="minBuyLimit" placeholder="0, 10k, 1m.." inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Max Buy Limit</label>
+                    <input type="text" id="maxBuyLimit" placeholder="0, 10k, 1m.." inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                
 
                 <div class="filter-group">
                     <label>Show</label>
@@ -547,29 +553,9 @@
                 <button class="save-filters-btn" id="saveFilters">Save Filters</button>
                 <button class="reset-btn" id="resetFilters" style="display:none">Reset All</button>
 
-                <div class="budget-group">
-                    <label>Budget (GP)</label>
-                    <div class="budget-input-row">
-                        <input type="text" id="budgetInput" placeholder="e.g. 5000000 or 5m" inputmode="numeric" autocomplete="one-time-code" data-lpignore="true" data-1p-ignore="true" data-form-type="other">
-                        <button class="budget-toggle-btn" id="budgetToggle" type="button" title="What Can I Afford?">Go</button>
-                    </div>
-                </div>
+                
 
-                <!-- Item Spotlight (inline in filters) -->
-                <div class="spotlight-banner" id="spotlightBanner" style="display:none">
-                    <div class="spotlight-glow"></div>
-                    <img class="spotlight-icon" id="spotlightIcon" alt="" src="">
-                    <div class="spotlight-text">
-                        <span class="spotlight-label">Item Spotlight</span>
-                        <span class="spotlight-name" id="spotlightName"></span>
-                        <span class="spotlight-lore" id="spotlightLore"></span>
-                    </div>
-                    <div class="spotlight-stats">
-                        <span class="spotlight-price" id="spotlightPrice"></span>
-                        <button class="spotlight-view-btn" id="spotlightView">View</button>
-                    </div>
-                    <button class="spotlight-close" id="spotlightClose" title="Dismiss">&times;</button>
-                </div>
+                <!-- Item Spotlight removed -->
             </div>
         </div>
     </nav>

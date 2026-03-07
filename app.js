@@ -407,7 +407,6 @@
 
             showMain();
             dom.totalItems.textContent = allItems.length.toLocaleString();
-            initSpotlight();
 
             // Start continuous last-updated timer
             dataLoadedAt = Date.now();
@@ -868,11 +867,7 @@
         dom.minBuyLimit.value = '';
         dom.maxBuyLimit.value = '';
         dom.sortBy.value = 'popular-desc';
-        // Clear budget mode
-        const budgetInp = document.getElementById('budgetInput');
-        const budgetBtn = document.getElementById('budgetToggle');
-        if (budgetInp) budgetInp.value = '';
-        if (budgetBtn) { budgetBtn.classList.remove('active'); budgetBtn.textContent = 'Go'; }
+        // (budget input removed)
         localStorage.removeItem('ge_saved_filters');
         // If save button exists, ensure it returns to save mode
         if (dom.saveFilters) {
@@ -894,9 +889,7 @@
         const minBL = parseNumberWithSuffix(dom.minBuyLimit.value) || 0;
         const maxBL = dom.maxBuyLimit.value ? parseNumberWithSuffix(dom.maxBuyLimit.value) : Infinity;
 
-        const budgetBtn = document.getElementById('budgetToggle');
-        const budgetActive = budgetBtn && budgetBtn.classList.contains('active');
-        const budgetVal = budgetActive ? (parseNumberWithSuffix(document.getElementById('budgetInput').value) || 0) : 0;
+        // budget filter removed
 
         filteredItems = allItems.filter(item => {
             // Favorites filter
@@ -932,11 +925,7 @@
             if (limit < minBL) return false;
             if (limit > maxBL) return false;
 
-            // Budget filter (What Can I Afford?)
-            if (budgetActive && budgetVal > 0) {
-                const itemPrice = item.buyPrice || item.sellPrice || 0;
-                if (itemPrice > budgetVal || itemPrice === 0) return false;
-            }
+            // budget filter removed
 
             return true;
         });
@@ -944,10 +933,6 @@
         // Sort
         const sortVal = dom.sortBy.value;
         filteredItems.sort((a, b) => {
-            // If budget mode is active, sort by price descending (best value = most expensive you can afford)
-            if (budgetActive && budgetVal > 0) {
-                return (b.buyPrice || 0) - (a.buyPrice || 0);
-            }
             switch (sortVal) {
                 case 'name-asc':
                     return a.name.localeCompare(b.name);
@@ -1411,42 +1396,7 @@
         updateFavoritesCount();
     }
 
-    // ========================================
-    // Item Spotlight
-    // ========================================
-
-    function initSpotlight() {
-        const banner = document.getElementById('spotlightBanner');
-        if (!banner || allItems.length === 0) return;
-
-        // Pick a random mid-tier item (10K - 10M GP) that has an examine blurb
-        const midTier = allItems.filter(item => {
-            const price = item.buyPrice || item.sellPrice || 0;
-            return price >= 10000 && price <= 10000000 && item.examine;
-        });
-        if (midTier.length === 0) return;
-
-        const item = midTier[Math.floor(Math.random() * midTier.length)];
-        const iconUrl = getIconUrl(item.icon);
-
-        document.getElementById('spotlightIcon').src = iconUrl;
-        document.getElementById('spotlightIcon').onerror = function() { this.style.display = 'none'; };
-        document.getElementById('spotlightName').textContent = item.name;
-        document.getElementById('spotlightLore').textContent = '"' + item.examine + '"';
-        document.getElementById('spotlightPrice').textContent = formatGp(item.buyPrice || item.sellPrice);
-
-        banner.style.display = '';
-        banner.classList.add('visible');
-
-        document.getElementById('spotlightView').addEventListener('click', () => {
-            openModal(item);
-        });
-
-        document.getElementById('spotlightClose').addEventListener('click', () => {
-            banner.classList.remove('visible');
-            banner.style.display = 'none';
-        });
-    }
+    // Item Spotlight removed — feature deprecated and markup hidden via CSS
 
     // ========================================
     // Event Listeners
@@ -1479,31 +1429,7 @@
         dom.maxBuyLimit.addEventListener('input', debounce(applyFilters, 500));
         dom.sortBy.addEventListener('change', applyFilters);
 
-        // Budget (What Can I Afford?)
-        const budgetInput = document.getElementById('budgetInput');
-        const budgetToggle = document.getElementById('budgetToggle');
-        
-        // Clear any auto-filled values from password managers
-        budgetInput.addEventListener('focus', () => {
-            if (budgetInput.value && isNaN(parseNumberWithSuffix(budgetInput.value))) {
-                budgetInput.value = '';
-            }
-        });
-        
-        budgetToggle.addEventListener('click', () => {
-            budgetToggle.classList.toggle('active');
-            budgetToggle.textContent = budgetToggle.classList.contains('active') ? 'On' : 'Go';
-            applyFilters();
-        });
-        budgetInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                if (!budgetToggle.classList.contains('active')) {
-                    budgetToggle.classList.add('active');
-                    budgetToggle.textContent = 'On';
-                }
-                applyFilters();
-            }
-        });
+        // Budget UI removed
 
         // Hide the separate reset button (we'll reuse the save button as a toggle)
         if (dom.resetFilters) dom.resetFilters.style.display = 'none';

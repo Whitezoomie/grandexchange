@@ -230,54 +230,20 @@ html {
     .spotlight-lore { display: none; }
 }
 
-/* Budget (What Can I Afford?) */
-.budget-group {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+/* Hide any remaining spotlight markup site-wide (feature removed) */
+.spotlight-banner,
+.spotlight-icon,
+.spotlight-text,
+.spotlight-stats,
+.spotlight-view-btn,
+.spotlight-close,
+.spotlight-label,
+.spotlight-name,
+.spotlight-lore {
+    display: none !important;
 }
-.budget-group label {
-    font-size: 0.7rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    font-weight: 500;
-}
-.budget-input-row {
-    display: flex;
-    gap: 4px;
-}
-.budget-input-row input {
-    width: 120px;
-    padding: 6px 10px;
-    background: var(--bg-input);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    color: var(--text-primary);
-    font-size: 0.82rem;
-}
-.budget-input-row input:focus {
-    border-color: var(--accent);
-    outline: none;
-}
-.budget-toggle-btn {
-    padding: 6px 12px;
-    background: var(--accent);
-    color: var(--bg-primary);
-    border: none;
-    border-radius: var(--radius-sm);
-    font-size: 0.78rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background var(--transition);
-    white-space: nowrap;
-}
-.budget-toggle-btn:hover {
-    background: var(--accent-hover);
-}
-.budget-toggle-btn.active {
-    background: var(--green);
-    color: #fff;
-}
+
+/* Budget controls removed */
 
 /* ===== LIGHT THEME ===== */
 [data-theme="light"] {
@@ -1725,16 +1691,16 @@ body.theme-transitioning *::after {
 .filter-group select,
 .filter-group input[type="number"],
 .filter-group input[type="text"] {
-    padding: 8px 12px;
+    padding: 6px 8px;
     background: var(--bg-input);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     color: var(--text-primary);
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     font-family: inherit;
     outline: none;
     transition: border-color var(--transition);
-    min-width: 140px;
+    min-width: 96px;
 }
 
 .filter-group select:focus,
@@ -1750,7 +1716,7 @@ body.theme-transitioning *::after {
 
 .filter-group input[type="number"],
 .filter-group input[type="text"] {
-    width: 120px;
+    width: 92px;
 }
 
 .filter-group input[type="number"]::placeholder,
@@ -2028,7 +1994,8 @@ body.theme-transitioning *::after {
     max-width: 1800px;
     margin: 0 auto;
     padding: 24px;
-    padding-top: 180px;
+    /* Reduced top padding so items sit directly under the (now thinner) filters row */
+    padding-top: 100px;
     transition: padding-top 0.3s ease;
 }
 
@@ -2057,7 +2024,8 @@ body.theme-transitioning *::after {
     gap: 16px;
     align-self: flex-start;
     position: sticky;
-    top: 170px;
+    /* Match the reduced main-content top padding so sidebar starts beneath filters */
+    top: 140px;
 }
 
 .news-sidebar {
@@ -4465,8 +4433,8 @@ body.theme-transitioning *::after {
     .filters-row input,
     .filters-row .search-input-row { z-index: 50; position: relative; }
 
-    /* Hide item spotlight and budget controls on very small screens to reduce vertical clutter */
-    .spotlight-banner, .budget-group, .budget-input-row, .budget-toggle-btn { display: none !important; }
+    /* Hide item spotlight on very small screens to reduce vertical clutter */
+    .spotlight-banner { display: none !important; }
 }
 
 /* Fine-grained phone breakpoints for common viewport widths
