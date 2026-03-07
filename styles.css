@@ -782,6 +782,48 @@ body {
     color: var(--accent);
 }
 
+/* Make sidebar headers inside hamburger match the menu item style */
+.hamburger-dropdown .sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+}
+.hamburger-dropdown .sidebar-header h3 {
+    margin: 0;
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+}
+.hamburger-dropdown .sidebar-header svg {
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+.hamburger-dropdown .sidebar-header .sidebar-header-hint {
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    margin-left: auto;
+    font-weight: 400;
+}
+.hamburger-dropdown .sidebar-header:hover {
+    background: var(--bg-hover);
+    color: var(--accent);
+}
+.hamburger-dropdown .sidebar-header:hover svg {
+    color: var(--accent);
+}
+
+/* Hide the "click to expand" hint for Feedback and News when shown in the hamburger */
+.hamburger-dropdown .hamburger-feedback .sidebar-header .sidebar-header-hint,
+.hamburger-dropdown .hamburger-news .sidebar-header .sidebar-header-hint {
+    display: none;
+}
+
 @media (max-width: 640px) {
     .hamburger-dropdown {
         /* full-width-ish on narrow screens */
