@@ -1831,6 +1831,14 @@ body.theme-transitioning *::after {
     color: var(--red);
 }
 
+/* Hide the static Reset All button by default to avoid flash-of-content
+   before JS switches the Save button into reset mode. JS controls
+   whether reset is available via the save button, so keep the static
+   reset markup hidden site-wide. */
+.reset-btn {
+    display: none !important;
+}
+
 /* Split-button for Save Filters + menu */
 .split-btn {
     display: inline-flex;
