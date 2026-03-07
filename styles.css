@@ -4299,6 +4299,87 @@ body.theme-transitioning *::after {
     }
 }
 
+/* Tighter adjustments for 480px and below */
+@media (max-width: 480px) {
+    /* Hide optional sidebars to give main content room */
+    .news-sidebar, .feedback-sidebar, .sidebar-column { display: none !important; }
+
+    /* Make header stats wrap and reduce visual weight */
+    .header-inner { align-items: flex-start; gap: 8px; }
+    .stat-box { padding: 6px 8px; min-width: 60px; font-size: 0.86rem; }
+    .favoritesStatBox, .favorites-count { display: none; }
+
+    /* Make search and filters take full width */
+    .filters-row { padding: 10px 12px; gap: 8px; }
+    .search-input-row, .filter-group { width: 100%; }
+    .search-input-row input, .filter-group select, .filter-group input { width: 100%; }
+
+    /* Hide the full filters row on very small screens to reduce clutter */
+    .filters-row { display: none !important; }
+
+    /* Single column items, provide breathing room */
+    .items-grid { grid-template-columns: 1fr; gap: 12px; padding-bottom: 12px; }
+    .item-card { padding: 12px; border-radius: 8px; }
+
+    /* Reduce noise: hide less-important small UI elements */
+    .sidebar-feed, .feedback-short, .news-short { display: none !important; }
+
+    /* Ensure toolbar buttons stack and remain tappable */
+    .header-actions { flex-direction: row; flex-wrap: wrap; gap: 8px; }
+    .header-action-btn { padding: 8px 10px; font-size: 0.8rem; }
+
+    /* Keep modal comfortable on small screens */
+    .modal { margin: 6px; border-radius: 8px; }
+}
+
+/* Fine-grained phone breakpoints for common viewport widths
+   Reference: small phones 320px, standard 360px, mid-range 375px, large 412-428px */
+@media (max-width: 420px) {
+    .items-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 12px;
+    }
+    .item-card { padding: 10px; }
+    .item-icon { width: 40px; height: 40px; }
+    .card-fav-btn { width: 36px; height: 36px; }
+    .header-inner { gap: 12px; }
+    .header-actions { gap: 6px; }
+    .filters-row { padding: 12px; }
+    .filter-group select, .filter-group input[type="number"], .filter-group input[type="text"] { width: 100%; }
+}
+
+@media (max-width: 375px) {
+    .items-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 10px;
+    }
+    .item-card { padding: 10px; gap: 6px; }
+    .item-name { font-size: 0.95rem; -webkit-line-clamp: 2; }
+    .price-box .value { font-size: 0.96rem; }
+    .header-inner { align-items: flex-start; }
+    .header-actions { flex-wrap: wrap; }
+}
+
+@media (max-width: 360px) {
+    .items-grid { grid-template-columns: 1fr; }
+    .item-card { flex-direction: column; align-items: flex-start; }
+    .item-card .item-card-header { min-width: 0; }
+    .card-fav-btn { top: 6px; right: 6px; }
+    .logo-text h1, .logo-text .logo-heading { font-size: 1.05rem; }
+}
+
+@media (max-width: 320px) {
+    :root { --radius: 8px; }
+    .header { padding: 10px 12px; }
+    .toolbar { padding: 8px 12px; }
+    .filters-row { padding: 8px 12px; }
+    .item-icon { width: 36px; height: 36px; }
+    .card-fav-btn { width: 40px; height: 40px; }
+    .item-name { font-size: 0.9rem; }
+    .price-box .value { font-size: 0.9rem; }
+    .pagination { padding: 20px 8px; }
+}
+
 /* ===== GE RADIO (Header-Inline Compact) ===== */
 .ge-radio {
     position: relative;
