@@ -1793,6 +1793,12 @@ body.theme-transitioning *::after {
     display: none !important;
 }
 
+/* Hide the static favorites button so the All button can be reused as the toggle
+   (JS swaps the icon so the visible button shows the heart when in All view). */
+.filter-toggle-btn[data-filter="favorites"] {
+    display: none !important;
+}
+
 .save-filters-btn {
     padding: 8px 16px;
     background: transparent;

@@ -526,16 +526,10 @@
             return;
         }
 
-        if (currentView === 'grid') {
-            dom.itemsContainer.className = 'items-grid';
-        } else {
-            dom.itemsContainer.className = 'items-grid list-view';
-        }
+        dom.itemsContainer.className = currentView === 'grid' ? 'items-grid' : 'items-grid list-view';
 
         const fragment = document.createDocumentFragment();
-        for (const item of pageItems) {
-            fragment.appendChild(createItemCard(item));
-        }
+        for (const item of pageItems) fragment.appendChild(createItemCard(item));
         dom.itemsContainer.innerHTML = '';
         dom.itemsContainer.appendChild(fragment);
         animateCardEntry();
@@ -1591,19 +1585,23 @@
         })();
 
         // Favorites filter toggle (All / Favorites)
-        dom.filterAll.addEventListener('click', () => {
-            showFavoritesOnly = false;
-            dom.filterAll.classList.add('active');
-            dom.filterFavorites.classList.remove('active');
-            applyFilters();
-        });
+        // Combine All / Favorites into a single toggle using the All button
+        if (dom.filterAll) {
+            // initialize visual state
+            dom.filterAll.dataset.mode = showFavoritesOnly ? 'favorites' : 'all';
+            dom.filterAll.title = showFavoritesOnly ? 'Favorites Only' : 'All Items';
+            dom.filterAll.classList.toggle('active', !showFavoritesOnly);
+            if (dom.filterFavorites) dom.filterFavorites.classList.toggle('active', showFavoritesOnly);
 
-        dom.filterFavorites.addEventListener('click', () => {
-            showFavoritesOnly = true;
-            dom.filterFavorites.classList.add('active');
-            dom.filterAll.classList.remove('active');
-            applyFilters();
-        });
+            dom.filterAll.addEventListener('click', () => {
+                showFavoritesOnly = !showFavoritesOnly;
+                dom.filterAll.dataset.mode = showFavoritesOnly ? 'favorites' : 'all';
+                dom.filterAll.title = showFavoritesOnly ? 'Favorites Only' : 'All Items';
+                dom.filterAll.classList.toggle('active', !showFavoritesOnly);
+                if (dom.filterFavorites) dom.filterFavorites.classList.toggle('active', showFavoritesOnly);
+                applyFilters();
+            });
+        }
 
         // Favorites stat box click -> toggle to favorites
         dom.favoritesStatBox.addEventListener('click', () => {
@@ -4073,6 +4071,10 @@
     function init() {
         // Critical path: run immediately
         initEvents();
+        // Ensure favorites button uses a heart icon (override static markup)
+        if (dom.filterFavorites) {
+            dom.filterFavorites.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true"><path d="M12.001 4.529c1.349-2.05 4.64-2.05 5.99 0 1.35 2.05.35 4.77-2.995 7.998L12 20.35l-2.995-7.823C5.657 9.299 4.657 6.579 6.007 4.529c1.35-2.05 4.641-2.05 5.994 0z"/></svg>';
+        }
         initTheme();
         initEffects();
         initHamburgerMenu();
