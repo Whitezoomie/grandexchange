@@ -4330,6 +4330,59 @@ body.theme-transitioning *::after {
 
     /* Keep modal comfortable on small screens */
     .modal { margin: 6px; border-radius: 8px; }
+
+    /* Hide GE Radio on small screens to reduce clutter */
+    .ge-radio { display: none !important; }
+}
+
+/* Re-enable filters visually underneath toolbar on small screens only.
+   Uses !important to override earlier hide rule and keeps desktop behaviour unchanged. */
+@media (max-width: 480px) {
+    .filters-row {
+        display: flex !important;
+        flex-direction: column;
+        gap: 8px;
+        padding: 10px 12px !important;
+        width: 100%;
+        box-shadow: none;
+        border: none;
+        background: transparent;
+        margin-top: 8px;
+        position: relative; /* ensure filters stay in document flow */
+        z-index: 2;
+        max-height: 600px;
+        overflow: visible;
+        pointer-events: auto;
+    }
+
+    /* Ensure filter groups and search input stretch full width */
+    .filters-row .filter-group,
+    .filters-row .search-input-row,
+    .filters-row input,
+    .filters-row select {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    /* If toolbar exists above filters, add a small separator for clarity */
+    .toolbar { border-bottom: 1px solid rgba(255,255,255,0.02); padding-bottom: 8px; }
+    /* Make header non-sticky so expanded header + filters push content down on small screens */
+    .header { position: relative; }
+
+    /* Ensure items container gets spacing below header+filters */
+    #itemsContainer, .items-grid {
+        margin-top: 8px;
+        padding-top: 2px;
+    }
+
+    /* Ensure filter controls and dropdowns render above cards */
+    .filters-row .filter-group,
+    .filters-row select,
+    .filters-row input,
+    .filters-row .search-input-row { z-index: 50; position: relative; }
+
+    /* Hide item spotlight and budget controls on very small screens to reduce vertical clutter */
+    .spotlight-banner, .budget-group, .budget-input-row, .budget-toggle-btn { display: none !important; }
 }
 
 /* Fine-grained phone breakpoints for common viewport widths
@@ -4628,6 +4681,24 @@ body.theme-transitioning *::after {
     .ge-radio-dropdown {
         width: 250px;
         right: -40px;
+    }
+
+    /* Make sure action buttons and toggles wrap and are easy to tap */
+    .filters-row { display: flex !important; flex-direction: column; }
+    .filters-row .filter-group { width: 100% !important; }
+    .filters-row .filter-toggle,
+    .filters-row .view-toggle { align-self: flex-start; width: 100%; display: flex; gap: 8px; }
+    .filters-row .filter-toggle { justify-content: flex-start; }
+    .filters-row .view-toggle { justify-content: flex-start; }
+
+    /* Make Save / Reset buttons full-width and stacked for mobile */
+    .save-filters-btn, .reset-btn {
+        width: 100% !important;
+        padding: 10px 12px !important;
+        box-sizing: border-box !important;
+        align-self: stretch !important;
+        text-align: center !important;
+        margin-top: 6px;
     }
 }
 @media (max-width: 500px) {
