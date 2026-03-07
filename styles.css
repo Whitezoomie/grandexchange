@@ -733,7 +733,10 @@ body {
     position: absolute;
     top: calc(100% + 6px);
     right: 0px;
-    min-width: 200px;
+    /* slightly narrower by default */
+    min-width: 160px;
+    width: 240px;
+    max-width: 320px;
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: var(--radius);
@@ -777,6 +780,21 @@ body {
 
 .hamburger-menu-item:hover svg {
     color: var(--accent);
+}
+
+@media (max-width: 640px) {
+    .hamburger-dropdown {
+        /* full-width-ish on narrow screens */
+        position: fixed;
+        left: 16px;
+        right: 16px;
+        width: auto;
+        max-width: none;
+    }
+    .hamburger-dropdown .hamburger-feedback .feedback-message,
+    .hamburger-dropdown .hamburger-feedback .feedback-name {
+        max-width: 100%;
+    }
 }
 
 /* ===== DEATH'S COFFER OVERLAY ===== */
@@ -2129,6 +2147,21 @@ body.theme-transitioning *::after {
     flex: 1;
     overflow-y: auto;
     padding: 0;
+}
+
+/* When news is inside the hamburger dropdown, limit height and ensure scrolling */
+.hamburger-dropdown .sidebar-feed {
+    /* cap height so the dropdown doesn't grow too tall; reduced per UX */
+    max-height: min(320px, calc(100vh - 220px));
+    overflow-y: auto;
+    padding: 6px 4px;
+}
+
+@media (max-width: 640px) {
+    .hamburger-dropdown .sidebar-feed {
+        /* tighter on mobile as well */
+        max-height: calc(100vh - 140px);
+    }
 }
 
 .sidebar-feed .feed-loading {

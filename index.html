@@ -322,7 +322,6 @@
                             <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
                             <span>Player Highlights</span>
                         </button>
-                        <div class="hamburger-divider" style="height:1px;background:var(--border);margin:8px 0"></div>
                         <div class="hamburger-feedback" id="hamburgerFeedback">
                             <div class="sidebar-header collapsed" data-collapse-toggle="feedbackContent">
                                 <svg class="feedback-icon" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
@@ -349,6 +348,23 @@
                                     </div>
                                     <div class="feedback-status" id="feedbackStatus"></div>
                                 </form>
+                            </div>
+                        </div>
+                        <div class="hamburger-divider" style="height:1px;background:var(--border);margin:8px 0"></div>
+                        <div class="hamburger-news" id="hamburgerNews">
+                            <div class="sidebar-header collapsed" data-collapse-toggle="newsFeed">
+                                <svg class="news-icon" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                                <h3>OSRS News</h3>
+                                <span class="sidebar-header-hint">click to expand</span>
+                                <button class="news-refresh-btn" id="newsRefreshBtn" title="Refresh news feed">
+                                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                                </button>
+                            </div>
+                            <div class="sidebar-feed collapsed" id="newsFeed">
+                                <div class="feed-loading">
+                                    <div class="loading-spinner small"></div>
+                                    <span>Loading news...</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -624,27 +640,7 @@
         </div>
         </div><!-- /.items-area -->
 
-        <!-- OSRS News Sidebar -->
-        <div class="sidebar-column">
-        <aside class="news-sidebar" id="newsSidebar">
-            <div class="sidebar-header collapsed" data-collapse-toggle="newsFeed">
-                <svg class="news-icon" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
-                <h3>OSRS News</h3>
-                <span class="sidebar-header-hint">click to expand</span>
-                <button class="news-refresh-btn" id="newsRefreshBtn" title="Refresh news feed">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
-                </button>
-            </div>
-            <div class="sidebar-feed collapsed" id="newsFeed">
-                <div class="feed-loading">
-                    <div class="loading-spinner small"></div>
-                    <span>Loading news...</span>
-                </div>
-            </div>
-        </aside>
-
         
-        </div><!-- /.sidebar-column -->
       </div><!-- /.content-with-sidebar -->
     </main>
 
