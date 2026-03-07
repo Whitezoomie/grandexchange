@@ -4250,6 +4250,21 @@ body.theme-transitioning *::after {
         grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     }
 
+    /* Improve touch targets and card density on tablet */
+    .item-card {
+        padding: 14px;
+    }
+
+    .item-icon {
+        width: 44px;
+        height: 44px;
+    }
+
+    .card-fav-btn {
+        width: 36px;
+        height: 36px;
+    }
+
     .list-view .item-card {
         flex-direction: column;
         align-items: flex-start;
@@ -4271,6 +4286,11 @@ body.theme-transitioning *::after {
     .modal-prices {
         grid-template-columns: 1fr;
     }
+
+    /* Modal becomes full-width-ish on tablet for easier interaction */
+    .modal {
+        max-width: 720px;
+    }
 }
 
 @media (max-width: 500px) {
@@ -4290,8 +4310,19 @@ body.theme-transitioning *::after {
         grid-template-columns: 1fr;
     }
 
+    /* Make modal fullscreen-like on phones for readability */
+    .modal-overlay {
+        padding: 12px;
+        align-items: flex-start;
+        overflow-y: auto;
+    }
+
     .modal {
-        margin: 12px;
+        margin: 6px 0;
+        width: 100%;
+        max-width: 100%;
+        border-radius: 8px;
+        max-height: calc(100vh - 20px);
     }
 
     .logo-text h1,
@@ -4308,6 +4339,163 @@ body.theme-transitioning *::after {
         padding: 8px 14px;
         font-size: 0.82rem;
     }
+
+    /* Mobile-specific card/tap improvements */
+    .item-card {
+        padding: 12px;
+        gap: 8px;
+    }
+
+    .item-name { font-size: 0.98rem; }
+
+    .card-fav-btn {
+        width: 40px;
+        height: 40px;
+    }
+
+    .price-box .value { font-size: 1rem; }
+
+    .price-box .label, .margin-label, .volume-label { font-size: 0.68rem; }
+
+    /* Ensure charts and canvases are touch-friendly */
+    .price-chart-container, .volume-chart-container, canvas {
+        width: 100% !important;
+        height: auto !important;
+    }
+}
+
+/* Tighter adjustments for 480px and below */
+@media (max-width: 480px) {
+    /* Hide optional sidebars to give main content room */
+    .news-sidebar, .feedback-sidebar, .sidebar-column { display: none !important; }
+
+    /* Make header stats wrap and reduce visual weight */
+    .header-inner { align-items: flex-start; gap: 8px; }
+    .stat-box { padding: 6px 8px; min-width: 60px; font-size: 0.86rem; }
+    .favoritesStatBox, .favorites-count { display: none; }
+
+    /* Make search and filters take full width */
+    .filters-row { padding: 10px 12px; gap: 8px; }
+    .search-input-row, .filter-group { width: 100%; }
+    .search-input-row input, .filter-group select, .filter-group input { width: 100%; }
+
+    /* Hide the full filters row on very small screens to reduce clutter */
+    .filters-row { display: none !important; }
+
+    /* Single column items, provide breathing room */
+    .items-grid { grid-template-columns: 1fr; gap: 12px; padding-bottom: 12px; }
+    .item-card { padding: 12px; border-radius: 8px; }
+
+    /* Reduce noise: hide less-important small UI elements */
+    .sidebar-feed, .feedback-short, .news-short { display: none !important; }
+
+    /* Ensure toolbar buttons stack and remain tappable */
+    .header-actions { flex-direction: row; flex-wrap: wrap; gap: 8px; }
+    .header-action-btn { padding: 8px 10px; font-size: 0.8rem; }
+
+    /* Keep modal comfortable on small screens */
+    .modal { margin: 6px; border-radius: 8px; }
+
+    /* Hide GE Radio on small screens to reduce clutter */
+    .ge-radio { display: none !important; }
+}
+
+/* Re-enable filters visually underneath toolbar on small screens only.
+   Uses !important to override earlier hide rule and keeps desktop behaviour unchanged. */
+@media (max-width: 480px) {
+    .filters-row {
+        display: flex !important;
+        flex-direction: column;
+        gap: 8px;
+        padding: 10px 12px !important;
+        width: 100%;
+        box-shadow: none;
+        border: none;
+        background: transparent;
+        margin-top: 8px;
+        position: relative; /* ensure filters stay in document flow */
+        z-index: 2;
+        max-height: 600px;
+        overflow: visible;
+        pointer-events: auto;
+    }
+
+    /* Ensure filter groups and search input stretch full width */
+    .filters-row .filter-group,
+    .filters-row .search-input-row,
+    .filters-row input,
+    .filters-row select {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    /* If toolbar exists above filters, add a small separator for clarity */
+    .toolbar { border-bottom: 1px solid rgba(255,255,255,0.02); padding-bottom: 8px; }
+    /* Make header non-sticky so expanded header + filters push content down on small screens */
+    .header { position: relative; }
+
+    /* Ensure items container gets spacing below header+filters */
+    #itemsContainer, .items-grid {
+        margin-top: 8px;
+        padding-top: 2px;
+    }
+
+    /* Ensure filter controls and dropdowns render above cards */
+    .filters-row .filter-group,
+    .filters-row select,
+    .filters-row input,
+    .filters-row .search-input-row { z-index: 50; position: relative; }
+
+    /* Hide item spotlight and budget controls on very small screens to reduce vertical clutter */
+    .spotlight-banner, .budget-group, .budget-input-row, .budget-toggle-btn { display: none !important; }
+}
+
+/* Fine-grained phone breakpoints for common viewport widths
+   Reference: small phones 320px, standard 360px, mid-range 375px, large 412-428px */
+@media (max-width: 420px) {
+    .items-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 12px;
+    }
+    .item-card { padding: 10px; }
+    .item-icon { width: 40px; height: 40px; }
+    .card-fav-btn { width: 36px; height: 36px; }
+    .header-inner { gap: 12px; }
+    .header-actions { gap: 6px; }
+    .filters-row { padding: 12px; }
+    .filter-group select, .filter-group input[type="number"], .filter-group input[type="text"] { width: 100%; }
+}
+
+@media (max-width: 375px) {
+    .items-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 10px;
+    }
+    .item-card { padding: 10px; gap: 6px; }
+    .item-name { font-size: 0.95rem; -webkit-line-clamp: 2; }
+    .price-box .value { font-size: 0.96rem; }
+    .header-inner { align-items: flex-start; }
+    .header-actions { flex-wrap: wrap; }
+}
+
+@media (max-width: 360px) {
+    .items-grid { grid-template-columns: 1fr; }
+    .item-card { flex-direction: column; align-items: flex-start; }
+    .item-card .item-card-header { min-width: 0; }
+    .card-fav-btn { top: 6px; right: 6px; }
+    .logo-text h1, .logo-text .logo-heading { font-size: 1.05rem; }
+}
+
+@media (max-width: 320px) {
+    :root { --radius: 8px; }
+    .header { padding: 10px 12px; }
+    .toolbar { padding: 8px 12px; }
+    .filters-row { padding: 8px 12px; }
+    .item-icon { width: 36px; height: 36px; }
+    .card-fav-btn { width: 40px; height: 40px; }
+    .item-name { font-size: 0.9rem; }
+    .price-box .value { font-size: 0.9rem; }
+    .pagination { padding: 20px 8px; }
 }
 
 /* ===== GE RADIO (Header-Inline Compact) ===== */
@@ -4558,6 +4746,24 @@ body.theme-transitioning *::after {
     .ge-radio-dropdown {
         width: 250px;
         right: -40px;
+    }
+
+    /* Make sure action buttons and toggles wrap and are easy to tap */
+    .filters-row { display: flex !important; flex-direction: column; }
+    .filters-row .filter-group { width: 100% !important; }
+    .filters-row .filter-toggle,
+    .filters-row .view-toggle { align-self: flex-start; width: 100%; display: flex; gap: 8px; }
+    .filters-row .filter-toggle { justify-content: flex-start; }
+    .filters-row .view-toggle { justify-content: flex-start; }
+
+    /* Make Save / Reset buttons full-width and stacked for mobile */
+    .save-filters-btn, .reset-btn {
+        width: 100% !important;
+        padding: 10px 12px !important;
+        box-sizing: border-box !important;
+        align-self: stretch !important;
+        text-align: center !important;
+        margin-top: 6px;
     }
 }
 @media (max-width: 500px) {
