@@ -2216,6 +2216,14 @@ body.theme-transitioning *::after {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    /* Float like the donation button on larger screens */
+    position: fixed;
+    bottom: 86px;
+    right: 75px;
+    width: 320px;
+    max-width: calc(100% - 32px);
+    z-index: 1001;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.12);
 }
 
 .feedback-sidebar .feedback-icon {
@@ -2341,6 +2349,44 @@ body.theme-transitioning *::after {
 
 .feedback-status.error {
     color: #e74c3c;
+}
+
+/* ===== HAMBURGER MENU FEEDBACK ADJUSTMENTS ===== */
+.hamburger-feedback .sidebar-header h3 {
+    font-size: 0.88rem;
+}
+
+.hamburger-feedback .feedback-name,
+.hamburger-feedback .feedback-message {
+    display: block;
+    width: 100%;
+    background: var(--bg-primary, #181b25);
+    border: 1px solid var(--border, #2e3348);
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: var(--text-primary, #e8e6e3);
+    font-size: 0.82rem;
+    font-family: inherit;
+    resize: vertical;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.hamburger-feedback .feedback-name:focus,
+.hamburger-feedback .feedback-message:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.hamburger-feedback .feedback-actions {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 8px;
 }
 
 /* ===== FOOTER ADMIN LINK ===== */
@@ -4203,6 +4249,14 @@ body.theme-transitioning *::after {
 
     .feedback-sidebar {
         max-height: 400px;
+        /* revert floating on small screens */
+        position: static;
+        bottom: auto;
+        right: auto;
+        width: 100%;
+        max-width: none;
+        box-shadow: none;
+        z-index: auto;
     }
 
     .header-inner {
@@ -5094,4 +5148,27 @@ body.theme-transitioning *::after {
     flex-wrap: wrap;
     gap: 6px;
     padding: 6px 10px 10px;
+}
+
+/* Mobile override: force show/view/save controls to stack below inputs
+   Ensures the toggle buttons and Save/Reset occupy their own full-width row
+   below the Max Buy Limit on small phones. */
+@media (max-width: 480px) {
+    .filters-row .filter-toggle,
+    .filters-row .view-toggle,
+    .save-filters-btn,
+    .reset-btn {
+        order: 999;
+        width: 100% !important;
+        align-self: stretch !important;
+        margin-top: 6px !important;
+        box-sizing: border-box !important;
+    }
+
+    .filters-row .view-toggle,
+    .filters-row .filter-toggle {
+        display: flex !important;
+        justify-content: flex-start !important;
+        gap: 8px !important;
+    }
 }
