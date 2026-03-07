@@ -1541,15 +1541,54 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
 
-        // View Toggle
-        document.querySelectorAll('.view-btn[data-view]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.view-btn[data-view]').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentView = btn.dataset.view;
+        // View Toggle: combine grid/list into a single toggle button
+        (function setupViewToggle() {
+            const gridBtn = document.querySelector('.view-btn[data-view="grid"]');
+            const listBtn = document.querySelector('.view-btn[data-view="list"]');
+            if (!gridBtn || !listBtn) {
+                // Fallback to original behavior if buttons aren't found
+                document.querySelectorAll('.view-btn[data-view]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.view-btn[data-view]').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        currentView = btn.dataset.view;
+                        renderItems();
+                    });
+                });
+                return;
+            }
+
+            // Capture icon markup so we can swap visuals
+            const gridIcon = gridBtn.innerHTML;
+            const listIcon = listBtn.innerHTML;
+
+            // Hide the list button (we'll reuse the grid button as the toggle)
+            listBtn.style.display = 'none';
+
+            // Initialize current view from whichever button was initially active
+            if (gridBtn.classList.contains('active')) currentView = 'grid';
+            if (listBtn.classList.contains('active')) currentView = 'list';
+            // Ensure grid button shows the correct icon for the current view
+            gridBtn.innerHTML = currentView === 'grid' ? gridIcon : listIcon;
+            gridBtn.title = currentView === 'grid' ? 'Grid View' : 'List View';
+            gridBtn.classList.toggle('active', currentView === 'grid');
+            listBtn.classList.toggle('active', currentView === 'list');
+
+            gridBtn.addEventListener('click', () => {
+                // Toggle view state
+                currentView = currentView === 'grid' ? 'list' : 'grid';
+
+                // Swap visuals on the visible button
+                gridBtn.innerHTML = currentView === 'grid' ? gridIcon : listIcon;
+                gridBtn.title = currentView === 'grid' ? 'Grid View' : 'List View';
+
+                // Keep hidden button's active state in sync for any code that reads it
+                listBtn.classList.toggle('active', currentView === 'list');
+                gridBtn.classList.toggle('active', currentView === 'grid');
+
                 renderItems();
             });
-        });
+        })();
 
         // Favorites filter toggle (All / Favorites)
         dom.filterAll.addEventListener('click', () => {

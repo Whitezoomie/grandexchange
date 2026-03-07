@@ -1788,6 +1788,11 @@ body.theme-transitioning *::after {
     color: #0f1117;
 }
 
+/* Hide the static list view button to prevent brief flash before JS toggles */
+.view-btn[data-view="list"] {
+    display: none !important;
+}
+
 .save-filters-btn {
     padding: 8px 16px;
     background: transparent;
