@@ -1696,7 +1696,7 @@ body.theme-transitioning *::after {
     max-height: 200px;
     overflow: hidden;
     opacity: 1;
-    transition: max-height 0.3s ease, opacity 0.2s ease, padding 0.3s ease;
+    transition: max-height 0.14s ease, opacity 0.08s ease, padding 0.14s ease;
 }
 
 .filters-row.collapsed {

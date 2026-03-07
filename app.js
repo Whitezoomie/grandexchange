@@ -1687,41 +1687,28 @@
         // Retry
         dom.retryBtn.addEventListener('click', loadData);
 
-        // Scroll: collapse filters + spotlight when scrolling down; reveal when scrolling up
+        // Scroll: collapse filters — visible ONLY when scrolled to the very top (scrollY === 0)
         const filtersRow = document.querySelector('.filters-row');
         const mainContent = document.querySelector('.main-content');
         let ticking = false;
-        let lastScrollY = window.scrollY || 0;
-        const SCROLL_THRESHOLD = 8; // px to ignore tiny jitters
         window.addEventListener('scroll', () => {
             if (!ticking) {
                 requestAnimationFrame(() => {
                     const currentY = window.scrollY || 0;
 
-                    // If user scrolled down past a small threshold, collapse filters
-                    if (currentY - lastScrollY > SCROLL_THRESHOLD && currentY > 50) {
+                    if (currentY === 0) {
+                        if (filtersRow.classList.contains('collapsed')) {
+                            filtersRow.classList.remove('collapsed');
+                            mainContent.classList.remove('filters-hidden');
+                        }
+                    } else {
                         if (!filtersRow.classList.contains('collapsed')) {
                             filtersRow.classList.add('collapsed');
                             mainContent.classList.add('filters-hidden');
                         }
                     }
 
-                    // If user scrolled up significantly, reveal filters again
-                    if (lastScrollY - currentY > SCROLL_THRESHOLD) {
-                        if (filtersRow.classList.contains('collapsed')) {
-                            filtersRow.classList.remove('collapsed');
-                            mainContent.classList.remove('filters-hidden');
-                        }
-                    }
-
-                    // Always show filters at very top
-                    if (currentY === 0) {
-                        filtersRow.classList.remove('collapsed');
-                        mainContent.classList.remove('filters-hidden');
-                    }
-
                     dom.backToTop.classList.toggle('visible', currentY > 400);
-                    lastScrollY = currentY;
                     ticking = false;
                 });
                 ticking = true;
