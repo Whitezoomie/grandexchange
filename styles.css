@@ -1994,6 +1994,15 @@ body.theme-transitioning *::after {
     color: #0f1117;
 }
 
+/* Hide the primary 'Show' (All) button visually per user request.
+   Kept in DOM for JS logic but removed from display. */
+#filterAll { display: none !important; }
+
+/* Hide the supporting 'Show' label for the filter-toggle control while
+    preserving other filter labels. Uses :has() to target the group that
+    contains the toggle so other labels remain visible. */
+.filter-group:has(.filter-toggle) > label { display: none !important; }
+
 /* ===== LOADING ===== */
 .loading-container {
     display: flex;

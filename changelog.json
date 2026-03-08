@@ -1,4 +1,5 @@
 [
+  { "date": "2026-03-09T14:30:00Z", "message": "Favorites Button on the top now properly switches between Favorites and All", "link": "#" },
   { "date": "2026-03-08T10:00:00Z", "message": "Added Changelog Dropdown to Menu for displaying recent updates and changes to the site", "link": "#" },
   { "date": "2026-03-08T12:15:00Z", "message": "Changed market data refresh interval", "link": "#" },
   { "date": "2026-03-08T12:15:00Z", "message": "Death's Coffer addition", "link": "#" },

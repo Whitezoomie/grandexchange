@@ -256,6 +256,8 @@
         dom.favoritesCount.textContent = favorites.size;
     }
 
+    
+
     // ========================================
     // Number Parsing with k/m suffix
     // ========================================
@@ -621,6 +623,8 @@
                 applyFilters();
             }
         });
+
+        
 
         return card;
     }
@@ -1529,11 +1533,25 @@
             });
         }
 
-        // Favorites stat box click -> toggle to favorites
+        // Allow the Favorites button itself to toggle between favorites/all
+        if (dom.filterFavorites) {
+            dom.filterFavorites.addEventListener('click', () => {
+                // Toggle the logical state and keep visuals in sync
+                showFavoritesOnly = !showFavoritesOnly;
+                dom.filterFavorites.classList.toggle('active', showFavoritesOnly);
+                if (dom.filterAll) dom.filterAll.classList.toggle('active', !showFavoritesOnly);
+                // Ensure dataset/mode on primary toggle stays correct
+                if (dom.filterAll) dom.filterAll.dataset.mode = showFavoritesOnly ? 'favorites' : 'all';
+                applyFilters();
+            });
+        }
+
+        // Favorites stat box click -> toggle favorites view
         dom.favoritesStatBox.addEventListener('click', () => {
-            showFavoritesOnly = true;
-            dom.filterFavorites.classList.add('active');
-            dom.filterAll.classList.remove('active');
+            showFavoritesOnly = !showFavoritesOnly;
+            dom.filterFavorites.classList.toggle('active', showFavoritesOnly);
+            dom.filterAll.classList.toggle('active', !showFavoritesOnly);
+            if (dom.filterAll) dom.filterAll.dataset.mode = showFavoritesOnly ? 'favorites' : 'all';
             applyFilters();
         });
 
