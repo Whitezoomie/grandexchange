@@ -1709,6 +1709,7 @@ body.theme-transitioning *::after {
     left: 0;
     right: 0;
     display: flex;
+    justify-content: center;
     align-items: flex-end;
     gap: 12px;
     flex-wrap: wrap;
@@ -4519,6 +4520,7 @@ body.theme-transitioning *::after {
     .filters-row {
         display: flex !important;
         flex-direction: column;
+        justify-content: flex-start;
         gap: 8px;
         padding: 10px 12px !important;
         width: 100%;
@@ -4863,6 +4865,7 @@ body.theme-transitioning *::after {
 
     /* Make sure action buttons and toggles wrap and are easy to tap */
     .filters-row { display: flex !important; flex-direction: column; }
+    .filters-row { justify-content: flex-start; }
     .filters-row .filter-group { width: 100% !important; }
     .filters-row .filter-toggle,
     .filters-row .view-toggle { align-self: flex-start; width: 100%; display: flex; gap: 8px; }
