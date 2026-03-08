@@ -1,0 +1,17 @@
+[
+  { "date": "2026-03-08T10:00:00Z", "message": "Added Changelog Dropdown to Menu for displaying recent updates and changes to the site", "link": "#" },
+  { "date": "2026-03-08T12:15:00Z", "message": "Changed market data refresh interval", "link": "#" },
+  { "date": "2026-03-08T12:15:00Z", "message": "Death's Coffer addition", "link": "#" },
+  { "date": "2026-03-07T09:00:00Z", "message": "Initial release of OSRS Grand Exchange Tracker", "link": "#" },
+  { "date": "2026-03-06T09:00:00Z", "message": "Keep the filters-row centered at all times (layout tweak)", "link": "#" },
+  { "date": "2026-03-05T09:00:00Z", "message": "Added news feed section to homepage for displaying recent updates and announcements", "link": "#" },
+  { "date": "2026-03-04T09:00:00Z", "message": "Hide tax-related stats in modals and charts for tax-exempt items", "link": "#" },
+  { "date": "2026-03-03T09:00:00Z", "message": "Added new themes", "link": "#" },
+  { "date": "2026-03-02T09:00:00Z", "message": "Heatmap addition (experimental)", "link": "#" },
+  { "date": "2026-03-01T09:00:00Z", "message": "Added flip sentiment voting (thumbs up/down) to item modals", "link": "#" },
+  { "date": "2026-02-28T09:00:00Z", "message": "Added Player Highlights where Players can submit their images of accomplishments", "link": "#" },
+  { "date": "2026-02-27T09:00:00Z", "message": "Combined Save and Reset Filters Button", "link": "#" },
+  { "date": "2026-02-26T09:00:00Z", "message": "Combined Grid and List view Button", "link": "#" },
+  { "date": "2026-02-25T09:00:00Z", "message": "Combined All and Favorites Button", "link": "#" },
+  { "date": "2026-02-24T09:00:00Z", "message": "Filters Row Rearrange", "link": "#" }
+]

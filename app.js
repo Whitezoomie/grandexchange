@@ -3186,6 +3186,23 @@
                 const isCollapsed = target.classList.toggle('collapsed');
                 header.classList.toggle('collapsed', isCollapsed);
                 if (hint) hint.textContent = isCollapsed ? 'click to expand' : 'click to collapse';
+
+                // If this section was expanded, collapse other sidebar sections in the same hamburger dropdown
+                if (!isCollapsed) {
+                    const container = header.closest('.hamburger-dropdown') || document;
+                    container.querySelectorAll('.sidebar-header[data-collapse-toggle]').forEach(other => {
+                        if (other === header) return;
+                        const otherId = other.getAttribute('data-collapse-toggle');
+                        const otherTarget = document.getElementById(otherId);
+                        if (!otherTarget) return;
+                        if (!otherTarget.classList.contains('collapsed')) {
+                            otherTarget.classList.add('collapsed');
+                            other.classList.add('collapsed');
+                            const otherHint = other.querySelector('.sidebar-header-hint');
+                            if (otherHint) otherHint.textContent = 'click to expand';
+                        }
+                    });
+                }
             });
         });
     }
@@ -3283,6 +3300,9 @@
 
         toggle.addEventListener('click', function(e) {
             e.stopPropagation();
+            // Close settings dropdown if open
+            const effectsSel = document.getElementById('themeEffectsSelector');
+            if (effectsSel && effectsSel.classList.contains('open')) effectsSel.classList.remove('open');
             menu.classList.toggle('open');
         });
 
@@ -3316,6 +3336,75 @@
             highlightBtn.addEventListener('click', function() {
                 menu.classList.remove('open');
                 openHighlightGallery();
+            });
+        }
+    }
+
+    // ========================================
+    // Changelog Menu
+    // ========================================
+
+    async function loadChangelog() {
+        const feedEl = document.getElementById('changelogFeed');
+        if (!feedEl) return;
+
+        try {
+            const resp = await fetch('changelog.json?cb=' + Date.now());
+            if (!resp.ok) throw new Error('Fetch failed');
+            const entries = await resp.json();
+            if (!Array.isArray(entries) || entries.length === 0) {
+                feedEl.innerHTML = '<div class="news-error"><p>No changes found.</p></div>';
+                return;
+            }
+
+            let html = '';
+            entries.slice(0, 20).forEach(entry => {
+                const date = entry.date ? (new Date(entry.date)).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+                const msg = entry.message || entry.msg || entry.title || '';
+                html += `<div class="news-card changelog-item">
+                    <div class="news-card-body">
+                        ${date ? `<span class="news-date">${date}</span>` : ''}
+                        <h4 class="news-title">${msg}</h4>
+                    </div>
+                </div>`;
+            });
+
+            feedEl.innerHTML = html;
+        } catch (err) {
+            feedEl.innerHTML = `
+                <div class="news-error">
+                    <p>Unable to load changelog.</p>
+                </div>`;
+        }
+    }
+
+    function initChangelogMenu() {
+        // Use the collapsible sidebar header for changelog (matches OSRS News behavior)
+        const header = document.querySelector('.sidebar-header[data-collapse-toggle="changelogFeed"]');
+        const feed = document.getElementById('changelogFeed');
+        const refreshBtn = document.getElementById('changelogRefreshBtn');
+
+        if (!header || !feed) return;
+
+        // When the header is clicked, the collapsible logic runs first (initCollapsibleSidebars).
+        // Defer a tick and then load the changelog if the feed is expanded.
+        header.addEventListener('click', function(e) {
+            // ignore clicks on refresh button
+            if (e.target.closest('.news-refresh-btn')) return;
+            setTimeout(() => {
+                if (!feed.classList.contains('collapsed')) {
+                    loadChangelog();
+                }
+            }, 0);
+        });
+
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                refreshBtn.classList.add('spinning');
+                loadChangelog().finally(() => {
+                    setTimeout(() => refreshBtn.classList.remove('spinning'), 600);
+                });
             });
         }
     }
@@ -4016,6 +4105,7 @@
             initGERadio();
             initVisitorCounter();
             loadNewsFeed();
+            initChangelogMenu();
             initFeedback();
             initAdmin();
         });
@@ -4362,6 +4452,9 @@
         // Toggle dropdown
         toggle.addEventListener('click', function(e) {
             e.stopPropagation();
+            // Close hamburger menu if open
+            const hamburger = document.getElementById('hamburgerMenu');
+            if (hamburger && hamburger.classList.contains('open')) hamburger.classList.remove('open');
             selector.classList.toggle('open');
         });
 

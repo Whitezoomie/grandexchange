@@ -752,7 +752,7 @@ body {
     align-items: center;
     gap: 10px;
     width: 100%;
-    padding: 10px 12px;
+    padding: 8px 12px;
     background: none;
     border: none;
     border-radius: var(--radius-sm);
@@ -798,8 +798,31 @@ body {
     color: inherit;
 }
 .hamburger-dropdown .sidebar-header svg {
-    color: var(--text-secondary);
+    font-weight: 600;
     flex-shrink: 0;
+
+/* When a sidebar header is used as a hamburger menu item, match the menu item's weight/size */
+.hamburger-dropdown .sidebar-header.hamburger-menu-item {
+    font-weight: 400; /* match other hamburger items */
+    color: var(--text-primary);
+    padding: 10px 12px;
+}
+
+/* Make hamburger rows skinnier and consistent */
+.hamburger-dropdown .hamburger-menu-item,
+.hamburger-dropdown .sidebar-header.hamburger-menu-item,
+.hamburger-dropdown .sidebar-header {
+    padding: 8px 12px;
+    min-height: 36px;
+    font-size: 0.85rem;
+    align-items: center;
+}
+
+.hamburger-dropdown .hamburger-menu-item svg,
+.hamburger-dropdown .sidebar-header svg {
+    width: 16px;
+    height: 16px;
+}
 }
 .hamburger-dropdown .sidebar-header .sidebar-header-hint {
     color: var(--text-muted);
@@ -2138,7 +2161,7 @@ body.theme-transitioning *::after {
 }
 
 .sidebar-collapsible {
-    transition: max-height 0.3s ease, opacity 0.25s ease;
+    transition: max-height 0.18s ease, opacity 0.12s ease;
     overflow: hidden;
 }
 
@@ -2311,7 +2334,7 @@ body.theme-transitioning *::after {
 
 .feedback-content {
     overflow: hidden;
-    transition: max-height 0.3s ease, opacity 0.25s ease;
+    transition: max-height 0.18s ease, opacity 0.12s ease;
 }
 
 .feedback-content.collapsed {
@@ -5030,7 +5053,7 @@ body.theme-transitioning *::after {
 .effects-section-body {
     overflow: hidden;
     max-height: 2000px;
-    transition: max-height 0.35s ease;
+    transition: max-height 0.18s ease;
 }
 .effects-section-body.collapsed {
     max-height: 0;

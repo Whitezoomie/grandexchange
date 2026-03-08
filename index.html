@@ -304,8 +304,10 @@
                 </div>
             </div>
                         <div class="header-actions">
-                <!-- Hamburger Menu -->
-                <div class="hamburger-menu" id="hamburgerMenu">
+                        <!-- Changelog + Hamburger Menu -->
+                        <!-- Changelog was moved into the hamburger dropdown (above Feedback) -->
+                        <!-- Hamburger Menu -->
+                        <div class="hamburger-menu" id="hamburgerMenu">
                     <button class="header-action-btn hamburger-btn" id="hamburgerToggle" title="Menu">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
                         <span>Menu</span>
@@ -323,6 +325,20 @@
                             <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
                             <span>Player Highlights</span>
                         </button>
+                        <div class="hamburger-changelog" id="hamburgerChangelog">
+                            <button class="hamburger-menu-item sidebar-header collapsed" id="changelogToggle" data-collapse-toggle="changelogFeed" title="Changelog">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M3 5h18v14H3z"/><path d="M7 9h10M7 13h6"/></svg>
+                                <span>Changelog</span>
+                            </button>
+                            <div class="sidebar-feed collapsed" id="changelogFeed">
+                                <div class="changelog-feed">
+                                    <div class="feed-loading">
+                                        <div class="loading-spinner small"></div>
+                                        <span>Loading changelog...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="hamburger-feedback" id="hamburgerFeedback">
                             <div class="sidebar-header collapsed" data-collapse-toggle="feedbackContent">
                                 <svg class="feedback-icon" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
@@ -351,7 +367,6 @@
                                 </form>
                             </div>
                         </div>
-                        <div class="hamburger-divider" style="height:1px;background:var(--border);margin:8px 0"></div>
                         <div class="hamburger-news" id="hamburgerNews">
                             <div class="sidebar-header collapsed" data-collapse-toggle="newsFeed">
                                 <svg class="news-icon" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
