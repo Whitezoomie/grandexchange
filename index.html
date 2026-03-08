@@ -985,50 +985,7 @@
       })();
         </script>
 
-        <!-- Image examples: remote, responsive, WebP fallback, and inline base64 -->
-        <style>
-        /* Local styles for the image examples section */
-        #image-examples{padding:18px;background:linear-gradient(180deg,#071018,#0b1216);color:#dfeeee;margin:12px;border-radius:8px}
-        #image-examples h2{margin:0 0 8px;font-size:18px}
-        .image-examples .examples-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
-        .image-examples img{max-width:100%;height:auto;display:block;border-radius:6px;border:1px solid rgba(255,255,255,0.06)}
-        .image-examples .example h3{margin:6px 0 6px;font-size:14px}
-        </style>
-
-        <section id="image-examples" class="image-examples" aria-label="Image examples">
-            <div class="container">
-                <h2>Image Examples</h2>
-                <p style="margin:0 0 12px;opacity:.9">Demonstration of embedding images: remote, responsive, WebP fallback, and inline base64 SVG.</p>
-                <div class="examples-grid">
-                    <div class="example">
-                        <h3>Local root image (drop file in project root)</h3>
-                        <!-- Place your image in the site root with the filename: site-image.jpg -->
-                        <img src="site-image.jpg" alt="Site image (place file site-image.jpg in root)">
-                    </div>
-
-                    <div class="example">
-                        <h3>Responsive (srcset)</h3>
-                        <img src="https://via.placeholder.com/400x240.png?text=Small"
-                                 srcset="https://via.placeholder.com/400x240.png?text=Small 400w, https://via.placeholder.com/800x480.png?text=Medium 800w, https://via.placeholder.com/1200x720.png?text=Large 1200w"
-                                 sizes="(max-width:600px) 400px, 800px"
-                                 alt="Responsive example">
-                    </div>
-
-                    <div class="example">
-                        <h3>WebP + fallback</h3>
-                        <picture>
-                            <source srcset="https://via.placeholder.com/600x360.webp?text=WebP" type="image/webp">
-                            <img src="https://via.placeholder.com/600x360.png?text=Fallback" alt="WebP fallback example">
-                        </picture>
-                    </div>
-
-                    <div class="example">
-                        <h3>Inline base64 (tiny SVG)</h3>
-                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDIwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiNkZGQiIC8+PHRleHQgeD0iMTAwIiB5PSI1NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzIyMiI+SU1HPC90ZXh0Pjwvc3ZnPg==" alt="Inline SVG base64">
-                    </div>
-                </div>
-            </div>
-        </section>
+        <!-- Image examples removed: images are kept for Open Graph previews only -->
 
         <!-- Image preview modal for Player Highlights -->
         <style>

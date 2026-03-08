@@ -3984,6 +3984,9 @@
     function init() {
         // Critical path: run immediately
         initEvents();
+        // Ensure the page remains hidden until we set the loading UI to avoid flashes
+        try { showLoading(); } catch (e) { /* ignore if DOM not ready */ }
+        try { document.documentElement.style.display = 'block'; } catch (e) { /* ignore */ }
         // Ensure favorites button uses a heart icon (override static markup)
         if (dom.filterFavorites) {
             dom.filterFavorites.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true"><path d="M12.001 4.529c1.349-2.05 4.64-2.05 5.99 0 1.35 2.05.35 4.77-2.995 7.998L12 20.35l-2.995-7.823C5.657 9.299 4.657 6.579 6.007 4.529c1.35-2.05 4.641-2.05 5.994 0z"/></svg>';
@@ -4031,7 +4034,7 @@
         // Auto-refresh prices every 1 minute
         setInterval(() => {
             refreshPrices();
-        }, 60000);
+        }, 30000);
     }
 
     // Handle URL-based routing

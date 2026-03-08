@@ -33,10 +33,7 @@
     --transition: 0.2s ease;
 }
 
-/* Show content once stylesheet is loaded */
-html {
-    display: block !important;
-}
+/* Page visibility is controlled by the inlined script and app.js to avoid flashes of content */
 
 /* ===== PRICE CHANGE INDICATORS ===== */
 .price-change-indicator {
