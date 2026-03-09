@@ -3131,6 +3131,19 @@ body.theme-transitioning *::after {
     pointer-events: none;
 }
 
+.hod-badge svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+    fill: #111111;
+}
+
+/* Ensure HOD badge contrasts on dark backgrounds when card background overlaps */
+.highlight-card.dark-theme .hod-badge svg,
+.highlight-card.dark .hod-badge svg {
+    fill: #ffffff;
+}
+
 .highlight-card-body {
     padding: 10px 12px;
 }

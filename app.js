@@ -3954,7 +3954,9 @@
                     return '<div class="highlight-card">' +
                         '<div class="highlight-card-media">' +
                             '<img class="highlight-card-img" src="' + esc(h.image) + '" alt="' + esc(h.playerName) + '" loading="lazy" onerror="this.style.display=\'none\'">' +
-                            (h.highlightOfDay ? '<span class="hod-badge" title="Highlight of the Day">★</span>' : '') +
+                            (h.highlightOfDay ? '<span class="hod-badge" title="Highlight of the Day">' +
+                                '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 .587l3.668 7.431L23.5 9.75l-5.75 5.602L19.335 23 12 19.26 4.665 23l1.585-7.648L.5 9.75l7.832-1.732L12 .587z"/></svg>' +
+                            '</span>' : '') +
                         '</div>' +
                         '<div class="highlight-card-body">' +
                             '<div class="highlight-card-name">' + esc(h.playerName) + '</div>' +
