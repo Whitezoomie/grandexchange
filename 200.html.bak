@@ -1,0 +1,601 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="icon" href="coins_10000.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="rating" content="general">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <title>OSRS Grand Exchange Tracker | Live Item Prices & Market Data</title>
+    
+    <!-- Essential Meta Tags for SEO -->
+    <meta name="description" content="Track OSRS Grand Exchange prices in real-time. Monitor item trends, price history, and market data for Old School RuneScape. Free GE price tracker tool.">
+    <meta name="keywords" content="OSRS, Grand Exchange, price tracker, RuneScape, GE prices, item prices, market trends, price history">
+    <meta name="author" content="Zoomie">
+    <meta name="theme-color" content="#1a1a1a">
+    
+    <!-- Open Graph Tags for Social Media Sharing -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="OSRS Grand Exchange Tracker | Live Item Prices & Market Data">
+    <meta property="og:description" content="Track OSRS Grand Exchange prices in real-time. Monitor item trends, price history, and market data for Old School RuneScape.">
+    <meta property="og:url" content="https://therealge.com/">
+    <meta property="og:site_name" content="OSRS Grand Exchange Tracker">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:image" content="https://therealge.com/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="OSRS Grand Exchange Tracker - Live item prices and market data for Old School RuneScape">
+    
+    <!-- Twitter Card Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="OSRS Grand Exchange Tracker | Live Item Prices & Market Data">
+    <meta name="twitter:description" content="Track OSRS Grand Exchange prices in real-time. Monitor item trends, price history, and market data.">
+    <meta name="twitter:image" content="https://therealge.com/og-image.png">
+    <meta name="twitter:image:alt" content="OSRS Grand Exchange Tracker - Live item prices and market data for Old School RuneScape">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://therealge.com/">
+    
+    <!-- Apple Mobile Web App -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="TheRealGE">
+    <link rel="apple-touch-icon" href="/favicon.png">
+    
+    <!-- Preconnect & DNS Prefetch for Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://oldschool.runescape.wiki" crossorigin>
+    <link rel="preconnect" href="https://prices.runescape.wiki" crossorigin>
+    <link rel="dns-prefetch" href="https://prices.runescape.wiki">
+    <link rel="dns-prefetch" href="https://oldschool.runescape.wiki">
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="styles.css?v=20260301-fbdel-005">
+    <link rel="preload" as="style" href="styles.css?v=20260301-fbdel-005">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=optional"></noscript>
+    
+    <!-- JSON-LD Schema Markup -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "OSRS Grand Exchange Tracker",
+      "description": "Real-time price tracker for Old School RuneScape Grand Exchange items",
+      "url": "https://therealge.com/",
+      "image": "https://therealge.com/og-image.png",
+      "creator": {
+        "@type": "Person",
+        "name": "Zoomie"
+      },
+      "applicationCategory": "UtilityApplication",
+      "isAccessibleForFree": true,
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "500"
+      }
+    }
+    </script>
+    
+    <!-- Organization Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "OSRS Grand Exchange Tracker",
+      "url": "https://therealge.com/",
+      "image": "https://therealge.com/og-image.png",
+      "sameAs": [
+        "https://therealge.com/"
+      ]
+    }
+    </script>
+    
+    <!-- WebSite Schema for Sitelinks Search -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "OSRS Grand Exchange Tracker",
+      "url": "https://therealge.com/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://therealge.com/?search={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <!-- BreadcrumbList Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://therealge.com/"
+        }
+      ]
+    }
+    </script>
+    <link rel="icon" type="image/png" href="favicon.png">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-inner">
+            <div class="logo" id="logoHome" style="cursor:pointer" title="Reset to home">
+                <div class="logo-text">
+                    <h1>Grand Exchange</h1>
+                    <span class="subtitle">OSRS Price Tracker by Zoomie</span>
+                </div>
+            </div>
+            <div class="header-stats">
+                <div class="stat-box">
+                    <span class="stat-label">Items Loaded</span>
+                    <span class="stat-value" id="totalItems">-</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Last Updated</span>
+                    <span class="stat-value" id="lastUpdated">-</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Shown</span>
+                    <span class="stat-value" id="shownItems">-</span>
+                </div>
+                <div class="stat-box favorites-stat" id="favoritesStatBox">
+                    <span class="stat-label">Favorites</span>
+                    <span class="stat-value" id="favoritesCount">0</span>
+                </div>
+                <div class="stat-box portfolio-stat" id="portfolioStatBox">
+                    <span class="stat-label">Favorite Value</span>
+                    <span class="stat-value portfolio-value" id="portfolioValue">-</span>
+                </div>
+                <!-- GE Radio (compact, header-inline) -->
+                <div class="ge-radio" id="geRadio">
+                    <button class="ge-radio-toggle" id="geRadioToggle" title="GE Radio — OSRS Soundtrack">
+                        <svg class="ge-radio-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+                        <div class="ge-radio-bars" id="geRadioBars"><span></span><span></span><span></span></div>
+                        <span class="ge-radio-label" id="geRadioLabel">GE Radio</span>
+                    </button>
+                    <div class="ge-radio-dropdown" id="geRadioDropdown">
+                        <div class="ge-radio-dd-header">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+                            <span>GE Radio</span>
+                        </div>
+                        <div class="ge-radio-now-playing" id="geRadioNowPlaying">Not playing</div>
+                        <div class="ge-radio-dd-controls">
+                            <button class="ge-radio-dd-btn" id="geRadioPrev" title="Previous">
+                                <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+                            </button>
+                            <button class="ge-radio-dd-btn ge-radio-dd-play" id="geRadioPlay" title="Play">
+                                <svg class="ge-radio-play-icon" viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M8 5v14l11-7z"/></svg>
+                                <svg class="ge-radio-pause-icon" viewBox="0 0 24 24" fill="currentColor" width="18" height="18" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                            </button>
+                            <button class="ge-radio-dd-btn" id="geRadioNext" title="Next">
+                                <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                            </button>
+                            <div class="ge-radio-dd-vol">
+                                <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8.5v7a4.47 4.47 0 0 0 2.5-3.5z"/></svg>
+                                <input type="range" id="geRadioVolume" min="0" max="100" value="30" class="ge-radio-vol-slider">
+                            </div>
+                        </div>
+                        <div class="ge-radio-dd-opts">
+                            <label class="ge-radio-dd-shuffle">
+                                <input type="checkbox" id="geRadioShuffle" checked> Shuffle
+                            </label>
+                        </div>
+                        <div class="ge-radio-dd-tracklist">
+                            <select id="geRadioTrackSelect" class="ge-radio-track-select">
+                                <option value="-1" selected disabled>Choose a song...</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                        <div class="header-actions">
+                <div class="theme-effects-selector" id="themeEffectsSelector">
+                    <button class="header-action-btn" id="themeEffectsToggle" title="Theme & Effects">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M12 2a7 7 0 0 0 0 14h.5a5.5 5.5 0 0 0 0-11H12V2z"/><circle cx="12" cy="12" r="10" stroke-dasharray="2 2"/></svg>
+                        <span id="themeEffectsLabel">Settings</span>
+                        <svg class="theme-effects-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="theme-effects-dropdown" id="themeEffectsDropdown">
+                        <!-- Effects Section -->
+                        <div class="effects-dropdown-section">
+                            <div class="effects-dropdown-header">Visual Effects</div>
+                            <button class="effects-toggle-option" id="effectsOnOffBtn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"/><circle cx="12" cy="12" r="4"/></svg>
+                                <span id="effectsOnOffLabel">Effects On</span>
+                                <span class="effects-status-dot" id="effectsStatusDot"></span>
+                            </button>
+                        </div>
+                        <div class="effects-dropdown-divider"></div>
+                        <div class="effects-dropdown-section">
+                            <button class="effects-dropdown-toggle" id="cursorSectionToggle">
+                                <span class="effects-dropdown-header">Cursor Style</span>
+                                <svg class="effects-section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="6 9 12 15 18 9"/></svg>
+                            </button>
+                            <div class="effects-section-body collapsed" id="cursorSectionBody">
+                                <div class="cursor-list" id="cursorList"></div>
+                            </div>
+                        </div>
+                        <div class="effects-dropdown-divider"></div>
+                        <div class="effects-dropdown-section">
+                            <button class="effects-dropdown-toggle" id="petSectionToggle">
+                                <span class="effects-dropdown-header">Pet Companion</span>
+                                <svg class="effects-section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="6 9 12 15 18 9"/></svg>
+                            </button>
+                            <div class="effects-section-body collapsed" id="petSectionBody">
+                                <div class="pet-list" id="petList"></div>
+                            </div>
+                        </div>
+                        <div class="effects-dropdown-divider"></div>
+                        <!-- Theme Section -->
+                        <div class="effects-dropdown-section">
+                            <div class="effects-dropdown-header">Theme</div>
+                        </div>
+                        <div class="theme-dropdown-options" id="themeDropdownOptions">
+                            <button class="theme-option" data-theme="dark">
+                                <span class="theme-swatch" style="background: linear-gradient(135deg, #0f1117, #22263a)"></span>
+                                <span class="theme-option-name">Dark</span>
+                            </button>
+                            <button class="theme-option" data-theme="light">
+                                <span class="theme-swatch" style="background: linear-gradient(135deg, #f5ebe0, #fdf8f0)"></span>
+                                <span class="theme-option-name">Light</span>
+                            </button>
+                            <button class="theme-option" data-theme="blood-moon">
+                                <span class="theme-swatch" style="background: linear-gradient(135deg, #1a0a0a, #3d1111)"></span>
+                                <span class="theme-option-name">Blood Moon</span>
+                            </button>
+                            <button class="theme-option" data-theme="dark-green">
+                                <span class="theme-swatch" style="background: linear-gradient(135deg, #0a1410, #132e1f)"></span>
+                                <span class="theme-option-name">Dark Forest</span>
+                            </button>
+                            <button class="theme-option" data-theme="ocean">
+                                <span class="theme-swatch" style="background: linear-gradient(135deg, #0a1628, #142d4f)"></span>
+                                <span class="theme-option-name">Ocean Depths</span>
+                            </button>
+                            <button class="theme-option" data-theme="royal-purple">
+                                <span class="theme-swatch" style="background: linear-gradient(135deg, #140a1e, #2a1540)"></span>
+                                <span class="theme-option-name">Royal Purple</span>
+                            </button>
+                            <button class="theme-option" data-theme="sunset">
+                                <span class="theme-swatch" style="background: linear-gradient(135deg, #1a1008, #3d2810)"></span>
+                                <span class="theme-option-name">Sunset</span>
+                            </button>
+                        </div>
+                    </div>
+                        </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Toolbar -->
+    <nav class="toolbar" aria-label="Item search and filters">
+        <div class="toolbar-inner">
+            <!-- Search -->
+            <div class="search-container">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input type="text" id="searchInput" placeholder="Search items... (e.g. 'Abyssal whip', 'Dragon')" autocomplete="one-time-code">
+                <button class="clear-search" id="clearSearch" title="Clear search">&times;</button>
+            </div>
+
+            <!-- Filters Row -->
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label for="membersFilter">Members</label>
+                    <select id="membersFilter">
+                        <option value="all">All Items</option>
+                        <option value="true">Members Only</option>
+                        <option value="false">Free-to-Play</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Min Price</label>
+                    <input type="text" id="minPrice" placeholder="0 or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Max Price</label>
+                    <input type="text" id="maxPrice" placeholder="No limit or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Min Margin</label>
+                    <input type="text" id="minMargin" placeholder="0 or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Max Margin</label>
+                    <input type="text" id="maxMargin" placeholder="No limit or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Min Volume</label>
+                    <input type="text" id="minVolume" placeholder="0 or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Max Volume</label>
+                    <input type="text" id="maxVolume" placeholder="No limit or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Min Buy Limit</label>
+                    <input type="text" id="minBuyLimit" placeholder="0 or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Max Buy Limit</label>
+                    <input type="text" id="maxBuyLimit" placeholder="No limit or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label for="sortBy">Sort By</label>
+                    <select id="sortBy">
+                        <option value="popular-desc" selected>Most Popular</option>
+                        <option value="best-flipping">Best Flipping Items</option>
+                        <option value="name-asc">Name (A-Z)</option>
+                        <option value="name-desc">Name (Z-A)</option>
+                        <option value="price-desc">Price (High to Low)</option>
+                        <option value="price-asc">Price (Low to High)</option>
+                        <option value="margin-desc">Margin (High to Low)</option>
+                        <option value="margin-asc">Margin (Low to High)</option>
+                        <option value="volume-desc">Volume (High to Low)</option>
+                        <option value="highalch-desc">High Alch (High to Low)</option>
+                        <option value="traded-desc">Most Recently Traded</option>
+                        <option value="traded-asc">Least Recently Traded</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Show</label>
+                    <div class="filter-toggle">
+                        <button class="filter-toggle-btn" data-filter="all" id="filterAll" title="All Items">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                        </button>
+                        <button class="filter-toggle-btn" data-filter="favorites" id="filterFavorites" title="Favorites Only">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label>View</label>
+                    <div class="view-toggle">
+                        <button class="view-btn active" data-view="grid" title="Grid View">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                        </button>
+                        <button class="view-btn" data-view="list" title="List View">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><rect x="3" y="4" width="18" height="3" rx="1"/><rect x="3" y="10.5" width="18" height="3" rx="1"/><rect x="3" y="17" width="18" height="3" rx="1"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <button class="save-filters-btn" id="saveFilters">Save Filters</button>
+                <button class="reset-btn" id="resetFilters">Reset All</button>
+
+                <div class="budget-group">
+                    <label>Budget (GP)</label>
+                    <div class="budget-input-row">
+                        <input type="text" id="budgetInput" placeholder="e.g. 5000000 or 5m" inputmode="numeric" autocomplete="one-time-code" data-lpignore="true" data-1p-ignore="true" data-form-type="other">
+                        <button class="budget-toggle-btn" id="budgetToggle" type="button" title="What Can I Afford?">Go</button>
+                    </div>
+                </div>
+
+                <!-- Item Spotlight (inline in filters) -->
+                <div class="spotlight-banner" id="spotlightBanner" style="display:none">
+                    <div class="spotlight-glow"></div>
+                    <img class="spotlight-icon" id="spotlightIcon" alt="" src="">
+                    <div class="spotlight-text">
+                        <span class="spotlight-label">Item Spotlight</span>
+                        <span class="spotlight-name" id="spotlightName"></span>
+                        <span class="spotlight-lore" id="spotlightLore"></span>
+                    </div>
+                    <div class="spotlight-stats">
+                        <span class="spotlight-price" id="spotlightPrice"></span>
+                        <button class="spotlight-view-btn" id="spotlightView">View</button>
+                    </div>
+                    <button class="spotlight-close" id="spotlightClose" title="Dismiss">&times;</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Loading State -->
+    <div class="loading-container" id="loadingContainer">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">Loading Grand Exchange data...</p>
+        <p class="loading-subtext" id="loadingStatus">Fetching item database...</p>
+    </div>
+
+    <!-- Error State -->
+    <div class="error-container" id="errorContainer" style="display: none;">
+        <div class="error-icon">⚠️</div>
+        <h2>Failed to Load Data</h2>
+        <p id="errorMessage">Something went wrong while fetching data.</p>
+        <button class="retry-btn" id="retryBtn">Try Again</button>
+    </div>
+
+    <!-- Items Container -->
+    <main class="main-content" id="mainContent" style="display: none;" aria-label="Grand Exchange item listings">
+      <div class="content-with-sidebar">
+        <div class="items-area">
+            <div class="items-grid" id="itemsContainer"></div>
+        
+            <!-- Pagination -->
+            <div class="pagination" id="pagination" role="navigation" aria-label="Item pages">
+            <button class="page-btn" id="prevPage" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="m15 18-6-6 6-6"/></svg>
+                Previous
+            </button>
+            <div class="page-info">
+                Page <span id="currentPage">1</span> of <span id="totalPages">1</span>
+            </div>
+            <button class="page-btn" id="nextPage">
+                Next
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+        </div>
+        </div><!-- /.items-area -->
+
+        <!-- OSRS News Sidebar -->
+        <div class="sidebar-column">
+        <aside class="news-sidebar" id="newsSidebar">
+            <div class="sidebar-header collapsed" data-collapse-toggle="newsFeed">
+                <svg class="news-icon" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                <h2>OSRS News</h2>
+                <span class="sidebar-header-hint">click to expand</span>
+                <button class="news-refresh-btn" id="newsRefreshBtn" title="Refresh news feed">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                </button>
+            </div>
+            <div class="sidebar-feed collapsed" id="newsFeed">
+                <div class="feed-loading">
+                    <div class="loading-spinner small"></div>
+                    <span>Loading news...</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Changelog Sidebar -->
+        <aside class="changelog-sidebar" id="changelogSidebar">
+            <div class="sidebar-header collapsed" data-collapse-toggle="changelogFeed">
+                <svg class="changelog-icon" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+                <h2>Changelog</h2>
+                <span class="sidebar-header-hint">click to expand</span>
+            </div>
+            <div class="changelog-feed collapsed" id="changelogFeed">
+                <div class="feed-loading"><span>No updates yet.</span></div>
+            </div>
+        </aside>
+        </div><!-- /.sidebar-column -->
+      </div><!-- /.content-with-sidebar -->
+    </main>
+
+    <!-- Item Detail Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal" id="itemModal">
+            <button class="modal-close" id="modalClose">&times;</button>
+            <div class="modal-header">
+                <img class="modal-icon" id="modalIcon" src="" alt="">
+                <div class="modal-header-text">
+                    <h2 class="modal-title" id="modalTitle"></h2>
+                    <p class="modal-examine" id="modalExamine"></p>
+                </div>
+                <button class="modal-fav-btn" id="modalFavBtn" title="Toggle Favorite">
+                    <svg class="fav-icon-outline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    <svg class="fav-icon-filled" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-tags" id="modalTags"></div>
+                <div class="modal-prices">
+                    <div class="modal-price-card buy">
+                        <span class="price-label">Buy Price (Instant)</span>
+                        <span class="price-value" id="modalBuyPrice">-</span>
+                        <span class="price-time" id="modalBuyTime">-</span>
+                    </div>
+                    <div class="modal-price-card sell">
+                        <span class="price-label">Sell Price (Instant)</span>
+                        <span class="price-value" id="modalSellPrice">-</span>
+                        <span class="price-time" id="modalSellTime">-</span>
+                    </div>
+                    <div class="modal-price-card margin">
+                        <span class="price-label">Margin</span>
+                        <span class="price-value" id="modalMargin">-</span>
+                        <span class="price-time" id="modalMarginPct">-</span>
+                    </div>
+                </div>
+                <div class="modal-details">
+                    <div class="detail-row">
+                        <span>GE Tax (2%)</span>
+                        <span id="modalGeTax" style="color: var(--red)">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Buy Limit (4h)</span>
+                        <span id="modalLimit">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Buy Limit Profit</span>
+                        <span id="modalLimitProfit">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>High Alchemy</span>
+                        <span id="modalHighAlch">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>High Alch Profit</span>
+                        <span id="modalAlchProfit">-</span>
+                    </div>
+                </div>
+                <!-- Price & Volume History -->
+                <div class="history-section">
+                    <div class="history-header">
+                        <h3>Price & Volume History</h3>
+                        <div class="history-tabs">
+                            <button class="history-tab active" data-period="5m">24h</button>
+                            <button class="history-tab" data-period="1h">7d</button>
+                            <button class="history-tab" data-period="24h">30d</button>
+                            <button class="history-tab" data-period="1y">1y</button>
+                        </div>
+                    </div>
+                    <div class="chart-container" style="display:none;">
+                        <canvas id="priceChart"></canvas>
+                    </div>
+                    <div class="chart-container volume-chart" style="display:none;">
+                        <canvas id="volumeChart"></canvas>
+                    </div>
+                    <div class="history-loading" id="historyLoading" style="display:none;">
+                        <div class="loading-spinner small"></div>
+                        <span>Loading history...</span>
+                    </div>
+                    <div class="history-error" id="historyError" style="display:none;">
+                        <span>No history data available for this item.</span>
+                    </div>
+                </div>
+
+                <a class="wiki-link" id="modalWikiLink" href="#" target="_blank" rel="noopener">
+                    View on OSRS Wiki →
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back to Top -->
+    <button class="back-to-top" id="backToTop" title="Back to top">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20" height="20"><path d="m18 15-6-6-6 6"/></svg>
+    </button>
+
+    <footer class="footer" role="contentinfo">
+        <p>Data from <a href="https://prices.runescape.wiki" target="_blank" rel="noopener">prices.runescape.wiki</a> &bull; Not affiliated with Jagex Ltd.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
+

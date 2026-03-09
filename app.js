@@ -1681,7 +1681,8 @@
     }
 
     function scrollToItems() {
-        dom.mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Scroll to the very top of the page so Prev/Next always land at top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function isInputFocused() {

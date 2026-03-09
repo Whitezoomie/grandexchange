@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="coins_10000.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Not Found | OSRS Grand Exchange Tracker</title>
+    <meta name="description" content="The page you're looking for doesn't exist. Browse OSRS Grand Exchange item prices, trends, and market data.">
+    <meta name="robots" content="noindex, follow">
+    <link rel="canonical" href="https://therealge.com/">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=optional"></noscript>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f1117;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+        }
+        .error-code {
+            font-size: 8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f0c040 0%, #e8a020 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: #fff;
+        }
+        p {
+            font-size: 1.1rem;
+            color: #a0a0a0;
+            max-width: 500px;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        .actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        a {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+        .primary {
+            background: linear-gradient(135deg, #f0c040, #e8a020);
+            color: #1a1a1a;
+        }
+        .primary:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(240,192,64,0.3); }
+        .secondary {
+            background: rgba(255,255,255,0.08);
+            color: #e0e0e0;
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+        .secondary:hover { background: rgba(255,255,255,0.14); }
+        .suggestions {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            max-width: 600px;
+        }
+        .suggestions h2 {
+            font-size: 1rem;
+            color: #a0a0a0;
+            margin-bottom: 1rem;
+            font-weight: 400;
+        }
+        .popular-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+        .popular-items a {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.06);
+            color: #f0c040;
+            border: 1px solid rgba(240,192,64,0.15);
+        }
+        .popular-items a:hover { background: rgba(240,192,64,0.1); }
+    </style>
+    <link rel="icon" type="image/png" href="favicon.png">
+</head>
+<body>
+    <div class="error-code">404</div>
+    <h1>Page Not Found</h1>
+    <p>The item or page you're looking for doesn't exist or may have been moved. Try searching for it on the Grand Exchange tracker.</p>
+    <div class="actions">
+        <a href="/" class="primary">Go to Grand Exchange</a>
+        <a href="javascript:history.back()" class="secondary">Go Back</a>
+    </div>
+    <div class="suggestions">
+        <h2>Popular items you might be looking for:</h2>
+        <div class="popular-items">
+            <a href="/abyssal-whip.html">Abyssal whip</a>
+            <a href="/twisted-bow.html">Twisted bow</a>
+            <a href="/dragon-claws.html">Dragon claws</a>
+            <a href="/bandos-chestplate.html">Bandos chestplate</a>
+            <a href="/armadyl-crossbow.html">Armadyl crossbow</a>
+            <a href="/osmumtens-fang.html">Osmumten's fang</a>
+            <a href="/torva-full-helm.html">Torva full helm</a>
+            <a href="/dragon-warhammer.html">Dragon warhammer</a>
+        </div>
+    </div>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Page Not Found",
+        "description": "404 error page for OSRS Grand Exchange Tracker",
+        "url": "https://therealge.com/404",
+        "isPartOf": {
+            "@type": "WebSite",
+            "name": "OSRS Grand Exchange Tracker",
+            "url": "https://therealge.com/"
+        }
+    }
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,1014 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="icon" href="coins_10000.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="rating" content="general">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="theme-color" content="#0f1117">
+    <title>Team cape zero Price - OSRS Grand Exchange | TheRealGE</title>
+    <link rel="apple-touch-icon" href="/favicon.png">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="preload" as="style" href="styles.css?v=20260301-fbdel-005">
+    <link rel="stylesheet" href="styles.css?v=20260301-fbdel-005">
+    <style>
+        /* Prevent FOUC by hiding unstyled content briefly */
+        html { display: none; }
+    </style>
+    <noscript><style>html { display: block !important; }</style></noscript>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://oldschool.runescape.wiki" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=optional" rel="stylesheet">
+
+    <meta name="description" content="Track OSRS Team cape zero prices. Current price: 3.3M gp. View price history, trends, and market data.">
+    <meta name="keywords" content="OSRS, Grand Exchange, Team cape zero, price, tracker">
+    
+    <!-- Open Graph Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Team cape zero Price - OSRS Grand Exchange | TheRealGE">
+    <meta property="og:description" content="Track OSRS Team cape zero prices. Current price: 3.3M gp. View price history, trends, and market data.">
+    <meta property="og:image" content="https://oldschool.runescape.wiki/images/Team%20cape%20zero.png">
+    <meta property="og:image:alt" content="Team cape zero - OSRS Grand Exchange item icon">
+    <meta property="og:url" content="https://therealge.com/team-cape-zero">
+    <meta property="og:site_name" content="OSRS Grand Exchange Tracker">
+    <meta property="og:locale" content="en_US">
+    
+    <!-- Twitter Card Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Team cape zero Price - OSRS Grand Exchange | TheRealGE">
+    <meta name="twitter:description" content="Track OSRS Team cape zero prices. Current price: 3.3M gp. View price history, trends, and market data.">
+    <meta name="twitter:image" content="https://oldschool.runescape.wiki/images/Team%20cape%20zero.png">
+    <meta name="twitter:image:alt" content="Team cape zero - OSRS Grand Exchange item">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://therealge.com/team-cape-zero">
+    <link rel="alternate" hreflang="en" href="https://therealge.com/team-cape-zero">
+    
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "brand": {"@type": "Brand", "name": "Old School RuneScape"},
+      "category": "OSRS Grand Exchange Items",
+      "name": "Team cape zero",
+      "description": "Track OSRS Team cape zero prices. Current price: 3.3M gp. View price history, trends, and market data.",
+      "image": "https://oldschool.runescape.wiki/images/Team%20cape%20zero.png",
+      "offers": {
+        "@type": "Offer",
+        "priceCurrency": "GP",
+        "price": "3263065",
+        "availability": "https://schema.org/InStock"
+      },
+      "url": "https://therealge.com/team-cape-zero"
+    }
+    </script>
+    
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Grand Exchange",
+          "item": "https://therealge.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Team cape zero",
+          "item": "https://therealge.com/team-cape-zero"
+        }
+      ]
+    }
+    </script>
+</head>
+<body data-initial-item="20211">
+    <h1 class="seo-item-title">Team cape zero - OSRS Grand Exchange Price</h1>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-inner">
+            <div class="logo" id="logoHome" style="cursor:pointer" title="Reset to home">
+                <div class="logo-text">
+                    <h1>Grand Exchange</h1>
+                    <span class="subtitle">OSRS Price Tracker by Zoomie</span>
+                </div>
+            </div>
+            <div class="header-stats">
+                <div class="stat-box">
+                    <span class="stat-label">Items Loaded</span>
+                    <span class="stat-value" id="totalItems">-</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Last Updated</span>
+                    <span class="stat-value" id="lastUpdated">-</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Shown</span>
+                    <span class="stat-value" id="shownItems">-</span>
+                </div>
+                <div class="stat-box favorites-stat" id="favoritesStatBox">
+                    <span class="stat-label">Favorites</span>
+                    <span class="stat-value" id="favoritesCount">0</span>
+                </div>
+                <div class="stat-box portfolio-stat" id="portfolioStatBox">
+                    <span class="stat-label">Favorite Value</span>
+                    <span class="stat-value portfolio-value" id="portfolioValue">-</span>
+                </div>
+                <!-- GE Radio (compact, header-inline) -->
+                <div class="ge-radio" id="geRadio">
+                    <button class="ge-radio-toggle" id="geRadioToggle" title="GE Radio � OSRS Soundtrack">
+                        <svg class="ge-radio-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+                        <div class="ge-radio-bars" id="geRadioBars"><span></span><span></span><span></span></div>
+                        <span class="ge-radio-label" id="geRadioLabel">GE Radio</span>
+                    </button>
+                    <div class="ge-radio-dropdown" id="geRadioDropdown">
+                        <div class="ge-radio-dd-header">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+                            <span>GE Radio</span>
+                        </div>
+                        <div class="ge-radio-now-playing" id="geRadioNowPlaying">Not playing</div>
+                        <div class="ge-radio-dd-controls">
+                            <button class="ge-radio-dd-btn" id="geRadioPrev" title="Previous">
+                                <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+                            </button>
+                            <button class="ge-radio-dd-btn ge-radio-dd-play" id="geRadioPlay" title="Play">
+                                <svg class="ge-radio-play-icon" viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M8 5v14l11-7z"/></svg>
+                                <svg class="ge-radio-pause-icon" viewBox="0 0 24 24" fill="currentColor" width="18" height="18" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                            </button>
+                            <button class="ge-radio-dd-btn" id="geRadioNext" title="Next">
+                                <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                            </button>
+                            <div class="ge-radio-dd-vol">
+                                <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8.5v7a4.47 4.47 0 0 0 2.5-3.5z"/></svg>
+                                <input type="range" id="geRadioVolume" min="0" max="100" value="30" class="ge-radio-vol-slider">
+                            </div>
+                        </div>
+                        <div class="ge-radio-dd-opts">
+                            <label class="ge-radio-dd-shuffle">
+                                <input type="checkbox" id="geRadioShuffle" checked> Shuffle
+                            </label>
+                        </div>
+                        <div class="ge-radio-dd-tracklist">
+                            <select id="geRadioTrackSelect" class="ge-radio-track-select">
+                                <option value="-1" selected disabled>Choose a song...</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                        <div class="header-actions">
+                        <!-- Changelog + Hamburger Menu -->
+                        <!-- View toggle (moved here) -->
+                        <div class="header-view">
+                            <div class="view-label">View</div>
+                            <div class="view-toggle header-view-toggle">
+                                <button class="view-btn active" data-view="grid" title="Grid View">
+                                    <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                                </button>
+                                <button class="view-btn" data-view="list" title="List View">
+                                    <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><rect x="3" y="4" width="18" height="3" rx="1"/><rect x="3" y="10.5" width="18" height="3" rx="1"/><rect x="3" y="17" width="18" height="3" rx="1"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Changelog was moved into the hamburger dropdown (above Feedback) -->
+                        <!-- Hamburger Menu -->
+                        <div class="hamburger-menu" id="hamburgerMenu">
+                    <button class="header-action-btn hamburger-btn" id="hamburgerToggle" title="Menu">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+                        <span>Menu</span>
+                    </button>
+                    <div class="hamburger-dropdown" id="hamburgerDropdown">
+                        <button class="hamburger-menu-item" id="menuDeathCoffer">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M20 6h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zM10 4h4v2h-4V4zm10 16H4V8h16v12z"/></svg>
+                            <span>Death's Coffer</span>
+                        </button>
+                        <button class="hamburger-menu-item" id="menuHeatmap">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M3 3h4v4H3zm0 7h4v4H3zm0 7h4v4H3zm7-14h4v4h-4zm0 7h4v4h-4zm0 7h4v4h-4zm7-14h4v4h-4zm0 7h4v4h-4zm0 7h4v4h-4z"/></svg>
+                            <span>Market Heatmap</span>
+                        </button>
+                        <button class="hamburger-menu-item" id="menuHighlight">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+                            <span>Player Highlights</span>
+                        </button>
+                        <div class="hamburger-changelog" id="hamburgerChangelog">
+                            <button class="hamburger-menu-item sidebar-header collapsed" id="changelogToggle" data-collapse-toggle="changelogFeed" title="Changelog">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M3 5h18v14H3z"/><path d="M7 9h10M7 13h6"/></svg>
+                                <span>Changelog</span>
+                            </button>
+                            <div class="sidebar-feed collapsed" id="changelogFeed">
+                                <div class="changelog-feed">
+                                    <div class="feed-loading">
+                                        <div class="loading-spinner small"></div>
+                                        <span>Loading changelog...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="hamburger-feedback" id="hamburgerFeedback">
+                            <div class="sidebar-header collapsed" data-collapse-toggle="feedbackContent">
+                                <svg class="feedback-icon" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+                                <h3>Feedback</h3>
+                                <span class="sidebar-header-hint">click to expand</span>
+                            </div>
+                            <div class="feedback-content collapsed" id="feedbackContent">
+                                <form class="feedback-form" id="feedbackForm">
+                                    <div class="feedback-type-row">
+                                        <label class="feedback-type-label">
+                                            <input type="radio" name="feedbackType" value="suggestion" checked>
+                                            <span>Suggestion</span>
+                                        </label>
+                                        <label class="feedback-type-label">
+                                            <input type="radio" name="feedbackType" value="bug">
+                                            <span>Bug Report</span>
+                                        </label>
+                                    </div>
+                                    <input type="text" class="feedback-name" id="feedbackName" placeholder="Your name (optional)" maxlength="50" autocomplete="one-time-code">
+                                    <textarea class="feedback-message" id="feedbackMessage" placeholder="Tell us what you think..." rows="4" maxlength="2000" required></textarea>
+                                    <div class="feedback-actions">
+                                        <span class="feedback-char-count" id="feedbackCharCount">0 / 2000</span>
+                                        <button type="submit" class="feedback-submit" id="feedbackSubmitBtn">Send Feedback</button>
+                                    </div>
+                                    <div class="feedback-status" id="feedbackStatus"></div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="hamburger-news" id="hamburgerNews">
+                            <div class="sidebar-header collapsed" data-collapse-toggle="newsFeed">
+                                <svg class="news-icon" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                                <h3>OSRS News</h3>
+                                <span class="sidebar-header-hint">click to expand</span>
+                                <button class="news-refresh-btn" id="newsRefreshBtn" title="Refresh news feed">
+                                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                                </button>
+                            </div>
+                            <div class="sidebar-feed collapsed" id="newsFeed">
+                                <div class="feed-loading">
+                                    <div class="loading-spinner small"></div>
+                                    <span>Loading news...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="theme-effects-selector" id="themeEffectsSelector">
+                    <button class="header-action-btn" id="themeEffectsToggle" title="Theme & Effects">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M12 2a7 7 0 0 0 0 14h.5a5.5 5.5 0 0 0 0-11H12V2z"/><circle cx="12" cy="12" r="10" stroke-dasharray="2 2"/></svg>
+                        <span id="themeEffectsLabel">Settings</span>
+                        <svg class="theme-effects-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="theme-effects-dropdown" id="themeEffectsDropdown">
+                        <!-- Effects Section -->
+                        <div class="effects-dropdown-section">
+                            <div class="effects-dropdown-header">Visual Effects</div>
+                            <button class="effects-toggle-option" id="effectsOnOffBtn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"/><circle cx="12" cy="12" r="4"/></svg>
+                                <span id="effectsOnOffLabel">Effects On</span>
+                                <span class="effects-status-dot" id="effectsStatusDot"></span>
+                            </button>
+                        </div>
+                        <div class="effects-dropdown-divider"></div>
+                        <div class="effects-dropdown-section">
+                            <button class="effects-dropdown-toggle" id="cursorSectionToggle">
+                                <span class="effects-dropdown-header">Cursor Style</span>
+                                <svg class="effects-section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="6 9 12 15 18 9"/></svg>
+                            </button>
+                            <div class="effects-section-body collapsed" id="cursorSectionBody">
+                                <div class="cursor-list" id="cursorList"></div>
+                            </div>
+                        </div>
+                        <div class="effects-dropdown-divider"></div>
+                        <div class="effects-dropdown-section">
+                            <button class="effects-dropdown-toggle" id="petSectionToggle">
+                                <span class="effects-dropdown-header">Pet Companion</span>
+                                <svg class="effects-section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="6 9 12 15 18 9"/></svg>
+                            </button>
+                            <div class="effects-section-body collapsed" id="petSectionBody">
+                                <div class="pet-list" id="petList"></div>
+                            </div>
+                        </div>
+                        <div class="effects-dropdown-divider"></div>
+                        <!-- Theme Section -->
+                        <div class="effects-dropdown-section">
+                            <button class="effects-dropdown-toggle" id="themeSectionToggle">
+                                <span class="effects-dropdown-header">Theme</span>
+                                <svg class="effects-section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="6 9 12 15 18 9"/></svg>
+                            </button>
+                            <div class="effects-section-body collapsed" id="themeSectionBody">
+                        <div class="theme-dropdown-options" id="themeDropdownOptions">
+                            <button class="theme-option" data-theme="dark">
+                                <span class="theme-swatch" style="background: linear-gradient(135deg, #0f1117, #22263a)"></span>
+                                <span class="theme-option-name">Dark</span>
+                            </button>
+                            <button class="theme-option" data-theme="light">
+                                <span class="theme-swatch" style="background: linear-gradient(135deg, #f5ebe0, #fdf8f0)"></span>
+                                <span class="theme-option-name">Light</span>
+                            </button>
+                            <button class="theme-option" data-theme="blood-moon">
+                                <span class="theme-swatch" style="background: linear-gradient(135deg, #1a0a0a, #3d1111)"></span>
+                                <span class="theme-option-name">Blood Moon</span>
+                            </button>
+                            <button class="theme-option" data-theme="dark-green">
+                                <span class="theme-swatch" style="background: linear-gradient(135deg, #0a1410, #132e1f)"></span>
+                                <span class="theme-option-name">Dark Forest</span>
+                            </button>
+                            <button class="theme-option" data-theme="ocean">
+                                <span class="theme-swatch" style="background: linear-gradient(135deg, #0a1628, #142d4f)"></span>
+                                <span class="theme-option-name">Ocean Depths</span>
+                            </button>
+                            <button class="theme-option" data-theme="royal-purple">
+                                <span class="theme-swatch" style="background: linear-gradient(135deg, #140a1e, #2a1540)"></span>
+                                <span class="theme-option-name">Royal Purple</span>
+                            </button>
+                            <button class="theme-option" data-theme="sunset">
+                                <span class="theme-swatch" style="background: linear-gradient(135deg, #1a1008, #3d2810)"></span>
+                                <span class="theme-option-name">Sunset</span>
+                            </button>
+                            <button class="theme-option" data-theme="arctic">
+                                <span class="theme-swatch" style="background: linear-gradient(135deg, #0d1f2d, #1a3350)"></span>
+                                <span class="theme-option-name">Arctic</span>
+                            </button>
+                            <button class="theme-option" data-theme="volcanic">
+                                <span class="theme-swatch" style="background: linear-gradient(135deg, #121212, #262626)"></span>
+                                <span class="theme-option-name">Volcanic</span>
+                            </button>
+                            <button class="theme-option" data-theme="void">
+                                <span class="theme-swatch" style="background: linear-gradient(135deg, #050508, #10101e)"></span>
+                                <span class="theme-option-name">Void Knight</span>
+                            </button>
+                            <button class="theme-option" data-theme="desert">
+                                <span class="theme-swatch" style="background: linear-gradient(135deg, #1e1608, #3c2e18)"></span>
+                                <span class="theme-option-name">Desert</span>
+                            </button>
+                            <button class="theme-option" data-theme="cosmic">
+                                <span class="theme-swatch" style="background: linear-gradient(135deg, #07040f, #180e32)"></span>
+                                <span class="theme-option-name">Cosmic</span>
+                            </button>
+                            <button class="theme-option" data-theme="toxic">
+                                <span class="theme-swatch" style="background: linear-gradient(135deg, #080e08, #142014)"></span>
+                                <span class="theme-option-name">Toxic</span>
+                            </button>
+                            <button class="theme-option" data-theme="golden">
+                                <span class="theme-swatch" style="background: linear-gradient(135deg, #16100a, #2e2010)"></span>
+                                <span class="theme-option-name">Golden</span>
+                            </button>
+                            <button class="theme-option" data-theme="midnight">
+                                <span class="theme-swatch" style="background: linear-gradient(135deg, #080a10, #141830)"></span>
+                                <span class="theme-option-name">Midnight</span>
+                            </button>
+                        </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <div class="toolbar-inner">
+            <!-- Search -->
+            <div class="search-container">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input type="text" id="searchInput" placeholder="Search items... (e.g. 'Abyssal whip', 'Dragon')" autocomplete="one-time-code">
+                <button class="clear-search" id="clearSearch" title="Clear search">&times;</button>
+            </div>
+
+            <!-- Filters Row -->
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label>Members</label>
+                    <select id="membersFilter">
+                        <option value="all">All Items</option>
+                        <option value="true">Members Only</option>
+                        <option value="false">Free-to-Play</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Min Price</label>
+                    <input type="text" id="minPrice" placeholder="0 or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Max Price</label>
+                    <input type="text" id="maxPrice" placeholder="No limit or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Min Margin</label>
+                    <input type="text" id="minMargin" placeholder="0 or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Max Margin</label>
+                    <input type="text" id="maxMargin" placeholder="No limit or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Min Volume</label>
+                    <input type="text" id="minVolume" placeholder="0 or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Max Volume</label>
+                    <input type="text" id="maxVolume" placeholder="No limit or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Min Buy Limit</label>
+                    <input type="text" id="minBuyLimit" placeholder="0 or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Max Buy Limit</label>
+                    <input type="text" id="maxBuyLimit" placeholder="No limit or 10k, 1m" inputmode="numeric" autocomplete="one-time-code">
+                </div>
+
+                <div class="filter-group">
+                    <label>Sort By</label>
+                    <select id="sortBy">
+                        <option value="popular-desc" selected>Most Popular</option>
+                        <option value="best-flipping">Best Flipping Items</option>
+                        <option value="name-asc">Name (A-Z)</option>
+                        <option value="name-desc">Name (Z-A)</option>
+                        <option value="price-desc">Price (High to Low)</option>
+                        <option value="price-asc">Price (Low to High)</option>
+                        <option value="margin-desc">Margin (High to Low)</option>
+                        <option value="margin-asc">Margin (Low to High)</option>
+                        <option value="volume-desc">Volume (High to Low)</option>
+                        <option value="highalch-desc">High Alch (High to Low)</option>
+                        <option value="traded-desc">Most Recently Traded</option>
+                        <option value="traded-asc">Least Recently Traded</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Show</label>
+                    <div class="filter-toggle">
+                        <button class="filter-toggle-btn" data-filter="all" id="filterAll" title="All Items">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                        </button>
+                        <button class="filter-toggle-btn" data-filter="favorites" id="filterFavorites" title="Favorites Only">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label>View</label>
+                    <div class="view-toggle">
+                        <button class="view-btn active" data-view="grid" title="Grid View">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                        </button>
+                        <button class="view-btn" data-view="list" title="List View">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><rect x="3" y="4" width="18" height="3" rx="1"/><rect x="3" y="10.5" width="18" height="3" rx="1"/><rect x="3" y="17" width="18" height="3" rx="1"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <button class="save-filters-btn" id="saveFilters">Save Filters</button>
+                <button class="reset-btn" id="resetFilters">Reset All</button>
+
+                <div class="budget-group">
+                    <label>Budget (GP)</label>
+                    <div class="budget-input-row">
+                        <input type="text" id="budgetInput" placeholder="e.g. 5000000 or 5m" inputmode="numeric" autocomplete="one-time-code" data-lpignore="true" data-1p-ignore="true" data-form-type="other">
+                        <button class="budget-toggle-btn" id="budgetToggle" type="button" title="What Can I Afford?">Go</button>
+                    </div>
+                </div>
+
+                <!-- Item Spotlight (inline in filters) -->
+                <div class="spotlight-banner" id="spotlightBanner" style="display:none">
+                    <div class="spotlight-glow"></div>
+                    <img class="spotlight-icon" id="spotlightIcon" alt="" src="">
+                    <div class="spotlight-text">
+                        <span class="spotlight-label">Item Spotlight</span>
+                        <span class="spotlight-name" id="spotlightName"></span>
+                        <span class="spotlight-lore" id="spotlightLore"></span>
+                    </div>
+                    <div class="spotlight-stats">
+                        <span class="spotlight-price" id="spotlightPrice"></span>
+                        <button class="spotlight-view-btn" id="spotlightView">View</button>
+                    </div>
+                    <button class="spotlight-close" id="spotlightClose" title="Dismiss">&times;</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-container" id="loadingContainer">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">Loading Grand Exchange data...</p>
+        <p class="loading-subtext" id="loadingStatus">Fetching item database...</p>
+    </div>
+
+    <!-- Error State -->
+    <div class="error-container" id="errorContainer" style="display: none;">
+        <div class="error-icon">??</div>
+        <h2>Failed to Load Data</h2>
+        <p id="errorMessage">Something went wrong while fetching data.</p>
+        <button class="retry-btn" id="retryBtn">Try Again</button>
+    </div>
+
+    <!-- Items Container -->
+    <main class="main-content" id="mainContent" style="display: none;">
+      <div class="content-with-sidebar">
+        <div class="items-area">
+            <div class="items-grid" id="itemsContainer"></div>
+        
+            <!-- Pagination -->
+            <div class="pagination" id="pagination">
+            <button class="page-btn" id="prevPage" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="m15 18-6-6 6-6"/></svg>
+                Previous
+            </button>
+            <div class="page-info">
+                Page <span id="currentPage">1</span> of <span id="totalPages">1</span>
+            </div>
+            <button class="page-btn" id="nextPage">
+                Next
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+        </div>
+        </div><!-- /.items-area -->
+
+        <!-- OSRS News Sidebar -->
+        <div class="sidebar-column">
+        <aside class="news-sidebar" id="newsSidebar">
+            <div class="sidebar-header collapsed" data-collapse-toggle="newsFeed">
+                <svg class="news-icon" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                <h3>OSRS News</h3>
+                <span class="sidebar-header-hint">click to expand</span>
+                <button class="news-refresh-btn" id="newsRefreshBtn" title="Refresh news feed">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                </button>
+            </div>
+            <div class="sidebar-feed collapsed" id="newsFeed">
+                <div class="feed-loading">
+                    <div class="loading-spinner small"></div>
+                    <span>Loading news...</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Feedback Sidebar -->
+        <aside class="feedback-sidebar" id="feedbackSidebar">
+            <div class="sidebar-header collapsed" data-collapse-toggle="feedbackContent">
+                <svg class="feedback-icon" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+                <h3>Feedback</h3>
+                <span class="sidebar-header-hint">click to expand</span>
+            </div>
+            <div class="feedback-content collapsed" id="feedbackContent">
+                <form class="feedback-form" id="feedbackForm">
+                    <div class="feedback-type-row">
+                        <label class="feedback-type-label">
+                            <input type="radio" name="feedbackType" value="suggestion" checked>
+                            <span>?? Suggestion</span>
+                        </label>
+                        <label class="feedback-type-label">
+                            <input type="radio" name="feedbackType" value="bug">
+                            <span>?? Bug Report</span>
+                        </label>
+                    </div>
+                    <input type="text" class="feedback-name" id="feedbackName" placeholder="Your name (optional)" maxlength="50" autocomplete="one-time-code">
+                    <textarea class="feedback-message" id="feedbackMessage" placeholder="Tell us what you think..." rows="4" maxlength="2000" required></textarea>
+                    <div class="feedback-actions">
+                        <span class="feedback-char-count" id="feedbackCharCount">0 / 2000</span>
+                        <button type="submit" class="feedback-submit" id="feedbackSubmitBtn">Send Feedback</button>
+                    </div>
+                    <div class="feedback-status" id="feedbackStatus"></div>
+                </form>
+            </div>
+        </aside>
+        </div><!-- /.sidebar-column -->
+      </div><!-- /.content-with-sidebar -->
+    </main>
+
+    <!-- Item Detail Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal" id="itemModal">
+            <button class="modal-close" id="modalClose">&times;</button>
+            <div class="modal-header">
+                <img class="modal-icon" id="modalIcon" src="" alt="">
+                <div class="modal-header-text">
+                    <h2 class="modal-title" id="modalTitle"></h2>
+                    <p class="modal-examine" id="modalExamine"></p>
+                </div>
+                <button class="modal-fav-btn" id="modalFavBtn" title="Toggle Favorite">
+                    <svg class="fav-icon-outline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    <svg class="fav-icon-filled" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-tags" id="modalTags"></div>
+                <div class="modal-prices">
+                    <div class="modal-price-card buy">
+                        <span class="price-label">Buy Price (Instant)</span>
+                        <span class="price-value" id="modalBuyPrice">-</span>
+                        <span class="price-time" id="modalBuyTime">-</span>
+                    </div>
+                    <div class="modal-price-card sell">
+                        <span class="price-label">Sell Price (Instant)</span>
+                        <span class="price-value" id="modalSellPrice">-</span>
+                        <span class="price-time" id="modalSellTime">-</span>
+                    </div>
+                    <div class="modal-price-card margin">
+                        <span class="price-label">Margin</span>
+                        <span class="price-value" id="modalMargin">-</span>
+                        <span class="price-time" id="modalMarginPct">-</span>
+                    </div>
+                </div>
+                <div class="modal-details">
+                    <div class="detail-row">
+                        <span>GE Tax (2%)</span>
+                        <span id="modalGeTax" style="color: var(--red)">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Buy Limit (4h)</span>
+                        <span id="modalLimit">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Buy Limit Profit</span>
+                        <span id="modalLimitProfit">-</span>
+                    </div>
+                </div>
+                <!-- Flip Sentiment Vote -->
+                <div class="flip-vote-section" id="flipVoteSection">
+                    <div class="flip-vote-label">Is this a good flip?</div>
+                    <div class="flip-vote-buttons">
+                        <button class="flip-vote-btn flip-vote-up" id="flipVoteUp" title="Good flip">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+                            <span class="flip-vote-count" id="flipVoteUpCount">0</span>
+                        </button>
+                        <div class="flip-vote-bar-wrap" id="flipVoteBarWrap">
+                            <div class="flip-vote-bar-up" id="flipVoteBarUp"></div>
+                            <div class="flip-vote-bar-down" id="flipVoteBarDown"></div>
+                        </div>
+                        <button class="flip-vote-btn flip-vote-down" id="flipVoteDown" title="Bad flip">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L10.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z"/></svg>
+                            <span class="flip-vote-count" id="flipVoteDownCount">0</span>
+                        </button>
+                    </div>
+                    <div class="flip-vote-meta" id="flipVoteMeta"></div>
+                </div>
+
+                <!-- Price & Volume History -->
+                <div class="history-section">
+                    <div class="history-header">
+                        <h3>Price & Volume History</h3>
+                        <div class="history-tabs">
+                            <button class="history-tab active" data-period="5m">24h</button>
+                            <button class="history-tab" data-period="1h">7d</button>
+                            <button class="history-tab" data-period="24h">30d</button>
+                            <button class="history-tab" data-period="1y">1y</button>
+                        </div>
+                    </div>
+                    <div class="chart-container" style="display:none;">
+                        <canvas id="priceChart"></canvas>
+                    </div>
+                    <div class="chart-container volume-chart" style="display:none;">
+                        <canvas id="volumeChart"></canvas>
+                    </div>
+                    <div class="history-loading" id="historyLoading" style="display:none;">
+                        <div class="loading-spinner small"></div>
+                        <span>Loading history...</span>
+                    </div>
+                    <div class="history-error" id="historyError" style="display:none;">
+                        <span>No history data available for this item.</span>
+                    </div>
+                </div>
+
+                <a class="wiki-link" id="modalWikiLink" href="#" target="_blank" rel="noopener">
+                    View on OSRS Wiki ?
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back to Top -->
+    <button class="back-to-top" id="backToTop" title="Back to top">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20" height="20"><path d="m18 15-6-6-6 6"/></svg>
+    </button>
+
+    <!-- Buy Me a Coffee Button -->
+    <a href="https://ko-fi.com/whitezoomie" target="_blank" rel="noopener" class="donation-float-btn" title="Buy me a coffee">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M20 3H4v10c0 2.2 1.8 4 4 4h6c2.2 0 4-1.8 4-4v-3h2c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 5h-2V5h2v3zM4 14c-1.1 0-2-.9-2-2v-2h2v4zm16 3H8c-1.1 0-2 .9-2 2s.9 2 2 2h12c1.1 0 2-.9 2-2s-.9-2-2-2z"/></svg>
+        <span>Buy me some Pizza</span>
+    </a>
+
+    <footer class="footer" role="contentinfo">
+        <div class="visitor-stats-bar">
+            <div class="visitor-stat">
+                <span class="visitor-dot"></span>
+                <span><strong id="onlineCount">0</strong> online now</span>
+            </div>
+            <div class="visitor-stat">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+                <span><strong id="totalVisitors">0</strong> Unique visitors</span>
+            </div>
+        </div>
+        <p>Data from <a href="https://prices.runescape.wiki" target="_blank" rel="noopener noreferrer">prices.runescape.wiki</a> &bull; Not affiliated with Jagex Ltd &bull; &copy; 2026 Zoomie</p>
+
+        <span class="footer-manage" id="footerManage" title="Site management">Manage</span>
+    </footer>
+
+
+    <!-- Admin Login Modal -->
+    <div class="admin-overlay" id="adminOverlay">
+        <div class="admin-modal">
+            <button class="admin-close" id="adminClose">&times;</button>
+            <div class="admin-login" id="adminLogin">
+                <h3>Site Management</h3>
+                <input type="text" class="admin-input" id="adminUser" placeholder="Username" autocomplete="new-password">
+                <input type="password" class="admin-input" id="adminPass" placeholder="Password" autocomplete="new-password">
+                <button class="admin-btn" id="adminLoginBtn">Login</button>
+                <div class="admin-error" id="adminError"></div>
+            </div>
+            <div class="admin-panel" id="adminPanel" style="display:none">
+                <div class="admin-panel-header">
+                    <h3>Site Management</h3>
+                    <button class="admin-btn admin-btn-sm" id="adminLogout">Logout</button>
+                </div>
+                <div class="admin-section-label" style="display:flex;align-items:center;justify-content:space-between;">&#128293; Flip Votes <button class="admin-btn admin-btn-sm admin-btn-danger" id="adminResetVotes">Reset All Votes</button></div>
+                <div class="admin-section-label">&#128161; Feedback Inbox</div>
+                <div class="admin-feedback-list" id="adminFeedbackList">
+                    <p class="admin-loading">Loading feedback...</p>
+                </div>
+                <div class="admin-section-label admin-section-label-mt" style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                    <div>&#128248; Pending Highlights</div>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <button class="admin-btn admin-btn-sm" id="adminHighlightsRefresh">Refresh Pending</button>
+                        <button class="admin-btn admin-btn-sm" id="adminShowApproved">Manage Approved</button>
+                    </div>
+                </div>
+                <div class="admin-highlights-list" id="adminHighlightsList">
+                    <p class="admin-loading">Loading...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Player Highlight Gallery Overlay -->
+    <div class="highlight-overlay" id="highlightOverlay">
+        <div class="highlight-panel">
+            <div class="highlight-header">
+                <div class="highlight-title-row">
+                    <h2 class="highlight-title">Player Highlights</h2>
+                    <span class="highlight-count" id="highlightCount">0 players</span>
+                </div>
+                <button class="highlight-close" id="highlightClose">&times;</button>
+            </div>
+            <div class="highlight-divider"></div>
+            <div class="highlight-toolbar">
+                <p class="highlight-desc">Community OSRS players showing off their characters. Submit yours for a chance to be featured!</p>
+                <button class="highlight-submit-open-btn" id="highlightOpenSubmit">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Submit Your Character
+                </button>
+            </div>
+            <div class="highlight-grid" id="highlightGrid">
+                <div class="highlight-loading">
+                    <div class="loading-spinner small"></div>
+                    <span>Loading highlights...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Player Highlight Submit Overlay -->
+    <div class="highlight-submit-overlay" id="highlightSubmitOverlay">
+        <div class="highlight-submit-panel">
+            <div class="highlight-header">
+                <h2 class="highlight-title">Submit Your Character</h2>
+                <button class="highlight-close" id="highlightSubmitClose">&times;</button>
+            </div>
+            <div class="highlight-divider"></div>
+            <form class="highlight-form" id="highlightForm" autocomplete="off">
+                <div class="highlight-field">
+                    <label class="highlight-label" for="highlightPlayerName">Player Name <span class="highlight-req">*</span></label>
+                    <input type="text" id="highlightPlayerName" class="highlight-input" placeholder="Your RSN" maxlength="30" autocomplete="off">
+                </div>
+                <div class="highlight-field">
+                    <label class="highlight-label" for="highlightCaption">Caption <span class="highlight-opt">(optional)</span></label>
+                    <input type="text" id="highlightCaption" class="highlight-input" placeholder="e.g. Just got my fire cape!" maxlength="120" autocomplete="off">
+                </div>
+                <div class="highlight-field">
+                    <label class="highlight-label">Screenshot <span class="highlight-req">*</span></label>
+                    <div class="highlight-drop-zone" id="highlightDropZone">
+                        <div class="highlight-drop-inner" id="highlightDropInner">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="36" height="36"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            <p>Drop image here, <label for="highlightFileInput" class="highlight-file-label">browse files</label>, or press Ctrl+V to paste</p>
+                            <p class="highlight-drop-hint">PNG &bull; JPG &bull; WebP &mdash; max 8 MB</p>
+                        </div>
+                        <input type="file" id="highlightFileInput" accept="image/*" style="display:none">
+                        <img class="highlight-preview" id="highlightPreview" alt="Preview" style="display:none">
+                        <button type="button" class="highlight-clear-img" id="highlightClearImg" style="display:none" title="Remove image">&times;</button>
+                    </div>
+                    <div class="highlight-url-row">
+                        <span class="highlight-url-label">or enter an image URL:</span>
+                        <input type="text" id="highlightUrlInput" class="highlight-input highlight-url-input" placeholder="https://i.imgur.com/..." autocomplete="off">
+                    </div>
+                </div>
+                <div class="highlight-submit-row">
+                    <button type="submit" class="highlight-submit-form-btn" id="highlightSubmitBtn">Submit for Review</button>
+                    <span class="highlight-status" id="highlightStatus"></span>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Market Heatmap Overlay -->
+    <div class="heatmap-overlay" id="heatmapOverlay">
+        <div class="heatmap-panel">
+            <div class="heatmap-header">
+                <div class="heatmap-title-row">
+                    <h2 class="heatmap-title">Market Heatmap</h2>
+                    <span class="heatmap-item-count" id="heatmapItemCount">0 items</span>
+                </div>
+                <button class="heatmap-close" id="heatmapClose">&times;</button>
+            </div>
+            <div class="heatmap-divider"></div>
+            <p class="heatmap-desc">Items are sized by daily trade volume. Color reflects margin percentage. Click any tile to view full item details.</p>
+            <div class="heatmap-controls-row">
+                <div class="heatmap-filter-row">
+                    <label class="heatmap-filter-label" for="heatmapColorBy">Color By</label>
+                    <select id="heatmapColorBy" class="heatmap-select">
+                        <option value="margin">Margin %</option>
+                        <option value="volume">Volume</option>
+                    </select>
+                </div>
+                <div class="heatmap-filter-row">
+                    <label class="heatmap-filter-label" for="heatmapMinPrice">Min Price</label>
+                    <input type="text" id="heatmapMinPrice" class="heatmap-filter-input" placeholder="e.g. 1k, 1m" inputmode="numeric" autocomplete="off">
+                </div>
+                <div class="heatmap-filter-row">
+                    <label class="heatmap-filter-label" for="heatmapMaxPrice">Max Price</label>
+                    <input type="text" id="heatmapMaxPrice" class="heatmap-filter-input" placeholder="e.g. 50k, 1m" inputmode="numeric" autocomplete="off">
+                </div>
+                <div class="heatmap-filter-row">
+                    <label class="heatmap-filter-label" for="heatmapMinVol">Min Volume</label>
+                    <input type="text" id="heatmapMinVol" class="heatmap-filter-input" placeholder="e.g. 100, 5k" inputmode="numeric" autocomplete="off">
+                </div>
+            </div>
+            <div class="heatmap-legend" id="heatmapLegend">
+                <span class="heatmap-legend-label">Margin:</span>
+                <span class="heatmap-legend-swatch" style="background:#166534">&ge;8%</span>
+                <span class="heatmap-legend-swatch" style="background:#15803d">4&ndash;8%</span>
+                <span class="heatmap-legend-swatch" style="background:#65a30d">2&ndash;4%</span>
+                <span class="heatmap-legend-swatch" style="background:#b45309">1&ndash;2%</span>
+                <span class="heatmap-legend-swatch" style="background:#c2410c">0&ndash;1%</span>
+                <span class="heatmap-legend-swatch" style="background:#991b1b">Negative</span>
+            </div>
+            <div class="heatmap-grid" id="heatmapGrid">
+                <div class="heatmap-loading">
+                    <div class="loading-spinner small"></div>
+                    <span>Loading heatmap...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Death's Coffer Overlay -->
+    <div class="coffer-overlay" id="cofferOverlay">
+        <div class="coffer-panel">
+            <div class="coffer-header">
+                <div class="coffer-title-row">
+                    <h2 class="coffer-title">Death's Coffer</h2>
+                    <span class="coffer-item-count" id="cofferItemCount">0 items</span>
+                </div>
+                <button class="coffer-close" id="cofferClose">&times;</button>
+            </div>
+            <div class="coffer-divider"></div>
+            <p class="coffer-desc">This page will display items that can be sacrificed to <a href="https://oldschool.runescape.wiki/w/Death%27s_Coffer" target="_blank" rel="noopener" class="coffer-link">Death's Coffer</a> that can be obtained on the GE for less than the coffer value.</p>
+            <div class="coffer-controls-row">
+                <div class="coffer-sort-row">
+                    <label class="coffer-sort-label">Sort by</label>
+                    <select id="cofferSortBy" class="coffer-sort-select">
+                        <option value="savings-desc" selected>Savings (High to Low)</option>
+                        <option value="savings-asc">Savings (Low to High)</option>
+                        <option value="price-asc">Buy Price (Low to High)</option>
+                        <option value="price-desc">Buy Price (High to Low)</option>
+                        <option value="name-asc">Name (A-Z)</option>
+                        <option value="name-desc">Name (Z-A)</option>
+                    </select>
+                </div>
+                <div class="coffer-filter-row">
+                    <label class="coffer-sort-label" for="cofferMaxBuy">Max Buy Price</label>
+                    <input type="text" id="cofferMaxBuy" class="coffer-filter-input" placeholder="e.g. 50k, 1m" inputmode="numeric" autocomplete="off">
+                </div>
+                <div class="coffer-filter-row">
+                    <label class="coffer-sort-label" for="cofferMinVol">Min Volume</label>
+                    <input type="text" id="cofferMinVol" class="coffer-filter-input" placeholder="e.g. 100, 5k" inputmode="numeric" autocomplete="off">
+                </div>
+            </div>
+            <div class="coffer-list" id="cofferList">
+                <div class="coffer-loading">
+                    <div class="loading-spinner small"></div>
+                    <span>Loading coffer items...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+      // Auto-version: forces browser to always fetch fresh CSS & JS
+      (function(){
+        var ts = Date.now();
+        // Refresh the stylesheet
+        document.querySelector('link[href*="styles.css"]').href = 'styles.css?v=' + ts;
+        // Dynamically load app.js with a fresh cache-bust
+        var s = document.createElement('script');
+        s.src = 'app.js?v=' + ts;
+        document.body.appendChild(s);
+      })();
+        </script>
+
+        <!-- Image examples removed: images are kept for Open Graph previews only -->
+
+        <!-- Image preview modal for Player Highlights -->
+        <style>
+        .highlight-image-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:1200}
+        .highlight-image-modal.open{display:flex}
+        .himodal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px)}
+        .himodal-content{position:relative;max-width:92vw;max-height:88vh;padding:14px;border-radius:10px;background:linear-gradient(180deg,#0b0d0f, #0f1317);box-shadow:0 8px 30px rgba(0,0,0,.6);display:flex;flex-direction:column;align-items:center;gap:10px}
+        .himodal-content img{max-width:100%;max-height:70vh;border-radius:6px;object-fit:contain}
+        .himodal-close{position:absolute;top:8px;right:8px;background:transparent;border:0;color:#b6f26b;font-size:26px;line-height:1;cursor:pointer}
+        .himodal-caption{color:#bcd9b3;font-size:14px;opacity:.95;max-width:90vw;text-align:center}
+        @media (max-width:480px){.himodal-content{padding:8px}.himodal-close{font-size:22px}}
+        </style>
+
+        <div class="highlight-image-modal" id="highlightImageModal" aria-hidden="true">
+                        <div class="himodal-backdrop" id="himodalBackdrop"></div>
+                        <div class="himodal-content" role="dialog" aria-modal="true">
+                                        <button class="himodal-close" id="himodalClose" aria-label="Close">&times;</button>
+                                        <img src="" alt="" id="himodalImg">
+                                        <div class="himodal-caption" id="himodalCaption"></div>
+                        </div>
+        </div>
+
+        <script>
+        (function(){
+                var grid = document.getElementById('highlightGrid');
+                var modal = document.getElementById('highlightImageModal');
+                var backdrop = document.getElementById('himodalBackdrop');
+                var closeBtn = document.getElementById('himodalClose');
+                var imgEl = document.getElementById('himodalImg');
+                var captionEl = document.getElementById('himodalCaption');
+
+                function openModal(src, alt){
+                        imgEl.src = src || '';
+                        imgEl.alt = alt || '';
+                        captionEl.textContent = alt || '';
+                        modal.classList.add('open');
+                        modal.setAttribute('aria-hidden','false');
+                        document.body.style.overflow = 'hidden';
+                }
+
+                function closeModal(){
+                        modal.classList.remove('open');
+                        modal.setAttribute('aria-hidden','true');
+                        imgEl.src = '';
+                        captionEl.textContent = '';
+                        document.body.style.overflow = '';
+                }
+
+                if(grid){
+                        grid.addEventListener('click', function(e){
+                                var tgt = e.target;
+                                var img = tgt.closest ? tgt.closest('img') : null;
+                                if(!img) return;
+                                if(!grid.contains(img)) return;
+                                var full = img.dataset && img.dataset.full ? img.dataset.full : img.src;
+                                var caption = img.alt || (img.dataset && img.dataset.caption) || '';
+                                openModal(full, caption);
+                        });
+                }
+
+                backdrop.addEventListener('click', closeModal);
+                closeBtn.addEventListener('click', closeModal);
+                document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeModal(); });
+
+                imgEl.addEventListener('click', function(){
+                        if(imgEl.style.objectFit === 'contain' || !imgEl.style.objectFit){
+                                imgEl.style.objectFit = 'contain';
+                        }
+                });
+        })();
+        </script>
+</body>
+</html>
+
