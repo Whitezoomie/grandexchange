@@ -1189,7 +1189,7 @@
                     {
                         label: 'Trend',
                         data: trendData,
-                        borderColor: 'rgba(99,179,237,0.9)',
+                        borderColor: 'rgba(99,179,237,0.45)',
                         borderWidth: 2.5,
                         pointRadius: 0,
                         tension: 0.6,
