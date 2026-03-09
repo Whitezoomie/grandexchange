@@ -37,6 +37,29 @@
         return '/' + slugify(item.name);
     }
 
+    // Wrap the last word of the subtitle (e.g. "Zoomie") in a span.author-name
+    function wrapSubtitleAuthorName() {
+        document.querySelectorAll('.logo-text .subtitle').forEach(function(el) {
+            try {
+                if (el.dataset.authorWrapped) return;
+                var html = el.innerHTML.trim();
+                var m = html.match(/^(.*?\b)(\S+)$/);
+                if (m) {
+                    el.innerHTML = m[1] + '<span class="author-name">' + m[2] + '</span>';
+                    el.dataset.authorWrapped = '1';
+                }
+            } catch (e) {
+                // ignore
+            }
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', wrapSubtitleAuthorName);
+    } else {
+        wrapSubtitleAuthorName();
+    }
+
     // Items to hide (removed from game / no GE value)
     const BLACKLISTED_NAMES = new Set([
         'blighted snare sack',

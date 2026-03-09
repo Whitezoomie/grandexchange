@@ -1618,6 +1618,49 @@ body.theme-transitioning *::after {
     line-height: 1.2;
 }
 
+/* Shining sweep effect for the site title */
+@keyframes logoShine {
+    0% { left: -75%; }
+    100% { left: 125%; }
+}
+
+.logo-text h1 {
+    position: relative;
+    overflow: hidden;
+}
+
+.logo-text h1::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -75%;
+    height: 100%;
+    width: 50%;
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.65) 50%, rgba(255,255,255,0) 100%);
+    transform: skewX(-25deg);
+    filter: blur(0.4px);
+    mix-blend-mode: overlay;
+    pointer-events: none;
+    animation: logoShine 3s ease-in-out infinite;
+}
+
+/* Gold shimmer for author name (e.g. "Zoomie") */
+@keyframes goldShimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.author-name {
+    display: inline-block;
+    background: linear-gradient(90deg, #ffd66b 0%, #fff4c2 50%, #ffd66b 100%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: goldShimmer 2.5s linear infinite;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.35), 0 6px 18px rgba(255,200,80,0.06);
+}
+
 /* Visually hidden SEO H1 for item pages - accessible to search engines and screen readers */
 .seo-item-title {
     position: absolute;
