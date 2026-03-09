@@ -1155,11 +1155,52 @@
 
     function renderPriceChart(labels, buyPrices, sellPrices) {
         const ctx = dom.priceChart.getContext('2d');
+        // compute a centered moving average trend for a smooth, continuous trendline
+        function movingAverage(arr, windowSize) {
+            const n = (arr && arr.length) || 0;
+            const res = new Array(n).fill(null);
+            if (n === 0) return res;
+            const w = Math.max(3, Math.min(windowSize, Math.floor(n / 2)));
+            const half = Math.floor(w / 2);
+            for (let i = 0; i < n; i++) {
+                let sum = 0;
+                let count = 0;
+                const start = Math.max(0, i - half);
+                const end = Math.min(n - 1, i + half);
+                for (let j = start; j <= end; j++) {
+                    const v = arr[j];
+                    if (v != null && !Number.isNaN(v)) { sum += v; count++; }
+                }
+                if (count > 0) res[i] = Math.round(sum / count);
+                else res[i] = null;
+            }
+            return res;
+        }
+
+        // pick a window relative to dataset length for smoothness; larger = smoother
+        const trendWindow = Math.max(15, Math.floor(labels.length / 20) * 2 + 15);
+        const trendData = movingAverage(buyPrices, trendWindow);
+
         priceChartInstance = new Chart(ctx, {
             type: 'line',
             data: {
                 labels,
                 datasets: [
+                    {
+                        label: 'Trend',
+                        data: trendData,
+                        borderColor: 'rgba(99,179,237,0.9)',
+                        borderWidth: 2.5,
+                        pointRadius: 0,
+                        tension: 0.6,
+                        cubicInterpolationMode: 'monotone',
+                        borderCapStyle: 'round',
+                        borderJoinStyle: 'round',
+                        fill: false,
+                        spanGaps: true,
+                        // draw trend first (behind) so it does not cover price lines
+                        order: 0,
+                    },
                     {
                         label: 'Buy Price',
                         data: buyPrices,
@@ -1172,6 +1213,7 @@
                         pointHoverRadius: 4,
                         pointHitRadius: 10,
                         tension: 0.3,
+                        order: 2,
                         fill: false,
                         spanGaps: true,
                     },
@@ -1187,6 +1229,7 @@
                         pointHoverRadius: 4,
                         pointHitRadius: 10,
                         tension: 0.3,
+                        order: 2,
                         fill: false,
                         spanGaps: true,
                     }
@@ -1208,7 +1251,11 @@
                         borderColor: '#2e3348',
                         borderWidth: 1,
                         callbacks: {
-                            label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y != null ? ctx.parsed.y.toLocaleString() + ' gp' : 'N/A'}`,
+                            label: (ctx) => {
+                                // only show buy/sell prices in tooltip, skip trend dataset
+                                if (ctx.dataset.label !== 'Buy Price' && ctx.dataset.label !== 'Sell Price') return '';
+                                return `${ctx.dataset.label}: ${ctx.parsed.y != null ? ctx.parsed.y.toLocaleString() + ' gp' : 'N/A'}`;
+                            },
                             afterBody: (tooltipItems) => {
                                 let buyVal = null;
                                 let sellVal = null;

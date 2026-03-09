@@ -4231,6 +4231,46 @@ body.theme-transitioning *::after {
     height: 180px;
 }
 
+/* Trending line overlay for price charts — increased visibility */
+.chart-container:not(.volume-chart)::after,
+.price-chart-container::after {
+    content: "";
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    top: 8px;
+    bottom: 8px;
+    pointer-events: none;
+    border-radius: calc(var(--radius-sm) - 2px);
+    /* thicker, slightly colored diagonal line for clearer visibility */
+    background-image: linear-gradient(
+        90deg,
+        transparent calc(50% - 1px),
+        rgba(99,179,237,0.14) 50%,
+        transparent calc(50% + 1px)
+    );
+    background-size: 100% 2px;
+    background-repeat: no-repeat;
+    transform: rotate(-8deg);
+    transform-origin: center;
+    opacity: 1;
+    z-index: 9999;
+    box-shadow: 0 0 6px rgba(99,179,237,0.03);
+    mix-blend-mode: normal;
+}
+
+/* Reduce visibility even further in dark themes */
+:root[data-theme="dark"] .chart-container:not(.volume-chart)::after,
+:root[data-theme="dark"] .price-chart-container::after {
+    background-image: linear-gradient(
+        90deg,
+        transparent calc(50% - 1px),
+        rgba(255,255,255,0.12) 50%,
+        transparent calc(50% + 1px)
+    );
+    box-shadow: 0 0 6px rgba(255,255,255,0.02);
+}
+
 .history-loading {
     display: flex;
     align-items: center;
@@ -4636,6 +4676,12 @@ body.theme-transitioning *::after {
     .price-chart-container, .volume-chart-container, canvas {
         width: 100% !important;
         height: auto !important;
+    }
+
+    /* Make sure the canvas stays behind decorative overlays */
+    .chart-container canvas {
+        position: relative;
+        z-index: 1;
     }
 }
 
