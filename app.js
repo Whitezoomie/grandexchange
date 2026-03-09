@@ -1651,27 +1651,12 @@
         // Retry
         dom.retryBtn.addEventListener('click', loadData);
 
-        // Scroll: collapse filters — visible ONLY when scrolled to the very top (scrollY === 0)
-        const filtersRow = document.querySelector('.filters-row');
-        const mainContent = document.querySelector('.main-content');
+        // Scroll: handle back-to-top only. Do NOT auto-collapse the filters-row anymore.
         let ticking = false;
         window.addEventListener('scroll', () => {
             if (!ticking) {
                 requestAnimationFrame(() => {
                     const currentY = window.scrollY || 0;
-
-                    if (currentY === 0) {
-                        if (filtersRow.classList.contains('collapsed')) {
-                            filtersRow.classList.remove('collapsed');
-                            mainContent.classList.remove('filters-hidden');
-                        }
-                    } else {
-                        if (!filtersRow.classList.contains('collapsed')) {
-                            filtersRow.classList.add('collapsed');
-                            mainContent.classList.add('filters-hidden');
-                        }
-                    }
-
                     dom.backToTop.classList.toggle('visible', currentY > 400);
                     ticking = false;
                 });

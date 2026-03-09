@@ -1,9 +1,10 @@
 [
+  { "date": "2026-03-08T09:00:00Z", "message": "Filters Row no longer collapse", "link": "#" },
   { "date": "2026-03-08T09:00:00Z", "message": "Manual Save Filters is replaced with Auto Save Filters", "link": "#" },
   { "date": "2026-03-08T14:30:00Z", "message": "Favorites Button on the top now properly switches between Favorites and All", "link": "#" },
   { "date": "2026-03-08T10:00:00Z", "message": "Added Changelog Dropdown to Menu for displaying recent updates and changes to the site", "link": "#" },
-  { "date": "2026-03-08T12:15:00Z", "message": "Changed market data refresh interval", "link": "#" },
-  { "date": "2026-03-08T12:15:00Z", "message": "Death's Coffer addition", "link": "#" },
+  { "date": "2026-03-07T12:15:00Z", "message": "Changed market data refresh interval", "link": "#" },
+  { "date": "2026-03-07T12:15:00Z", "message": "Death's Coffer addition", "link": "#" },
   { "date": "2026-03-07T09:00:00Z", "message": "Initial release of OSRS Grand Exchange Tracker", "link": "#" },
   { "date": "2026-03-06T09:00:00Z", "message": "Keep the filters-row centered at all times (layout tweak)", "link": "#" },
   { "date": "2026-03-05T09:00:00Z", "message": "Added news feed section to homepage for displaying recent updates and announcements", "link": "#" },
