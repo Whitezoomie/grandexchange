@@ -2,3 +2,15 @@
   "buildCommand": "npm run build",
   "outputDirectory": "."
 }
+
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/:path*.html",
+      "destination": "/:path*",
+      "permanent": true
+    }
+  ]
+}
