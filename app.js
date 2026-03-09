@@ -815,7 +815,7 @@
     // Filtering & Sorting
     // ========================================
 
-    function saveFiltersToStorage() {
+    function saveFiltersToStorage(showUI = true) {
         const filters = {
             members: dom.membersFilter.value,
             minPrice: dom.minPrice.value,
@@ -830,13 +830,19 @@
         };
         localStorage.setItem('ge_saved_filters', JSON.stringify(filters));
         if (dom.saveFilters) {
-            dom.saveFilters.textContent = 'Saved!';
-            dom.saveFilters.classList.add('saved');
-            setTimeout(() => {
+            if (showUI) {
+                dom.saveFilters.textContent = 'Saved!';
+                dom.saveFilters.classList.add('saved');
+                setTimeout(() => {
+                    dom.saveFilters.textContent = 'Reset Filters';
+                    dom.saveFilters.classList.remove('saved');
+                    dom.saveFilters.dataset.mode = 'reset';
+                }, 700);
+            } else {
+                // silent save (autosave): mark button as reset mode without UI flash
                 dom.saveFilters.textContent = 'Reset Filters';
-                dom.saveFilters.classList.remove('saved');
                 dom.saveFilters.dataset.mode = 'reset';
-            }, 700);
+            }
         }
     }
 
@@ -1433,6 +1439,18 @@
         dom.maxBuyLimit.addEventListener('input', debounce(applyFilters, 500));
         dom.sortBy.addEventListener('change', applyFilters);
 
+        // Autosave filters when the user changes numeric inputs or sort order
+        const autosaveNumeric = debounce(() => saveFiltersToStorage(false), 700);
+        dom.minPrice.addEventListener('input', autosaveNumeric);
+        dom.maxPrice.addEventListener('input', autosaveNumeric);
+        dom.minMargin.addEventListener('input', autosaveNumeric);
+        dom.maxMargin.addEventListener('input', autosaveNumeric);
+        dom.minVolume.addEventListener('input', autosaveNumeric);
+        dom.maxVolume.addEventListener('input', autosaveNumeric);
+        dom.minBuyLimit.addEventListener('input', autosaveNumeric);
+        dom.maxBuyLimit.addEventListener('input', autosaveNumeric);
+        dom.sortBy.addEventListener('change', () => saveFiltersToStorage(false));
+
         // Budget UI removed
 
         // Hide the separate reset button (we'll reuse the save button as a toggle)
@@ -1455,6 +1473,8 @@
                 }
             });
         }
+
+        // Keep Save Filters in the filters row (default HTML placement). No runtime relocation.
 
         // Logo home reset
         document.getElementById('logoHome').addEventListener('click', () => {

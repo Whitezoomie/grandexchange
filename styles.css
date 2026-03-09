@@ -1870,6 +1870,9 @@ body.theme-transitioning *::after {
     color: var(--green);
 }
 
+/* When moved into the header, adjust spacing and alignment */
+/* No header placement styles: Save Filters remains inside `.filters-row`. */
+
 .reset-btn {
     padding: 8px 16px;
     background: transparent;
@@ -2953,10 +2956,10 @@ body.theme-transitioning *::after {
     justify-content: space-between;
     gap: 16px;
     flex-wrap: wrap;
-    margin-bottom: 16px;
+.header-stats {
+    display: flex;
+    gap: 10px;
 }
-
-.highlight-desc {
     font-size: 0.82rem;
     color: var(--text-secondary);
     margin: 0;
@@ -3624,16 +3627,16 @@ body.theme-transitioning *::after {
 }
 
 .list-view .item-card-header {
-    min-width: 250px;
-    flex-shrink: 0;
+.stat-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 10px;
+    background: var(--bg-card);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    min-width: 70px;
 }
-
-.list-view .item-badges {
-    min-width: 80px;
-    flex-shrink: 0;
-}
-
-.list-view .item-prices {
     flex: 1;
     grid-template-columns: repeat(2, 1fr);
 }
@@ -4595,6 +4598,17 @@ body.theme-transitioning *::after {
 
     /* Hide item spotlight on very small screens to reduce vertical clutter */
     .spotlight-banner { display: none !important; }
+
+     /* Make view toggle and action buttons part of the filters column on phones
+         so they visually merge with other filter controls and don't float out. */
+     .filters-row .view-toggle,
+     .filters-row .save-filters-btn,
+     .filters-row .reset-btn,
+     .filters-row .budget-group { width: 100% !important; align-self: stretch !important; }
+
+     .filters-row .view-toggle { display: flex; justify-content: flex-start; gap: 8px; }
+     .filters-row .save-filters-btn,
+     .filters-row .reset-btn { justify-content: center; padding: 10px 12px; }
 }
 
 /* Fine-grained phone breakpoints for common viewport widths
@@ -4644,6 +4658,56 @@ body.theme-transitioning *::after {
     .price-box .value { font-size: 0.9rem; }
     .pagination { padding: 20px 8px; }
 }
+
+/* Strong mobile override to ensure filter actions stack correctly on small phones */
+@media (max-width: 375px) {
+    .filters-row { display: flex !important; flex-direction: column !important; align-items: stretch !important; }
+    .filters-row > .save-filters-btn,
+    .filters-row > .reset-btn,
+    .filters-row .view-toggle,
+    .filters-row .filter-toggle {
+        display: block !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        margin: 6px 0 0 0 !important;
+        align-self: stretch !important;
+        text-align: center !important;
+    }
+    .filters-row .view-toggle { display:flex !important; justify-content:flex-start !important; gap:8px !important; }
+    .filters-row > .save-filters-btn { order: 1000 !important; }
+}
+
+/* Emergency override: ensure action buttons cannot float or be absolutely positioned
+   on very small viewports. This forcibly resets layout-affecting properties so the
+   buttons remain inside the filters flow. */
+@media (max-width: 380px) {
+    .filters-row {
+        position: relative !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        width: 100% !important;
+    }
+
+    .filters-row > .save-filters-btn,
+    .filters-row > .reset-btn,
+    .filters-row .view-toggle,
+    .filters-row .filter-toggle {
+        position: static !important;
+        float: none !important;
+        margin: 6px 0 0 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        text-align: center !important;
+        align-self: stretch !important;
+        order: 1000 !important;
+    }
+
+    /* Defensive: clear any horizontal margins that could push buttons aside */
+    .filters-row > .save-filters-btn, .filters-row > .reset-btn { margin-left: 0 !important; margin-right: 0 !important; }
+}
+
+/* (reverted final strong override) */
 
 /* ===== GE RADIO (Header-Inline Compact) ===== */
 .ge-radio {
