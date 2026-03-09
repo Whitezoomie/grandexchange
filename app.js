@@ -374,9 +374,8 @@
     async function fetchWithRetry(url, retries = 3) {
         for (let i = 0; i < retries; i++) {
             try {
-                const res = await fetch(url, {
-                    headers: { 'User-Agent': USER_AGENT }
-                });
+                // Browsers disallow setting the 'User-Agent' header; perform a plain fetch.
+                const res = await fetch(url);
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 return await res.json();
             } catch (err) {
@@ -1477,13 +1476,16 @@
         // Keep Save Filters in the filters row (default HTML placement). No runtime relocation.
 
         // Logo home reset
-        document.getElementById('logoHome').addEventListener('click', () => {
-            showFavoritesOnly = false;
-            dom.filterAll.classList.add('active');
-            dom.filterFavorites.classList.remove('active');
-            resetAllFilters();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
+        const _logoHome = document.getElementById('logoHome');
+        if (_logoHome) {
+            _logoHome.addEventListener('click', () => {
+                showFavoritesOnly = false;
+                if (dom.filterAll) dom.filterAll.classList.add('active');
+                if (dom.filterFavorites) dom.filterFavorites.classList.remove('active');
+                resetAllFilters();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
 
         // View Toggle: combine grid/list into a single toggle button
         (function setupViewToggle() {
@@ -1567,16 +1569,18 @@
         }
 
         // Favorites stat box click -> toggle favorites view
-        dom.favoritesStatBox.addEventListener('click', () => {
-            showFavoritesOnly = !showFavoritesOnly;
-            dom.filterFavorites.classList.toggle('active', showFavoritesOnly);
-            dom.filterAll.classList.toggle('active', !showFavoritesOnly);
-            if (dom.filterAll) dom.filterAll.dataset.mode = showFavoritesOnly ? 'favorites' : 'all';
-            applyFilters();
-        });
+        if (dom.favoritesStatBox) {
+            dom.favoritesStatBox.addEventListener('click', () => {
+                showFavoritesOnly = !showFavoritesOnly;
+                if (dom.filterFavorites) dom.filterFavorites.classList.toggle('active', showFavoritesOnly);
+                if (dom.filterAll) dom.filterAll.classList.toggle('active', !showFavoritesOnly);
+                if (dom.filterAll) dom.filterAll.dataset.mode = showFavoritesOnly ? 'favorites' : 'all';
+                applyFilters();
+            });
+        }
 
         // Set initial active state for filter toggle
-        dom.filterAll.classList.add('active');
+        if (dom.filterAll) dom.filterAll.classList.add('active');
 
         // Pagination
         dom.prevPage.addEventListener('click', () => {
