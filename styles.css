@@ -3108,6 +3108,29 @@ body.theme-transitioning *::after {
     background: var(--bg-main);
 }
 
+.highlight-card-media {
+    position: relative;
+}
+
+.hod-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    font-size: 16px;
+    color: #1b1b1b;
+    background: linear-gradient(180deg,#ffd966,#f2c94c);
+    border-radius: 50%;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+    border: 2px solid rgba(255,255,255,0.15);
+    line-height: 1;
+    pointer-events: none;
+}
+
 .highlight-card-body {
     padding: 10px 12px;
 }

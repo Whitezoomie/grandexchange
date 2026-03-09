@@ -3952,7 +3952,10 @@
                     var d = new Date(h.approvedDate || h.date);
                     var dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                     return '<div class="highlight-card">' +
-                        '<img class="highlight-card-img" src="' + esc(h.image) + '" alt="' + esc(h.playerName) + '" loading="lazy" onerror="this.style.display=\'none\'">' +
+                        '<div class="highlight-card-media">' +
+                            '<img class="highlight-card-img" src="' + esc(h.image) + '" alt="' + esc(h.playerName) + '" loading="lazy" onerror="this.style.display=\'none\'">' +
+                            (h.highlightOfDay ? '<span class="hod-badge" title="Highlight of the Day">★</span>' : '') +
+                        '</div>' +
                         '<div class="highlight-card-body">' +
                             '<div class="highlight-card-name">' + esc(h.playerName) + '</div>' +
                             (h.caption ? '<div class="highlight-card-caption">' + esc(h.caption) + '</div>' : '') +
