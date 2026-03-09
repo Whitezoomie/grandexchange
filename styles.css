@@ -4186,10 +4186,10 @@ body.theme-transitioning *::after {
 /* ===== BACK TO TOP ===== */
 .back-to-top {
     position: fixed;
-    bottom: 24px;
+    bottom: 52px;
     right: 24px;
-    width: 44px;
-    height: 44px;
+    width: 36px;
+    height: 36px;
     background: var(--accent);
     color: #0f1117;
     border: none;
