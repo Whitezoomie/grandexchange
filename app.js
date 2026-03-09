@@ -1180,6 +1180,12 @@
         // pick a window relative to dataset length for smoothness; larger = smoother
         const trendWindow = Math.max(15, Math.floor(labels.length / 20) * 2 + 15);
         const trendData = movingAverage(buyPrices, trendWindow);
+        const TREND_LOCAL_KEY = 'trendHidden';
+        const BUY_LOCAL_KEY = 'buyHidden';
+        const SELL_LOCAL_KEY = 'sellHidden';
+        const initialTrendHidden = localStorage.getItem(TREND_LOCAL_KEY) === 'true';
+        const initialBuyHidden = localStorage.getItem(BUY_LOCAL_KEY) === 'true';
+        const initialSellHidden = localStorage.getItem(SELL_LOCAL_KEY) === 'true';
 
         priceChartInstance = new Chart(ctx, {
             type: 'line',
@@ -1198,12 +1204,14 @@
                         borderJoinStyle: 'round',
                         fill: false,
                         spanGaps: true,
+                        hidden: initialTrendHidden,
                         // draw trend first (behind) so it does not cover price lines
                         order: 0,
                     },
                     {
                         label: 'Buy Price',
                         data: buyPrices,
+                        hidden: initialBuyHidden,
                         borderColor: '#2ecc71',
                         backgroundColor: 'rgba(46, 204, 113, 0.1)',
                         borderWidth: 1.5,
@@ -1220,6 +1228,7 @@
                     {
                         label: 'Sell Price',
                         data: sellPrices,
+                        hidden: initialSellHidden,
                         borderColor: '#e74c3c',
                         backgroundColor: 'rgba(231, 76, 60, 0.1)',
                         borderWidth: 1.5,
@@ -1242,7 +1251,26 @@
                 interaction: { mode: 'index', intersect: false },
                 plugins: {
                     legend: {
-                        labels: { color: '#9ca0b0', font: { size: 11 } }
+                        labels: { color: '#9ca0b0', font: { size: 11 } },
+                        onClick: function(e, legendItem, legend) {
+                            const ci = legend.chart;
+                            const idx = legendItem.datasetIndex;
+                            if (idx == null) return;
+                            const meta = ci.getDatasetMeta(idx);
+                            // toggle hidden (treat null as visible -> toggle to hidden)
+                            meta.hidden = !(meta.hidden === true);
+                            ci.update();
+                            const label = (ci.data.datasets[idx] && ci.data.datasets[idx].label) || '';
+                            try {
+                                if (label === 'Trend') {
+                                    localStorage.setItem('trendHidden', (meta.hidden === true).toString());
+                                } else if (label === 'Buy Price') {
+                                    localStorage.setItem('buyHidden', (meta.hidden === true).toString());
+                                } else if (label === 'Sell Price') {
+                                    localStorage.setItem('sellHidden', (meta.hidden === true).toString());
+                                }
+                            } catch (err) { /* ignore storage errors */ }
+                        }
                     },
                     tooltip: {
                         backgroundColor: '#1a1d27',
