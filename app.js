@@ -54,124 +54,7 @@
         });
     }
 
-        // ========================================
-        // Update checker — shows "Update available" next to the logo
-        // ========================================
-        function createUpdateBadge() {
-            try {
-                const logo = document.querySelector('.logo-text');
-                if (!logo) return null;
-                if (document.getElementById('updateBadge')) return document.getElementById('updateBadge');
-
-                // Inject shimmer CSS for badge text once
-                if (!document.getElementById('updateBadgeShimmerStyle')) {
-                    const style = document.createElement('style');
-                    style.id = 'updateBadgeShimmerStyle';
-                    style.textContent = '\n#updateBadge .update-badge-text{display:inline-block;background:linear-gradient(90deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.65) 50%, rgba(255,255,255,0.95) 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:updateBadgeShimmer 2.6s linear infinite;}\n@keyframes updateBadgeShimmer{0%{background-position:-150% 0}100%{background-position:150% 0}}\n';
-                    document.head.appendChild(style);
-                }
-
-                const badge = document.createElement('div');
-                badge.id = 'updateBadge';
-                badge.className = 'update-badge';
-                badge.title = 'A new site version is available. Click to refresh.';
-                badge.style.display = 'none';
-                badge.style.marginLeft = '10px';
-                badge.style.padding = '4px 8px';
-                badge.style.background = 'var(--accent, #ffd54f)';
-                badge.style.borderRadius = '4px';
-                badge.style.fontSize = '12px';
-                badge.style.cursor = 'pointer';
-                badge.style.boxShadow = '0 1px 4px rgba(0,0,0,0.12)';
-                badge.style.userSelect = 'none';
-
-                const textSpan = document.createElement('span');
-                textSpan.className = 'update-badge-text';
-                textSpan.textContent = 'Update available';
-                badge.appendChild(textSpan);
-
-                badge.addEventListener('click', function() {
-                    try { window.location.reload(true); } catch(e) { window.location.reload(); }
-                });
-
-                // Insert after logo-text content
-                logo.parentNode.insertBefore(badge, logo.nextSibling);
-                return badge;
-            } catch (e) { return null; }
-        }
-
-        function showUpdateBadge() {
-            const b = createUpdateBadge();
-            if (!b) return;
-            b.style.display = 'inline-block';
-            b.animate ? b.animate([{ transform: 'translateY(-4px)', opacity: 0 }, { transform: 'translateY(0)', opacity: 1 }], { duration: 240, easing: 'cubic-bezier(.2,.9,.2,1)' }) : null;
-        }
-
-        function hideUpdateBadge() {
-            const b = document.getElementById('updateBadge');
-            if (!b) return;
-            b.style.display = 'none';
-        }
-
-        async function computeTextHash(text) {
-            if (window.crypto && crypto.subtle && crypto.subtle.digest) {
-                try {
-                    const enc = new TextEncoder();
-                    const data = enc.encode(text);
-                    const hashBuf = await crypto.subtle.digest('SHA-1', data);
-                    const hashArr = Array.from(new Uint8Array(hashBuf));
-                    return hashArr.map(b => b.toString(16).padStart(2, '0')).join('');
-                } catch (e) { /* fallback below */ }
-            }
-            // Fallback simple checksum
-            let acc = 0;
-            for (let i = 0; i < text.length; i += 100) acc = (acc + text.charCodeAt(i)) & 0xffffffff;
-            return String(acc) + 'L' + text.length;
-        }
-
-        // Poll the script file for changes. If a change is detected (hash differs
-        // from previously stored value), show the update badge so user can refresh.
-        function startUpdateChecker() {
-            const KEY = 'app_js_hash_v1';
-            // Determine script URL: prefer currentScript, otherwise try to find a script src that ends with app.js
-            const getScriptUrl = () => {
-                try {
-                    if (document.currentScript && document.currentScript.src) return document.currentScript.src;
-                } catch (e) {}
-                const s = Array.from(document.querySelectorAll('script[src]')).find(x => /app\.js(\?|$)/i.test(x.src));
-                return s ? s.src : '/app.js';
-            };
-
-            const scriptUrl = getScriptUrl();
-
-            let lastHash = localStorage.getItem(KEY) || null;
-
-            async function checkOnce() {
-                try {
-                    const res = await fetch(scriptUrl, { cache: 'no-store' });
-                    if (!res.ok) return;
-                    const text = await res.text();
-                    const h = await computeTextHash(text);
-                    if (lastHash && lastHash !== h) {
-                        // New build detected
-                        showUpdateBadge();
-                    } else if (!lastHash) {
-                        // First time — save baseline
-                        localStorage.setItem(KEY, h);
-                        lastHash = h;
-                    }
-                } catch (e) {
-                    // ignore network errors
-                }
-            }
-
-            // Initial check after slight delay so HTML has loaded
-            setTimeout(checkOnce, 2000);
-            // Periodically check every 60 seconds
-            setInterval(checkOnce, 60000);
-        }
-
-        // (console helpers removed)
+        
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', wrapSubtitleAuthorName);
@@ -4385,8 +4268,6 @@
             initChangelogMenu();
             initFeedback();
             initAdmin();
-            // Start checking for new app builds; shows "Update available" badge
-            try { startUpdateChecker(); } catch (e) { /* non-fatal */ }
         });
 
         // News refresh button
