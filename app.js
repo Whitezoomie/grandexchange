@@ -554,6 +554,8 @@
             // Start continuous last-updated timer
             dataLoadedAt = Date.now();
             dom.lastUpdated.textContent = 'Just now';
+            // Ensure shimmer appears immediately
+            addLastUpdatedShimmer();
             if (lastUpdatedInterval) clearInterval(lastUpdatedInterval);
             lastUpdatedInterval = setInterval(updateLastUpdatedTimer, 1000);
 
@@ -1584,17 +1586,42 @@
         const elapsed = Math.floor((Date.now() - dataLoadedAt) / 1000);
         if (elapsed < 5) {
             dom.lastUpdated.textContent = 'Just now';
+            addLastUpdatedShimmer();
         } else if (elapsed < 60) {
             dom.lastUpdated.textContent = `${elapsed}s ago`;
+            removeLastUpdatedShimmer();
         } else if (elapsed < 3600) {
             const m = Math.floor(elapsed / 60);
             const s = elapsed % 60;
             dom.lastUpdated.textContent = `${m}m ${s}s ago`;
+            removeLastUpdatedShimmer();
         } else {
             const h = Math.floor(elapsed / 3600);
             const m = Math.floor((elapsed % 3600) / 60);
             dom.lastUpdated.textContent = `${h}h ${m}m ago`;
+            removeLastUpdatedShimmer();
         }
+    }
+
+    function ensureLastUpdatedShimmerStyle() {
+        if (document.getElementById('lastUpdatedShimmerStyle')) return;
+        try {
+            const s = document.createElement('style');
+            s.id = 'lastUpdatedShimmerStyle';
+            s.textContent = '\n.last-updated-shimmer{display:inline-block;background:linear-gradient(90deg,#f6d564 0%,#fff8d6 50%,#f6d564 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:lastUpdatedShimmer 2.4s linear infinite;text-shadow:0 0 6px rgba(246,213,100,0.15);}\n@keyframes lastUpdatedShimmer{0%{background-position:-150% 0}100%{background-position:150% 0}}\n';
+            document.head.appendChild(s);
+        } catch (e) { /* ignore */ }
+    }
+
+    function addLastUpdatedShimmer() {
+        try {
+            ensureLastUpdatedShimmerStyle();
+            if (dom && dom.lastUpdated) dom.lastUpdated.classList.add('last-updated-shimmer');
+        } catch (e) { /* ignore */ }
+    }
+
+    function removeLastUpdatedShimmer() {
+        try { if (dom && dom.lastUpdated) dom.lastUpdated.classList.remove('last-updated-shimmer'); } catch (e) { }
     }
 
     // ========================================
@@ -5083,6 +5110,8 @@
 
             dataLoadedAt = Date.now();
             dom.lastUpdated.textContent = 'Just now';
+            // Ensure shimmer appears immediately after refresh
+            addLastUpdatedShimmer();
             updateCardValues(oldPrices);
             updatePortfolioValue();
         } catch (e) {

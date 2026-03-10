@@ -1,4 +1,5 @@
 [
+  { "date": "2026-03-09T09:00:00Z", "message": "Added shimmer effect to Last Updated text while fetching new data", "link": "#" },
   { "date": "2026-03-09T09:00:00Z", "message": "Added an Update available button for when there are Updates made to the site", "link": "#" },
   { "date": "2026-03-09T09:00:00Z", "message": "Fixed the Trend/Buy/Sell Price line button on/off save state", "link": "#" },
   { "date": "2026-03-09T09:00:00Z", "message": "Added Trend line inside the price graphs", "link": "#" },
