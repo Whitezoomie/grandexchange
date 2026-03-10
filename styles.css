@@ -644,9 +644,127 @@
 [data-theme="midnight"] .header {
     background: linear-gradient(180deg, #0e1220 0%, #080a10 100%);
 }
+/* ===== MARKETPLACE DASHBOARD THEME ===== */
+[data-theme="marketplace-dashboard"] {
+    --bg-primary: #07080a;
+    --bg-secondary: #0e1215;
+    --bg-card: #0f1720;
+    --bg-card-hover: #131826;
+    --bg-input: #0b0f13;
+    --border: #1e2730;
+    --border-light: #2b3942;
+    --text-primary: #dce3ea;
+    --text-secondary: #9aa7b4;
+    --text-muted: #7b8790;
+    --accent: #00d1b2;
+    --accent-hover: #35e6c6;
+    --green: #4cd964;
+    --green-bg: rgba(76,217,100,0.06);
+    --red: #ff6b6b;
+    --red-bg: rgba(255,107,107,0.06);
+    --blue: #3aa0ff;
+    --blue-bg: rgba(58,160,255,0.06);
+    --yellow: #f3c623;
+    --shadow: 0 2px 0 rgba(0,0,0,0.6);
+    --shadow-lg: 0 6px 0 rgba(0,0,0,0.6);
+}
+[data-theme="marketplace-dashboard"] .header {
+    background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+    border-bottom: 1px solid var(--border);
+}
+
+/* Terminal / panel-heavy styles */
+[data-theme="marketplace-dashboard"] body,
+[data-theme="marketplace-dashboard"] .header,
+[data-theme="marketplace-dashboard"] .card,
+[data-theme="marketplace-dashboard"] .panel {
+    font-family: 'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+}
+
+[data-theme="marketplace-dashboard"] .card,
+[data-theme="marketplace-dashboard"] .panel {
+    background: linear-gradient(180deg, var(--bg-card) 0%, rgba(12,18,24,0.6) 100%);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+    border-radius: 4px;
+}
+
+[data-theme="marketplace-dashboard"] .panel--big {
+    border: 2px solid var(--border-light);
+    padding: 18px;
+}
+
+[data-theme="marketplace-dashboard"] button,
+[data-theme="marketplace-dashboard"] .btn,
+[data-theme="marketplace-dashboard"] .header-action-btn {
+    background: linear-gradient(180deg, #0f1720 0%, #0b131a 100%);
+    color: var(--text-primary);
+    border: 1px solid var(--border-light);
+    padding: 8px 12px;
+    border-radius: 3px;
+    box-shadow: none;
+    font-weight: 700;
+}
+
+[data-theme="marketplace-dashboard"] .controls-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+[data-theme="marketplace-dashboard"] .metric {
+    background: linear-gradient(180deg, #0b0f13 0%, #0f1317 100%);
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    border-radius: 2px;
+    color: var(--text-secondary);
+}
+
+/* (Favorites use base styles; no theme overrides) */
 
 html {
     scroll-behavior: smooth;
+}
+
+/* Ensure favorite button uses base styles under marketplace-dashboard theme */
+[data-theme="marketplace-dashboard"] .card-fav-btn {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition);
+    z-index: 2;
+    padding: 0;
+}
+
+[data-theme="marketplace-dashboard"] .card-fav-btn svg {
+    width: 15px;
+    height: 15px;
+}
+
+[data-theme="marketplace-dashboard"] .card-fav-btn .fav-outline {
+    color: var(--text-muted);
+}
+
+[data-theme="marketplace-dashboard"] .card-fav-btn .fav-filled {
+    display: none;
+    color: #e74c3c;
+}
+
+[data-theme="marketplace-dashboard"] .card-fav-btn.is-fav {
+    border-color: #e74c3c;
+    background: var(--red-bg);
+}
+
+[data-theme="marketplace-dashboard"] .card-fav-btn:hover {
+    border-color: #e74c3c;
+    background: var(--red-bg);
+    transform: scale(1.15);
 }
 
 body {

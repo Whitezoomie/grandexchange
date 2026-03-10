@@ -4336,6 +4336,7 @@
         'cosmic': 'Cosmic',
         'toxic': 'Toxic',
         'golden': 'Golden',
+        'marketplace-dashboard': 'Marketplace Dashboard',
         'midnight': 'Midnight',
     };
 
