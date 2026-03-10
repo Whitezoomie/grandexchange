@@ -679,6 +679,10 @@
 [data-theme="marketplace-dashboard"] .card,
 [data-theme="marketplace-dashboard"] .panel {
     font-family: 'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+    /* Slightly reduce base font-size for monospaced theme to match other themes
+       and avoid overflow/scale issues on mobile */
+    font-size: 0.95rem;
+    line-height: 1.45;
 }
 
 [data-theme="marketplace-dashboard"] .card,
@@ -718,6 +722,21 @@
     padding: 8px 12px;
     border-radius: 2px;
     color: var(--text-secondary);
+}
+
+/* Mobile adjustments specifically for marketplace theme to prevent text overflow */
+@media (max-width: 600px) {
+    [data-theme="marketplace-dashboard"] body,
+    [data-theme="marketplace-dashboard"] .header,
+    [data-theme="marketplace-dashboard"] .card,
+    [data-theme="marketplace-dashboard"] .panel {
+        font-size: 0.88rem;
+        line-height: 1.35;
+    }
+    [data-theme="marketplace-dashboard"] .card-fav-btn {
+        width: 28px;
+        height: 28px;
+    }
 }
 
 /* (Favorites use base styles; no theme overrides) */
