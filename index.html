@@ -269,6 +269,15 @@
                         <div class="ge-radio-bars" id="geRadioBars"><span></span><span></span><span></span></div>
                         <span class="ge-radio-label" id="geRadioLabel">GE Radio</span>
                     </button>
+                    <!-- Current Bond price (next to GE Radio) -->
+                    <div class="bond-price" id="bondPriceWrap" title="Current Bond price" style="display:flex;align-items:center;margin-left:8px;">
+                        <img id="bondIcon" src="" alt="Bond icon" style="width:22px;height:22px;object-fit:contain;margin-right:8px;display:none">
+                        <div class="bond-text" style="display:flex;flex-direction:column;line-height:1;">
+                            <span class="bond-label" style="font-size:11px;color:var(--muted);">Current Bond</span>
+                            <span class="stat-value" id="bondPrice">-</span>
+                            <span class="price-change-indicator" id="bondPriceChange" style="font-size:11px;color:var(--muted);margin-top:2px;"> </span>
+                        </div>
+                    </div>
                     <div class="ge-radio-dropdown" id="geRadioDropdown">
                         <div class="ge-radio-dd-header">
                             <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>

@@ -236,6 +236,8 @@
         filterFavorites: $('filterFavorites'),
         favoritesCount: $('favoritesCount'),
         favoritesStatBox: $('favoritesStatBox'),
+        bondPrice: $('bondPrice'),
+        bondIcon: $('bondIcon'),
         priceChart: $('priceChart'),
         volumeChart: $('volumeChart'),
         historyLoading: $('historyLoading'),
@@ -447,6 +449,8 @@
             await new Promise(r => setTimeout(r, 0));
             applyFilters();
             updatePortfolioValue();
+            // Update the bond display if present
+            try { updateBondDisplay(); } catch (e) { /* ignore */ }
 
             // Deep-link: open specific item if specified
             // First check for data-initial-item attribute (pre-rendered pages)
@@ -4996,8 +5000,52 @@
             addLastUpdatedShimmer();
             updateCardValues(oldPrices);
             updatePortfolioValue();
+            // Update bond display alongside other UI values
+            try { updateBondDisplay(); } catch (e) { /* ignore */ }
         } catch (e) {
             // Silent fail — next refresh will try again
+        }
+    }
+
+    // Update the Current Bond price UI (uses same data source as regular items)
+    function updateBondDisplay() {
+        const el = dom.bondPrice;
+        const iconEl = dom.bondIcon;
+        if (!el) return;
+
+        // Attempt to find the bond item robustly by name
+        const bondItem = allItems.find(i => {
+            const name = (i.name || '').toLowerCase();
+            return name === 'old school bond' || name === 'old school bond (b)' || name.includes('old school bond') || (name.includes('bond') && name.includes('old')) || name === 'bond';
+        }) || allItems.find(i => (i.name || '').toLowerCase().includes('bond'));
+
+        if (!bondItem) {
+            el.textContent = '-';
+            if (iconEl) iconEl.style.display = 'none';
+            return;
+        }
+
+        const price = bondItem.buyPrice || bondItem.sellPrice || 0;
+        el.textContent = formatGp(price);
+
+        if (iconEl && bondItem.icon) {
+            iconEl.src = getIconUrl(bondItem.icon);
+            iconEl.alt = bondItem.name + ' icon';
+            iconEl.style.display = '';
+            iconEl.onerror = function() { this.style.display = 'none'; };
+        }
+
+        const changeEl = document.getElementById('bondPriceChange');
+        const change = bondItem.buyChange || bondItem.sellChange || null;
+        if (changeEl) {
+            changeEl.className = 'price-change-indicator' + (change === 'up' ? ' price-increased' : change === 'down' ? ' price-decreased' : '');
+            changeEl.textContent = change === 'up' ? '▲ increased' : change === 'down' ? '▼ decreased' : '';
+        }
+
+        const wrap = document.getElementById('bondPriceWrap');
+        if (wrap) {
+            wrap.style.cursor = 'pointer';
+            wrap.onclick = function() { openModal(bondItem); };
         }
     }
 
