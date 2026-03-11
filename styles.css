@@ -3753,6 +3753,32 @@ body.theme-transitioning *::after {
     background: var(--yellow-bg);
     color: var(--yellow);
     border: 1px solid rgba(241, 196, 15, 0.2);
+    position: relative;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Glimmer/shimmer effect: a moving highlight band over the badge text */
+.badge-members::before {
+    content: "";
+    position: absolute;
+    top: -25%;
+    left: -150%;
+    width: 55%;
+    height: 150%;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.95) 50%, transparent 100%);
+    transform: skewX(-25deg);
+    filter: blur(6px);
+    mix-blend-mode: screen;
+    opacity: 0.95;
+    pointer-events: none;
+    animation: glimmer 5s linear infinite;
+}
+
+@keyframes glimmer {
+    0% { left: -150%; }
+    60% { left: 150%; }
+    100% { left: 150%; }
 }
 
 .badge-f2p {
