@@ -4313,27 +4313,38 @@ body.theme-transitioning *::after {
 }
 
 .flip-vote-bar-wrap {
+    position: relative;
     flex: 1;
     height: 8px;
     border-radius: 4px;
     background: var(--bg-main);
     overflow: hidden;
-    display: flex;
     min-width: 40px;
 }
-    }
-        font-size: 0.82rem;
-    }
+
+/* Layered bars: red background layer, green foreground layer that
+   expands left-to-right. Absolute positioning avoids flex-order
+   issues across themes/clients. */
+.flip-vote-bar-down,
 .flip-vote-bar-up {
+    position: absolute;
+    top: 0;
+    left: 0;
     height: 100%;
-    background: var(--green);
+    width: 0%;
     transition: width 0.35s ease;
 }
 
 .flip-vote-bar-down {
-    height: 100%;
     background: var(--red);
-    transition: width 0.35s ease;
+    z-index: 1;
+    right: 0;
+    left: auto;
+}
+
+.flip-vote-bar-up {
+    background: var(--green);
+    z-index: 2;
 }
 
 .flip-vote-meta {
