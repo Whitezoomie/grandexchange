@@ -5,7 +5,9 @@
 <head>
     <meta charset="UTF-8">
     <link rel="manifest" href="/site.webmanifest">
-    <link rel="icon" href="coins_10000.ico">
+    <link rel="icon" href="/icons/icon-192.png" sizes="192x192" type="image/png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OSRS Grand Exchange Tracker | Live Item Prices & Market Data</title>
     
@@ -56,8 +58,8 @@
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     
-    <link rel="preload" as="style" href="styles.css?v=20260301-fbdel-005">
-    <link rel="stylesheet" href="styles.css?v=20260301-fbdel-005">
+    <link rel="preload" href="styles.css?v=20260301-fbdel-005" as="style" onload="this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="styles.css?v=20260301-fbdel-005"></noscript>
     <style>
         /* Prevent FOUC by hiding unstyled content briefly - disabled for debugging */
         html { display: block; }
