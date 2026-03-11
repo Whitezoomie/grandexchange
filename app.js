@@ -238,6 +238,7 @@
         favoritesStatBox: $('favoritesStatBox'),
         bondPrice: $('bondPrice'),
         bondIcon: $('bondIcon'),
+        themeEffectsSelector: $('themeEffectsSelector'),
         priceChart: $('priceChart'),
         volumeChart: $('volumeChart'),
         historyLoading: $('historyLoading'),
@@ -272,7 +273,6 @@
         }
         saveFavorites();
         updateFavoritesCount();
-        updatePortfolioValue();
     }
 
     function isFavorite(itemId) {
@@ -321,78 +321,7 @@
         return number;
     }
 
-    // ========================================
-    // Portfolio Value (Animated GP Counter)
-    // ========================================
-
-    let portfolioDisplayValue = 0; // current displayed value for animation
-    let portfolioAnimFrame = null;
-
-    function getPortfolioTotal() {
-        let total = 0;
-        favorites.forEach(id => {
-            const item = allItems.find(i => i.id === id);
-            if (item) {
-                total += item.buyPrice || item.sellPrice || 0;
-            }
-        });
-        return total;
-    }
-
-    function formatPortfolioGp(value) {
-        if (value === 0) return '0 gp';
-        if (value >= 1e9) return (value / 1e9).toFixed(2) + 'B gp';
-        if (value >= 1e6) return (value / 1e6).toFixed(2) + 'M gp';
-        if (value >= 1e3) return (value / 1e3).toFixed(1) + 'K gp';
-        return value.toLocaleString() + ' gp';
-    }
-
-    function updatePortfolioValue() {
-        const el = document.getElementById('portfolioValue');
-        if (!el) return;
-
-        if (favorites.size === 0 || allItems.length === 0) {
-            portfolioDisplayValue = 0;
-            el.textContent = '-';
-            return;
-        }
-
-        const target = getPortfolioTotal();
-
-        if (!effectsEnabled || portfolioDisplayValue === 0) {
-            portfolioDisplayValue = target;
-            el.textContent = formatPortfolioGp(target);
-            return;
-        }
-
-        // Animate from current displayed value to new target
-        const from = portfolioDisplayValue;
-        const diff = target - from;
-        if (diff === 0) return;
-
-        if (portfolioAnimFrame) cancelAnimationFrame(portfolioAnimFrame);
-
-        const duration = 800;
-        const start = performance.now();
-
-        function tick(now) {
-            const elapsed = now - start;
-            const progress = Math.min(elapsed / duration, 1);
-            // ease-out cubic
-            const eased = 1 - Math.pow(1 - progress, 3);
-            const current = Math.round(from + diff * eased);
-            portfolioDisplayValue = current;
-            el.textContent = formatPortfolioGp(current);
-            if (progress < 1) {
-                portfolioAnimFrame = requestAnimationFrame(tick);
-            } else {
-                portfolioDisplayValue = target;
-                el.textContent = formatPortfolioGp(target);
-                portfolioAnimFrame = null;
-            }
-        }
-        portfolioAnimFrame = requestAnimationFrame(tick);
-    }
+    // Portfolio feature removed
 
     // ========================================
     // API Functions
@@ -448,7 +377,6 @@
             // Yield to the browser before the heavy filter+render pass
             await new Promise(r => setTimeout(r, 0));
             applyFilters();
-            updatePortfolioValue();
             // Update the bond display if present
             try { updateBondDisplay(); } catch (e) { /* ignore */ }
 
@@ -4999,7 +4927,6 @@
             // Ensure shimmer appears immediately after refresh
             addLastUpdatedShimmer();
             updateCardValues(oldPrices);
-            updatePortfolioValue();
             // Update bond display alongside other UI values
             try { updateBondDisplay(); } catch (e) { /* ignore */ }
         } catch (e) {
@@ -5047,6 +4974,55 @@
             wrap.style.cursor = 'pointer';
             wrap.onclick = function() { openModal(bondItem); };
         }
+    }
+
+    // Move/squish bond element next to Settings on narrow viewports
+    function repositionBondForMobile() {
+        const wrap = document.getElementById('bondPriceWrap');
+        const settings = dom.themeEffectsSelector;
+        if (!wrap || !settings) return;
+        const isMobile = window.innerWidth <= 720;
+        if (isMobile) {
+            if (!settings.querySelector('#bondPriceWrap')) {
+                wrap.classList.add('bond-compact');
+                    // Prefer placing the bond immediately to the right of the entire Settings control
+                    // (insert as a sibling after the `themeEffectsSelector` element). If that fails,
+                    // place the bond to the left of the Menu button as a fallback.
+                    try {
+                        // Insert after the settings container itself (not inside the button)
+                        settings.insertAdjacentElement('afterend', wrap);
+                    } catch (e) {
+                        const hamburgerToggle = document.getElementById('hamburgerToggle');
+                        if (hamburgerToggle && hamburgerToggle.parentElement) {
+                            hamburgerToggle.insertAdjacentElement('beforebegin', wrap);
+                        } else {
+                            // Fallback: append into settings if DOM insertion fails
+                            settings.appendChild(wrap);
+                        }
+                    }
+            }
+        } else {
+            // move back to original container (ge-radio parent)
+            const geRadio = document.getElementById('geRadio');
+            if (geRadio && !geRadio.querySelector('#bondPriceWrap')) {
+                wrap.classList.remove('bond-compact');
+                // place after the GE Radio toggle so it sits inline with radio
+                const radioToggle = geRadio.querySelector('#geRadioToggle');
+                if (radioToggle && radioToggle.parentElement === geRadio) {
+                    radioToggle.insertAdjacentElement('afterend', wrap);
+                } else {
+                    geRadio.appendChild(wrap);
+                }
+            }
+        }
+    }
+
+    // Run on load and resize
+    if (typeof window !== 'undefined') {
+        window.addEventListener('resize', debounce(repositionBondForMobile, 150));
+        document.addEventListener('DOMContentLoaded', repositionBondForMobile);
+        // call once now in case DOM is ready
+        setTimeout(repositionBondForMobile, 50);
     }
 
     // ========================================

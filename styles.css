@@ -57,6 +57,26 @@
     text-shadow: 0 0 6px rgba(231, 76, 60, 0.5);
 }
 
+/* Compact bond display used on mobile when moved next to settings */
+.bond-compact {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    border-radius: 6px;
+    background: transparent;
+}
+.bond-compact .bond-label { display:none; }
+.bond-compact #bondPrice { font-size: 0.85rem; }
+.bond-compact img { width:18px;height:18px;margin:0;padding:0; }
+
+@media (max-width: 720px) {
+    /* Ensure header actions are compact and bond fits */
+    .header .header-stats { display: flex; gap: 6px; align-items: center; }
+    .header .header-stats .ge-radio { display: none; }
+    .header-actions { display: flex; gap: 6px; align-items: center; }
+}
+
 /* ===== SEASONAL THEMES ===== */
 [data-season="christmas"] {
     --accent: #c0392b;
@@ -1826,11 +1846,14 @@ body.theme-transitioning *::after {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 6px 16px;
+    padding: 2px 6px;
     background: var(--bg-card);
     border-radius: var(--radius-sm);
     border: 1px solid var(--border);
-    min-width: 90px;
+    min-width: 48px;
+    min-height: 48px;
+    font-size: 0.82rem;
+    justify-content: center;
 }
 
 .stat-label {
@@ -1857,19 +1880,7 @@ body.theme-transitioning *::after {
 }
 
 /* Portfolio Value Stat */
-.portfolio-stat {
-    cursor: default;
-    border-color: var(--accent);
-    background: linear-gradient(135deg, rgba(200, 170, 110, 0.08), rgba(200, 170, 110, 0.02));
-    min-width: 120px;
-}
-
-.portfolio-value {
-    color: var(--accent) !important;
-    font-weight: 700 !important;
-    font-variant-numeric: tabular-nums;
-    letter-spacing: -0.3px;
-}
+/* Portfolio stat removed */
 
 /* ===== TOOLBAR ===== */
 .toolbar {
@@ -3894,11 +3905,13 @@ body.theme-transitioning *::after {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 6px 10px;
+    padding: 2px 6px;
     background: var(--bg-card);
     border-radius: var(--radius-sm);
     border: 1px solid var(--border);
-    min-width: 70px;
+    min-width: 48px;
+    min-height: 48px;
+    font-size: 0.82rem;
 }
     flex: 1;
     grid-template-columns: repeat(2, 1fr);
@@ -4282,7 +4295,9 @@ body.theme-transitioning *::after {
     display: flex;
     min-width: 40px;
 }
-
+    }
+        font-size: 0.82rem;
+    }
 .flip-vote-bar-up {
     height: 100%;
     background: var(--green);
@@ -4783,10 +4798,10 @@ body.theme-transitioning *::after {
     }
 
     .stat-box {
-        padding: 4px 10px;
+        padding: 6px 10px;
         min-width: 70px;
+        min-height: 68px;
     }
-
     .page-btn {
         padding: 8px 14px;
         font-size: 0.82rem;
@@ -4829,7 +4844,7 @@ body.theme-transitioning *::after {
 
     /* Make header stats wrap and reduce visual weight */
     .header-inner { align-items: flex-start; gap: 8px; }
-    .stat-box { padding: 6px 8px; min-width: 60px; font-size: 0.86rem; }
+    .stat-box { padding: 2px 6px; min-width: 36px; min-height: 40px; font-size: 0.82rem; }
     .favoritesStatBox, .favorites-count { display: none; }
 
     /* Make search and filters take full width */
@@ -4924,8 +4939,9 @@ body.theme-transitioning *::after {
    Reference: small phones 320px, standard 360px, mid-range 375px, large 412-428px */
 @media (max-width: 420px) {
     .items-grid {
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-        gap: 12px;
+        padding: 3px 6px;
+        min-width: 44px;
+        min-height: 48px;
     }
     .item-card { padding: 10px; }
     .item-icon { width: 40px; height: 40px; }
