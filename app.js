@@ -2925,6 +2925,73 @@
 
     const FEEDBACK_SERVER = 'https://osrs-ge-server.onrender.com';
 
+    // Move feedback out of hamburger into main page (above donation button)
+    function moveFeedbackToMain() {
+        try {
+            const hamburgerFeedback = document.getElementById('hamburgerFeedback');
+            const donateBtn = document.querySelector('.donation-float-btn');
+            if (!hamburgerFeedback || !donateBtn) return;
+            if (document.getElementById('mainFeedbackContainer')) return;
+
+            const feedbackContent = hamburgerFeedback.querySelector('.feedback-content') || hamburgerFeedback;
+
+            // Ensure feedback content is expanded/visible on main page
+            feedbackContent.classList.remove('collapsed');
+
+            // Create wrapper that will contain the form and a close button
+            const wrapper = document.createElement('div');
+            wrapper.id = 'mainFeedbackContainer';
+            wrapper.className = 'main-feedback';
+
+            const closeBtn = document.createElement('button');
+            closeBtn.type = 'button';
+            closeBtn.className = 'feedback-close-btn';
+            closeBtn.title = 'Close feedback';
+            closeBtn.innerHTML = '&times;';
+            closeBtn.addEventListener('click', () => {
+                wrapper.style.display = 'none';
+                // show the toggle button
+                const toggle = document.getElementById('feedbackToggleBtn');
+                if (toggle) toggle.style.display = 'flex';
+                try { localStorage.setItem('feedbackOpen', 'false'); } catch (e) {}
+            });
+
+            wrapper.appendChild(closeBtn);
+            wrapper.appendChild(feedbackContent);
+
+            // Create a small toggle button that remains visible when closed
+            const toggleBtn = document.createElement('button');
+            toggleBtn.id = 'feedbackToggleBtn';
+            toggleBtn.type = 'button';
+            toggleBtn.className = 'feedback-toggle-btn';
+            toggleBtn.title = 'Open feedback';
+            toggleBtn.innerHTML = 'Feedback';
+            toggleBtn.addEventListener('click', () => {
+                wrapper.style.display = 'block';
+                toggleBtn.style.display = 'none';
+                try { localStorage.setItem('feedbackOpen', 'true'); } catch (e) {}
+            });
+
+            // Insert elements into the DOM: toggleBtn then wrapper before donate button
+            donateBtn.parentElement.insertBefore(toggleBtn, donateBtn);
+            donateBtn.parentElement.insertBefore(wrapper, donateBtn);
+
+            // Restore open state from localStorage
+            try {
+                const wasOpen = localStorage.getItem('feedbackOpen');
+                if (wasOpen === 'false') {
+                    wrapper.style.display = 'none';
+                    toggleBtn.style.display = 'flex';
+                } else {
+                    wrapper.style.display = 'block';
+                    toggleBtn.style.display = 'none';
+                }
+            } catch (e) {}
+        } catch (e) {
+            // silent
+        }
+    }
+
     function initFeedback() {
         const form = document.getElementById('feedbackForm');
         const msgInput = document.getElementById('feedbackMessage');
@@ -2934,12 +3001,60 @@
 
         if (!form || !msgInput) return;
 
+        // Cooldown (ms) between submissions per user
+        const FEEDBACK_COOLDOWN_MS = 60 * 1000; // 1 minute
+        const LAST_KEY = 'feedbackLastSubmittedAt';
+
+        function getLastSubmittedAt() {
+            try { return parseInt(localStorage.getItem(LAST_KEY), 10) || 0; } catch (e) { return 0; }
+        }
+        function setLastSubmittedAt(ts) {
+            try { localStorage.setItem(LAST_KEY, String(ts)); } catch (e) {}
+        }
+
+        // Enforce cooldown on load or after submit
+        function enforceCooldownUI() {
+            const last = getLastSubmittedAt();
+            const now = Date.now();
+            const diff = now - last;
+            if (diff < FEEDBACK_COOLDOWN_MS) {
+                const remaining = Math.ceil((FEEDBACK_COOLDOWN_MS - diff) / 1000);
+                submitBtn.disabled = true;
+                statusEl.className = 'feedback-status error';
+                statusEl.textContent = `Please wait ${remaining}s before sending another feedback.`;
+                // Update every second
+                const iv = setInterval(() => {
+                    const rem = Math.ceil((FEEDBACK_COOLDOWN_MS - (Date.now() - last)) / 1000);
+                    if (rem <= 0) {
+                        clearInterval(iv);
+                        submitBtn.disabled = false;
+                        statusEl.className = 'feedback-status';
+                        statusEl.textContent = '';
+                    } else {
+                        statusEl.textContent = `Please wait ${rem}s before sending another feedback.`;
+                    }
+                }, 1000);
+            }
+        }
+
+        // run once on init
+        enforceCooldownUI();
+
         msgInput.addEventListener('input', () => {
             charCount.textContent = `${msgInput.value.length} / 2000`;
         });
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+            // Check cooldown before sending
+            const last = (function(){ try { return parseInt(localStorage.getItem('feedbackLastSubmittedAt'),10) || 0 } catch(e){return 0} })();
+            const now = Date.now();
+            if (now - last < 60 * 1000) {
+                const rem = Math.ceil((60 * 1000 - (now - last)) / 1000);
+                statusEl.className = 'feedback-status error';
+                statusEl.textContent = `Please wait ${rem}s before sending another feedback.`;
+                return;
+            }
             const type = form.querySelector('input[name="feedbackType"]:checked')?.value || 'suggestion';
             const name = document.getElementById('feedbackName')?.value.trim() || 'Anonymous';
             const message = msgInput.value.trim();
@@ -2956,19 +3071,42 @@
                     body: JSON.stringify({ type, name, message }),
                 });
                 if (res.ok) {
+                    // Show a brief thank-you message, then start the cooldown countdown
                     statusEl.className = 'feedback-status success';
-                    statusEl.textContent = 'Thanks for your feedback!';
+                    statusEl.textContent = 'Thank you for submitting';
                     form.reset();
+                    // record last submitted timestamp to enforce cooldown
+                    try { setLastSubmittedAt(Date.now()); } catch (e) { try { localStorage.setItem('feedbackLastSubmittedAt', String(Date.now())); } catch (e) {} }
                     charCount.textContent = '0 / 2000';
-                    setTimeout(() => { statusEl.textContent = ''; }, 4000);
+                    // After 3 seconds, begin showing the cooldown/countdown UI
+                    setTimeout(() => {
+                        try { enforceCooldownUI(); } catch (e) {}
+                    }, 3000);
+                    // keep submit button disabled until cooldown expires
+                } else if (res.status === 429) {
+                    // Server-side cooldown response: use retry_after to show countdown
+                    let data = null;
+                    try { data = await res.json(); } catch (e) { /* ignore */ }
+                    const retry = (data && data.retry_after) ? data.retry_after : 60;
+                    statusEl.className = 'feedback-status error';
+                    statusEl.textContent = `Please wait ${retry}s before sending another feedback.`;
+                    // set local timestamp so client shows same countdown
+                    try { setLastSubmittedAt(Date.now() - (FEEDBACK_COOLDOWN_MS - (retry * 1000))); } catch (e) { try { localStorage.setItem('feedbackLastSubmittedAt', String(Date.now() - (FEEDBACK_COOLDOWN_MS - (retry * 1000)))); } catch (e) {} }
+                    try { enforceCooldownUI(); } catch (e) {}
                 } else {
-                    throw new Error();
+                    let data = null;
+                    try { data = await res.json(); } catch (e) {}
+                    const msg = (data && data.error) ? data.error : 'Failed to send. Try again later.';
+                    statusEl.className = 'feedback-status error';
+                    statusEl.textContent = msg;
+                    submitBtn.disabled = false;
                 }
             } catch (e) {
                 statusEl.className = 'feedback-status error';
                 statusEl.textContent = 'Failed to send. Try again later.';
+                submitBtn.disabled = false;
             }
-            submitBtn.disabled = false;
+            
         });
     }
 
@@ -4198,6 +4336,8 @@
             initVisitorCounter();
             loadNewsFeed();
             initChangelogMenu();
+            // Move feedback out of the hamburger into the main page before initializing
+            try { moveFeedbackToMain(); } catch (e) {}
             initFeedback();
             initAdmin();
         });

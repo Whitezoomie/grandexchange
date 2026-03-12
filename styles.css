@@ -4648,6 +4648,134 @@ body.theme-transitioning *::after {
     }
 }
 
+/* Floating feedback placed above the donation button */
+.main-feedback {
+    position: fixed;
+    right: 75px;
+    bottom: 90px;
+    z-index: 1001;
+    width: 320px;
+    max-width: calc(100% - 40px);
+    background: var(--panel-bg, #0f1117);
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    color: var(--text-color, #e6edf3);
+}
+
+.main-feedback .feedback-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.main-feedback .feedback-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Style feedback inputs to match site darker inputs */
+.main-feedback .feedback-name,
+.main-feedback .feedback-message {
+    padding: 8px 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 0.88rem;
+    font-family: inherit;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.main-feedback .feedback-message {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.main-feedback .feedback-name:focus,
+.main-feedback .feedback-message:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.main-feedback .feedback-name::placeholder,
+.main-feedback .feedback-message::placeholder {
+    color: var(--text-secondary);
+}
+
+.main-feedback .feedback-submit {
+    padding: 8px 14px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.main-feedback .feedback-submit:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+@media (max-width: 640px) {
+    .main-feedback {
+        right: 16px;
+        bottom: 76px;
+        width: 280px;
+    }
+}
+
+/* Close button inside floating feedback */
+.main-feedback .feedback-close-btn {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    background: transparent;
+    border: none;
+    color: var(--text-color, #e6edf3);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 8px;
+}
+
+/* Small toggle button shown when feedback is closed */
+
+.feedback-toggle-btn {
+    position: fixed;
+    right: 75px;
+    bottom: 90px;
+    z-index: 1002;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #FFD700 0%, #FFC700 100%);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+    cursor: pointer;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 50px;
+    color: #000;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+@media (max-width: 640px) {
+    .feedback-toggle-btn, .main-feedback { right: 16px; }
+    .feedback-toggle-btn { bottom: 76px; }
+}
+
+/* Remove feedback from the hamburger menu (keeps floating version) */
+#hamburgerFeedback,
+.hamburger-feedback {
+    display: none !important;
+}
+
 /* ===== NO RESULTS ===== */
 .no-results {
     text-align: center;

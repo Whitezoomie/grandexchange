@@ -51,6 +51,9 @@ let feedbackList = [];
 let votesData = {};
 const ipVotes = {};
 let highlightsData = { pending: [], approved: [] };
+// Server-side feedback cooldowns per IP (ms timestamp)
+const feedbackCooldowns = new Map();
+const FEEDBACK_COOLDOWN_MS = 60 * 1000; // 1 minute
 
 // Load data from PostgreSQL on startup
 async function initializeData() {
@@ -234,6 +237,18 @@ const server = http.createServer(async (req, res) => {
                 res.writeHead(400, headers);
                 return res.end(JSON.stringify({ error: 'Message is required' }));
             }
+            // Server-side rate-limit per IP
+            const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
+            const last = feedbackCooldowns.get(ip) || 0;
+            const now = Date.now();
+            if (now - last < FEEDBACK_COOLDOWN_MS) {
+                const retryAfter = Math.ceil((FEEDBACK_COOLDOWN_MS - (now - last)) / 1000);
+                res.writeHead(429, headers);
+                return res.end(JSON.stringify({ error: 'Cooldown', retry_after: retryAfter }));
+            }
+
+            // record timestamp immediately to reduce race conditions
+            feedbackCooldowns.set(ip, now);
             const entry = {
                 id: crypto.randomBytes(8).toString('hex'),
                 type,
