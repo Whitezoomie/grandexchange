@@ -4110,6 +4110,32 @@ body.theme-transitioning *::after {
     background: var(--red-bg);
 }
 
+/* Mobile: nudge modal favorite button higher, smaller, and left enough to avoid close button */
+@media (max-width: 600px) {
+    .modal-fav-btn {
+        top: 9px;
+        right: 240px; /* move left from the close button */
+        z-index: 3;
+        width: 32px;
+        height: 32px;
+    }
+    .modal-fav-btn .fav-icon-outline,
+    .modal-fav-btn .fav-icon-filled {
+        width: 18px;
+        height: 18px;
+    }
+    .modal-close {
+        left: 12px;
+        right: auto;
+        top: 9px;
+        z-index: 4;
+    }
+
+    .modal-header {
+        padding-right: 30px; /* ensure header text doesn't flow underneath the icon and close button */
+        padding-left: 30px; /* make space for the close button on the left */
+    }
+}
 .modal-icon {
     width: 56px;
     height: 56px;
@@ -4399,6 +4425,18 @@ body.theme-transitioning *::after {
 
 .history-tab:hover {
     color: var(--text-primary);
+}
+
+/* Mobile: stack history header and left-align tabs to prevent right-shift */
+@media (max-width: 600px) {
+    .history-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    .history-tabs {
+        align-self: flex-start;
+    }
 }
 
 .history-tab.active {
