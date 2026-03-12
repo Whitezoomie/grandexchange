@@ -1071,8 +1071,7 @@ body {
         position: fixed;
         /* sit just under the header; tweak if your header height differs */
         top: 190px;
-        /* reduced offset so dropdown sits closer to the right edge on tablets */
-        right: 378px;
+        right: 470px;
         left: auto;
         width: auto;
         min-width: 160px;
@@ -3379,18 +3378,22 @@ body.theme-transitioning *::after {
     box-shadow: 0 4px 20px rgba(0,0,0,0.3);
 }
 
-.highlight-card-img {
-    width: 100%;
-    height: auto;
-    max-height: 420px;
-    object-fit: contain;
-    display: block;
-    background: var(--bg-main);
-}
-
 .highlight-card-media {
     position: relative;
     flex: 1 1 auto;
+    /* Fixed media area so all cards remain the same height
+       regardless of the original image aspect ratio. Overflow
+       is hidden and images are cropped via object-fit: cover. */
+    height: 220px;
+    overflow: hidden;
+}
+
+.highlight-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    background: var(--bg-main);
 }
 
 .hod-badge {
@@ -3684,9 +3687,7 @@ body.theme-transitioning *::after {
     .highlight-grid {
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     }
-    .highlight-card-img {
-        height: 130px;
-    }
+    .highlight-card-media { height: 130px; }
 }
 
 /* Tablet adjustments (601-768px): reduce image height so the bottom
@@ -3696,9 +3697,8 @@ body.theme-transitioning *::after {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 12px;
     }
-    .highlight-card-img {
-        max-height: 220px;
-        height: auto;
+    .highlight-card-media {
+        height: 220px;
     }
     .highlight-card-body {
         min-height: 84px;
@@ -3725,7 +3725,7 @@ body.theme-transitioning *::after {
         max-height: 420px; /* approx. 2 * (130px image + body) */
         overflow-y: auto;
     }
-    .highlight-card-img { max-height: 130px; }
+    .highlight-card-media { height: 130px; }
     .highlight-card-body { min-height: 48px; }
     .highlight-card-name { -webkit-line-clamp: 3; }
 }
@@ -3739,7 +3739,7 @@ body.theme-transitioning *::after {
         max-height: calc(2 * (130px + 48px) + 12px); /* ~368px */
         overflow-y: auto;
     }
-    .highlight-card-img { max-height: 130px; }
+    .highlight-card-media { height: 130px; }
     .highlight-card-body { min-height: 48px; }
 }
 
@@ -5000,7 +5000,7 @@ body.theme-transitioning *::after {
 .feedback-toggle-btn {
     position: fixed;
     right: 75px;
-    bottom: 70px;
+    bottom: 90px;
     z-index: 1002;
     display: none;
     align-items: center;
@@ -5021,23 +5021,7 @@ body.theme-transitioning *::after {
     .feedback-toggle-btn { bottom: 76px; }
 }
 
-/* On very small phones swap positions of feedback toggle and back-to-top.
-   Use a slightly larger breakpoint and !important to ensure overrides
-   on a range of narrow devices (e.g. 375-420px) where earlier rules
-   may have higher specificity. */
-@media (max-width: 420px) {
-    /* Move back-to-top to where feedback lives on small phones */
-    .back-to-top {
-        right: 16px !important;
-        bottom: 95px !important;
-    }
-
-    /* Move feedback toggle / panel to where back-to-top lives */
-    .feedback-toggle-btn, .main-feedback {
-        right: 16px !important;
-        bottom: 55px !important;
-    }
-}
+/* (removed mobile swap overrides) */
 
 /* Remove feedback from the hamburger menu (keeps floating version) */
 #hamburgerFeedback,
