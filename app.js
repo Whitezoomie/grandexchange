@@ -2976,15 +2976,17 @@
             donateBtn.parentElement.insertBefore(toggleBtn, donateBtn);
             donateBtn.parentElement.insertBefore(wrapper, donateBtn);
 
-            // Restore open state from localStorage
+            // Restore open state from localStorage (closed by default)
             try {
                 const wasOpen = localStorage.getItem('feedbackOpen');
-                if (wasOpen === 'false') {
-                    wrapper.style.display = 'none';
-                    toggleBtn.style.display = 'flex';
-                } else {
+                if (wasOpen === 'true') {
                     wrapper.style.display = 'block';
                     toggleBtn.style.display = 'none';
+                } else {
+                    // default: closed
+                    wrapper.style.display = 'none';
+                    toggleBtn.style.display = 'flex';
+                    try { localStorage.setItem('feedbackOpen', 'false'); } catch (e) {}
                 }
             } catch (e) {}
         } catch (e) {
