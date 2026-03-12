@@ -5000,7 +5000,7 @@ body.theme-transitioning *::after {
 .feedback-toggle-btn {
     position: fixed;
     right: 75px;
-    bottom: 90px;
+    bottom: 70px;
     z-index: 1002;
     display: none;
     align-items: center;
@@ -5019,6 +5019,24 @@ body.theme-transitioning *::after {
 @media (max-width: 640px) {
     .feedback-toggle-btn, .main-feedback { right: 16px; }
     .feedback-toggle-btn { bottom: 76px; }
+}
+
+/* On very small phones swap positions of feedback toggle and back-to-top.
+   Use a slightly larger breakpoint and !important to ensure overrides
+   on a range of narrow devices (e.g. 375-420px) where earlier rules
+   may have higher specificity. */
+@media (max-width: 420px) {
+    /* Move back-to-top to where feedback lives on small phones */
+    .back-to-top {
+        right: 16px !important;
+        bottom: 95px !important;
+    }
+
+    /* Move feedback toggle / panel to where back-to-top lives */
+    .feedback-toggle-btn, .main-feedback {
+        right: 16px !important;
+        bottom: 55px !important;
+    }
 }
 
 /* Remove feedback from the hamburger menu (keeps floating version) */
