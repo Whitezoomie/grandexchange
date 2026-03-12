@@ -1063,6 +1063,23 @@ body {
     }
 }
 
+/* Ensure hamburger dropdown expands from the right on tablet sizes (601-768px)
+   Some tablet layouts place the hamburger button towards the left; forcing
+   a fixed right-aligned dropdown keeps the menu opening on the right side. */
+@media (min-width: 601px) and (max-width: 768px) {
+    .hamburger-dropdown {
+        position: fixed;
+        /* sit just under the header; tweak if your header height differs */
+        top: 190px;
+        /* reduced offset so dropdown sits closer to the right edge on tablets */
+        right: 378px;
+        left: auto;
+        width: auto;
+        min-width: 160px;
+        max-width: 380px;
+        z-index: 9999;
+    }
+}
 /* ===== DEATH'S COFFER OVERLAY ===== */
 .coffer-overlay {
     display: none;
@@ -2041,6 +2058,113 @@ body.theme-transitioning *::after {
 .filter-group input[type="number"]::placeholder,
 .filter-group input[type="text"]::placeholder {
     color: var(--text-muted);
+}
+
+/* Tablet (iPad) layout: stack filters vertically between 601px and 768px
+   Keeps mobile (<=600px) rules untouched. */
+@media (min-width: 601px) and (max-width: 768px) {
+    .filters-row {
+        position: relative;
+        top: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        padding: 12px 16px;
+        max-height: none;
+        overflow: visible;
+    }
+
+    .filters-row .filter-group {
+        width: 100%;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+    }
+
+    .filters-row .filter-group select,
+    .filters-row .filter-group input[type="number"],
+    .filters-row .filter-group input[type="text"] {
+        width: 100%;
+        min-width: 0;
+    }
+
+    /* Align action controls to the end on tablet sizes */
+    .filters-row .view-toggle { align-self: flex-end; }
+    .filters-row .save-filters-btn,
+    .filters-row .filter-toggle,
+    .filters-row .split-btn { align-self: flex-end; }
+
+    /* Two item cards per row on tablet (iPad) */
+    .items-grid {
+        /* Force two equal columns that can shrink to fit the viewport */
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        align-items: start;
+        justify-items: stretch;
+    }
+
+    /* Reduce side padding on tablet so grid has more room */
+    .main-content {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    /* Slightly reduce card padding on tablet to help fit two columns */
+    .item-card {
+        padding: 10px;
+    }
+
+    /* Reduce header, toolbar and filters padding to free horizontal space */
+    .header {
+        padding: 12px 12px;
+    }
+
+    .toolbar {
+        padding: 10px 12px;
+    }
+
+    .filters-row {
+        padding: 8px 10px;
+    }
+
+    .item-card-header { gap: 8px; }
+    .item-icon { width: 36px; height: 36px; }
+
+    /* Collapse the sidebar under the items area to free horizontal space */
+    .content-with-sidebar {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .items-area { order: 1; }
+
+    .sidebar-column {
+        width: 100%;
+        flex-shrink: 0;
+        order: 2;
+        position: static; /* disable sticky positioning on tablet */
+        top: auto;
+        align-self: stretch;
+    }
+
+    /* Ensure items-area and grid occupy full width; hide large sidebar to free space */
+    .items-area {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .items-grid {
+        width: 100%;
+        max-width: none;
+    }
+
+    /* Temporarily hide the sidebar on tablet so two cards fit side-by-side */
+    .sidebar-column { display: none; }
 }
 
 /* View Toggle */
@@ -3101,7 +3225,8 @@ body.theme-transitioning *::after {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.88);
-    z-index: 1000;
+    /* Ensure highlights sit above floating feedback/donation buttons */
+    z-index: 1102;
     justify-content: center;
     align-items: flex-start;
     padding: 40px 20px;
@@ -3242,6 +3367,13 @@ body.theme-transitioning *::after {
     transition: border-color var(--transition), box-shadow var(--transition);
 }
 
+/* Use a column flex layout so media and body stack reliably and the
+   title area cannot be overlapped by the image on small viewports. */
+.highlight-card {
+    display: flex;
+    flex-direction: column;
+}
+
 .highlight-card:hover {
     border-color: var(--accent);
     box-shadow: 0 4px 20px rgba(0,0,0,0.3);
@@ -3258,6 +3390,7 @@ body.theme-transitioning *::after {
 
 .highlight-card-media {
     position: relative;
+    flex: 1 1 auto;
 }
 
 .hod-badge {
@@ -3300,6 +3433,32 @@ body.theme-transitioning *::after {
     font-size: 0.9rem;
     font-weight: 700;
     color: var(--accent);
+}
+
+/* Prevent player names from clipping: allow wrapping and clamp to two lines
+   so long names don't overflow card bounds. Also ensure the body has
+   enough minimum height to contain two lines on most viewports. */
+.highlight-card-name {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    word-break: break-word;
+}
+
+.highlight-card-body {
+    /* Reserve space for two lines of title + caption without overlapping */
+    min-height: 72px;
+    flex: 0 0 auto;
+    overflow: visible;
+}
+
+@media (max-width: 600px) {
+    .highlight-card-name { font-size: 0.86rem; }
+    .highlight-card-body { min-height: 48px; }
+    .highlight-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
 }
 
 .highlight-card-caption {
@@ -3528,6 +3687,60 @@ body.theme-transitioning *::after {
     .highlight-card-img {
         height: 130px;
     }
+}
+
+/* Tablet adjustments (601-768px): reduce image height so the bottom
+   caption/name area is always visible and allow an extra title line. */
+@media (min-width: 601px) and (max-width: 768px) {
+    .highlight-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+    .highlight-card-img {
+        max-height: 220px;
+        height: auto;
+    }
+    .highlight-card-body {
+        min-height: 84px;
+    }
+    .highlight-card-name {
+        -webkit-line-clamp: 3;
+    }
+
+    /* Show only two highlight rows/tiles at once on tablet — enable scrolling
+       Calculate from the image + body min-heights so approximately two
+       full cards are visible before scrolling. */
+    .highlight-grid {
+        max-height: calc(2 * (220px + 84px) + 16px); /* ~620px */
+        overflow-y: auto;
+    }
+}
+
+/* Small/mobile: cap to two cards tall (single column on narrow phones) */
+@media (max-width: 420px) {
+    .highlight-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        /* Fallback cap for narrow phones — special-case 375px below */
+        max-height: 420px; /* approx. 2 * (130px image + body) */
+        overflow-y: auto;
+    }
+    .highlight-card-img { max-height: 130px; }
+    .highlight-card-body { min-height: 48px; }
+    .highlight-card-name { -webkit-line-clamp: 3; }
+}
+
+/* Target small phones (e.g. 375px width) so only two highlight images are
+   visible before scrolling. Uses the image + body min-heights for a tighter cap. */
+@media (max-width: 375px) {
+    .highlight-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        max-height: calc(2 * (130px + 48px) + 12px); /* ~368px */
+        overflow-y: auto;
+    }
+    .highlight-card-img { max-height: 130px; }
+    .highlight-card-body { min-height: 48px; }
 }
 
 .sidebar-feed .feed-loading {
