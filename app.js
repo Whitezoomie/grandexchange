@@ -668,6 +668,251 @@
     // Modal
     // ========================================
 
+    // Ensure share button + popup exists and is populated for the modal
+    function ensureModalShareButton(item) {
+        const modal = document.getElementById('itemModal');
+        if (!modal) return;
+
+        // create button if missing
+        let btn = modal.querySelector('.modal-share-btn');
+        if (!btn) {
+            btn = document.createElement('button');
+            btn.className = 'modal-share-btn';
+            btn.title = 'Share item';
+            btn.setAttribute('aria-label', 'Share item');
+            // classic share icon (Material-style)
+            btn.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.03-.47-.09-.7l7.02-4.11c.5.5 1.19.82 1.93.82 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.99 9.53C8.49 9.04 7.8 8.72 7.06 8.72 5.4 8.72 4.06 10.06 4.06 11.72s1.34 3 3 3c.74 0 1.43-.32 1.93-.82l7.11 4.18c-.06.22-.1.45-.1.69 0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3z"/></svg>';
+            const header = modal.querySelector('.modal-header') || modal;
+            header.appendChild(btn);
+        }
+
+        // create popup if missing
+        let popup = modal.querySelector('.modal-share-popup');
+        if (!popup) {
+            popup = document.createElement('div');
+            popup.className = 'modal-share-popup';
+            popup.innerHTML = `
+                <div class="og-preview-wrap">
+                    <div class="share-card">
+                        <div class="sc-image" id="scImage" style="background-image:url('')"></div>
+                        <div class="sc-meta">
+                            <div class="sc-title" id="scTitle"></div>
+                            <div class="sc-desc" id="scDesc"></div>
+                            <div class="sc-badge" id="scBadge"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="share-actions">
+                    <button class="btn primary" id="shareTweet">Twitter</button>
+                    <button class="btn" id="shareFb">Facebook</button>
+                    <button class="btn" id="shareCopy">Copy Link</button>
+                </div>
+                <div id="copySuccess" class="share-copy-success" style="display:none">Link copied</div>
+            `;
+            modal.appendChild(popup);
+        }
+
+        // populate content
+        const title = (item && item.name) || document.getElementById('modalTitle')?.textContent || document.title;
+        const desc = (item && item.examine) || document.getElementById('modalExamine')?.textContent || '';
+        const pageName = window.location.pathname.split('/').pop() || '';
+        const base = '/og-images';
+        let imgUrl = base + '/' + (pageName.replace('.html','') || 'default') + '.png';
+        const icon = document.getElementById('modalIcon')?.src;
+        if (icon) imgUrl = icon;
+
+        const scImage = popup.querySelector('#scImage');
+        const scTitle = popup.querySelector('#scTitle');
+        const scDesc = popup.querySelector('#scDesc');
+        const scBadge = popup.querySelector('#scBadge');
+        if (scImage) scImage.style.backgroundImage = `url('${imgUrl}')`;
+        if (scTitle) scTitle.textContent = title;
+        if (scDesc) scDesc.textContent = desc;
+        if (scBadge) scBadge.textContent = item && item.members ? 'Members' : '';
+
+        // handlers: copy image URL to clipboard (no UI opens)
+        btn.onclick = async function(e){
+            e.stopPropagation();
+            try {
+                await copyImageUrlToClipboard(item, btn);
+            } catch (err) {
+                console.error('Copy image URL failed', err);
+                // fallback: show popup if copy fails
+                popup.classList.toggle('open');
+            }
+        };
+
+        const copyBtn = popup.querySelector('#shareCopy');
+        if (copyBtn) copyBtn.onclick = async function(){
+            try { await navigator.clipboard.writeText(window.location.href); const s = popup.querySelector('#copySuccess'); if (s){ s.style.display='inline'; setTimeout(()=>s.style.display='none',2000);} }
+            catch(e){ alert('Copy failed: '+e.message); }
+        };
+
+        const tweetBtn = popup.querySelector('#shareTweet');
+        if (tweetBtn) tweetBtn.onclick = function(){
+            const text = encodeURIComponent(`Check out ${title} on Grand Exchange`);
+            const url = encodeURIComponent(window.location.href);
+            window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`,'_blank','noopener');
+        };
+
+        const fbBtn = popup.querySelector('#shareFb');
+        if (fbBtn) fbBtn.onclick = function(){
+            const url = encodeURIComponent(window.location.href);
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`,'_blank','noopener');
+        };
+
+        // close popup when clicking outside
+        document.addEventListener('click', function(ev){ if (!popup.contains(ev.target) && !btn.contains(ev.target)) popup.classList.remove('open'); });
+    }
+
+    // Compose a share image (prices + 1h chart) and open Reddit submit + download image
+    async function shareItem(item) {
+        // switch chart to 1h data first
+        try {
+            await loadHistory(item.id, '1h');
+            // small delay to ensure Chart.js finished render
+            await new Promise(r => setTimeout(r, 350));
+        } catch (e) {
+            console.warn('Failed to load 1h history, proceeding with current chart', e);
+        }
+
+        const chartCanvas = dom.priceChart;
+        // create output canvas
+        const outW = 1200, outH = 630;
+        const out = document.createElement('canvas');
+        out.width = outW; out.height = outH;
+        const ctx = out.getContext('2d');
+
+        // background
+        const bg = ctx.createLinearGradient(0,0,outW,outH);
+        bg.addColorStop(0,'#0f1724'); bg.addColorStop(1,'#0b1220');
+        ctx.fillStyle = bg; ctx.fillRect(0,0,outW,outH);
+
+        // left panel for item & prices
+        const leftW = Math.floor(outW * 0.38);
+        ctx.fillStyle = 'rgba(255,255,255,0.02)'; ctx.fillRect(36,36,leftW-72,outH-72);
+
+        // draw icon
+        const iconEl = document.getElementById('modalIcon');
+        if (iconEl && iconEl.src) {
+            try {
+                const img = await new Promise((resolve, reject) => {
+                    const i = new Image();
+                    i.crossOrigin = 'anonymous';
+                    i.onload = () => resolve(i);
+                    i.onerror = reject;
+                    i.src = iconEl.src;
+                });
+                const imgSize = Math.min(160, leftW-120);
+                ctx.drawImage(img, 60, 80, imgSize, imgSize);
+            } catch (e) {
+                // ignore icon load errors
+            }
+        }
+
+        // title and prices
+        ctx.fillStyle = '#fff'; ctx.font = '700 36px Inter, Arial';
+        ctx.fillText(item.name || document.getElementById('modalTitle').textContent || 'Item', 60, 280);
+        ctx.font = '600 20px Inter, Arial'; ctx.fillStyle = '#cbd5e1';
+        const buyText = 'Buy: ' + (document.getElementById('modalBuyPrice')?.textContent || '-');
+        const sellText = 'Sell: ' + (document.getElementById('modalSellPrice')?.textContent || '-');
+        const marginText = 'Margin: ' + (document.getElementById('modalMargin')?.textContent || '-');
+        ctx.fillText(buyText, 60, 320);
+        ctx.fillText(sellText, 60, 350);
+        ctx.fillText(marginText, 60, 380);
+
+        // draw chart to right area
+        const chartX = leftW + 20;
+        const chartW = outW - chartX - 40;
+        const chartH = outH - 100;
+        try {
+            // scale chart canvas into target area
+            ctx.fillStyle = 'rgba(255,255,255,0.02)';
+            ctx.fillRect(chartX-8, 36, chartW+16, chartH+16);
+            ctx.drawImage(chartCanvas, chartX, 60, chartW, chartH);
+        } catch (e) {
+            console.warn('Failed to draw chart onto share image', e);
+        }
+
+        // footer branding
+        ctx.fillStyle = 'rgba(255,255,255,0.06)'; ctx.fillRect(outW - 220, outH - 72, 180, 48);
+        ctx.fillStyle = '#fff'; ctx.font = '600 14px Inter, Arial'; ctx.fillText('Grand Exchange', outW - 180, outH - 40);
+
+        // trigger download
+        out.toBlob(function(blob) {
+            if (!blob) return;
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const filename = (item && item.id) ? item.id + '-share.png' : 'item-share.png';
+            a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+            URL.revokeObjectURL(url);
+        }, 'image/png');
+
+        // open reddit submit (link post to item page) in new tab
+        try {
+            const title = encodeURIComponent(`Check out ${item.name} — current price ${document.getElementById('modalBuyPrice')?.textContent || ''}`);
+            const pageUrl = encodeURIComponent(window.location.href);
+            window.open(`https://www.reddit.com/submit?title=${title}&url=${pageUrl}`,'_blank','noopener');
+            // copy a suggested post text to clipboard for convenience (image upload instructions)
+            const suggested = `Check out ${item.name} on Grand Exchange (${window.location.href})\n\nI've attached a screenshot of the current price and 1h history.`;
+            try { await navigator.clipboard.writeText(suggested); } catch (e) { /* ignore */ }
+        } catch (e) { console.warn('Failed to open Reddit submit', e); }
+    }
+
+    // Copy predictable OG image URL to clipboard and show temporary confirmation
+    async function copyImageUrlToClipboard(item, anchorEl) {
+        const slug = slugify(item && item.name ? item.name : (item && item.id) || 'item');
+        const origin = window.location.origin || (window.location.protocol + '//' + window.location.host);
+        const imageUrl = origin.replace(/\/$/, '') + '/og-images/' + (item && item.id ? item.id : slug) + '.png';
+        // attempt clipboard API
+        try {
+            await navigator.clipboard.writeText(imageUrl);
+            showTempCopied(anchorEl, 'Image URL copied');
+            return imageUrl;
+        } catch (e) {
+            // fallback: older execCommand method
+            try {
+                const inp = document.createElement('input');
+                inp.style.position = 'fixed'; inp.style.left = '-9999px'; inp.value = imageUrl; document.body.appendChild(inp);
+                inp.select(); inp.setSelectionRange(0, inp.value.length);
+                const ok = document.execCommand('copy');
+                inp.remove();
+                if (ok) { showTempCopied(anchorEl, 'Image URL copied'); return imageUrl; }
+                throw new Error('copy command failed');
+            } catch (err) {
+                showTempCopied(anchorEl, 'Copy failed');
+                throw err;
+            }
+        }
+    }
+
+    function showTempCopied(anchorEl, message) {
+        try {
+            const modal = document.getElementById('itemModal') || document.body;
+            const rect = anchorEl.getBoundingClientRect();
+            const modalRect = modal.getBoundingClientRect ? modal.getBoundingClientRect() : { left:0, top:0 };
+            const tip = document.createElement('div');
+            tip.className = 'modal-share-copied';
+            tip.textContent = message;
+            tip.style.position = 'absolute';
+            tip.style.padding = '6px 10px';
+            tip.style.background = 'var(--bg-card)';
+            tip.style.color = 'var(--text-primary)';
+            tip.style.border = '1px solid var(--border)';
+            tip.style.borderRadius = '6px';
+            tip.style.fontSize = '13px';
+            tip.style.zIndex = 1202;
+            // position near button
+            const left = rect.left - modalRect.left + (rect.width / 2) - 60;
+            const top = rect.top - modalRect.top + rect.height + 8;
+            tip.style.left = Math.max(8, left) + 'px';
+            tip.style.top = Math.max(8, top) + 'px';
+            modal.appendChild(tip);
+            setTimeout(() => { tip.style.transition = 'opacity 0.25s'; tip.style.opacity = '0'; }, 1400);
+            setTimeout(() => tip.remove(), 1700);
+        } catch (e) { /* ignore UI errors */ }
+    }
+
     function openModal(item) {
         const iconUrl = getIconUrl(item.icon);
         $('modalIcon').src = iconUrl;
@@ -735,6 +980,9 @@
         // Set favorite state on modal button
         currentModalItemId = item.id;
         dom.modalFavBtn.classList.toggle('is-fav', isFavorite(item.id));
+
+        // add share button & popup for this modal
+        try { ensureModalShareButton(item); } catch(e) { /* ignore */ }
 
         // Load flip sentiment votes
         loadFlipVote(item.id);

@@ -199,6 +199,98 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+/* Social sharing preview card (used for in-site previews) */
+.share-card{
+    width:600px;
+    max-width:100%;
+    background:linear-gradient(135deg,#0f1724 0%, #0b1220 100%);
+    color:#fff;
+    border-radius:12px;
+    overflow:hidden;
+    display:flex;
+    box-shadow:0 8px 30px rgba(2,6,23,0.6);
+    font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+}
+.share-card .sc-image{
+    width:40%;
+    min-height:200px;
+    background-size:cover;
+    background-position:center center;
+}
+.share-card .sc-meta{
+    padding:18px 20px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:8px;
+}
+.share-card .sc-title{
+    font-size:20px;
+    font-weight:700;
+    line-height:1.1;
+    color:#fff;
+}
+.share-card .sc-desc{
+    font-size:13px;
+    color:#cbd5e1;
+    margin-top:6px;
+}
+.share-card .sc-badge{
+    display:inline-block;
+    background:rgba(255,255,255,0.06);
+    color:#f8fafc;
+    padding:6px 10px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:600;
+    margin-top:10px;
+}
+
+/* small utility for inline preview container */
+.og-preview-wrap{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
+
+/* Modal share button + popup */
+.modal-share-btn{
+    position:absolute;
+    top:12px;
+    right:92px; /* moved further left to align with design */
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition: all var(--transition);
+    z-index:1101;
+}
+.modal-share-btn:hover{
+    color: var(--text-primary);
+    border-color: var(--accent);
+}
+.modal-share-popup{
+    position:absolute;
+    top:64px;
+    right:14px;
+    width:360px;
+    max-width:calc(100% - 40px);
+    border-radius:10px;
+    background:linear-gradient(180deg,#0b0f14, #0f151a);
+    box-shadow:0 12px 40px rgba(0,0,0,0.6);
+    padding:12px;
+    z-index:1101;
+    display:none;
+}
+.modal-share-popup.open{ display:block; }
+.share-actions{ display:flex; gap:8px; margin-top:10px; justify-content:space-between }
+.share-actions .btn{ flex:1; padding:8px 10px; border-radius:8px; background:transparent; border:1px solid rgba(255,255,255,0.04); color:var(--text-primary); cursor:pointer; }
+.share-actions .btn.primary{ background:var(--accent); color:#0b0f14; border:0 }
+.share-copy-success{ font-size:12px; color:var(--green); margin-left:8px }
+
 .spotlight-stats {
     display: flex;
     align-items: center;
