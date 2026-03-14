@@ -2026,16 +2026,16 @@ body.theme-transitioning *::after {
 .filter-group select,
 .filter-group input[type="number"],
 .filter-group input[type="text"] {
-    padding: 6px 8px;
+    padding: 6px 10px;
     background: var(--bg-input);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     color: var(--text-primary);
-    font-size: 0.82rem;
+    font-size: 0.80rem;
     font-family: inherit;
     outline: none;
     transition: border-color var(--transition);
-    min-width: 96px;
+    min-width: 90px;
 }
 
 .filter-group select:focus,
@@ -2051,7 +2051,7 @@ body.theme-transitioning *::after {
 
 .filter-group input[type="number"],
 .filter-group input[type="text"] {
-    width: 92px;
+    width: 72px;
 }
 
 .filter-group input[type="number"]::placeholder,
