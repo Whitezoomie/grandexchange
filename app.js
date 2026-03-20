@@ -715,6 +715,12 @@
             $('modalLimitProfit').style.color = '';
         }
 
+        // High Alch
+        var highAlchEl = $('modalHighAlch');
+        if (highAlchEl) {
+            highAlchEl.textContent = (item.highalch || item.highAlch || 0) ? formatGp(item.highalch || item.highAlch, false) : '-';
+        }
+
         // Wiki link
         const wikiName = encodeURIComponent(item.name.replace(/ /g, '_'));
         $('modalWikiLink').href = `${WIKI_PAGE_BASE}/${wikiName}`;
