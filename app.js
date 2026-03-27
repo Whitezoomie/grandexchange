@@ -143,6 +143,9 @@
     let lastUpdatedInterval = null;
     let effectsEnabled = localStorage.getItem('ge_effects') !== 'off';
     let previousPrices = {};  // track old prices for pulse
+    let copilotBlocked = new Set(); // blocked item ids for Copilot menu (persisted)
+    let copilotSessionSkipped = new Set(); // runtime-only skipped ids for Copilot
+    let copilotLastSuggestedId = null; // track last suggestion to highlight changes
 
     // --- SEO Meta Helpers ---
     const DEFAULT_TITLE = 'OSRS Grand Exchange Tracker | Live Item Prices & Market Data';
@@ -244,6 +247,10 @@
         historyLoading: $('historyLoading'),
         historyError: $('historyError'),
         backToTop: $('backToTop'),
+        copilotBtn: $('copilotBtn'),
+        copilotDropdown: $('copilotDropdown'),
+        copilotContent: $('copilotContent'),
+        copilotDragHandle: $('copilotDragHandle'),
     };
 
     
@@ -377,6 +384,10 @@
             // Yield to the browser before the heavy filter+render pass
             await new Promise(r => setTimeout(r, 0));
             applyFilters();
+            // If CoPilot dropdown is open, update its suggestion now that items are loaded
+            try {
+                if (dom.copilotDropdown && dom.copilotDropdown.style.display === 'block') renderCopilotMenu();
+            } catch (e) { /* ignore */ }
             // Update the bond display if present
             try { updateBondDisplay(); } catch (e) { /* ignore */ }
 
@@ -493,6 +504,256 @@
         dom.itemsContainer.appendChild(fragment);
         animateCardEntry();
     }
+
+    // ========================================
+    // CoPilot quick-suggest menu
+    // ========================================
+    function loadCopilotBlocked() {
+        try {
+            const raw = localStorage.getItem('copilot_blocked');
+            if (!raw) return new Set();
+            const arr = JSON.parse(raw);
+            return new Set(Array.isArray(arr) ? arr : []);
+        } catch (e) { return new Set(); }
+    }
+
+    function saveCopilotBlocked() {
+        try {
+            localStorage.setItem('copilot_blocked', JSON.stringify([...copilotBlocked]));
+        } catch (e) { /* ignore */ }
+    }
+
+    // copilot queue feature removed
+
+    function getBestCopilotItem() {
+        if (!allItems || !allItems.length) return null;
+        const candidates = allItems.filter(it => {
+            if (it.volume == null) return false;
+            if ((it.volume || 0) < 150) return false; // require >=150 daily volume
+            if (it.margin == null) return false;
+            if (copilotBlocked.has(String(it.id)) || copilotBlocked.has(Number(it.id))) return false;
+            if (copilotSessionSkipped.has(String(it.id)) || copilotSessionSkipped.has(Number(it.id))) return false;
+            // ensure there is price data
+            if (!it.buyPrice && !it.sellPrice) return false;
+            return true;
+        });
+        if (!candidates.length) return null;
+        candidates.sort((a, b) => (b.margin || 0) - (a.margin || 0));
+        return candidates[0];
+    }
+
+    function renderCopilotMenu() {
+        const wrap = dom.copilotContent;
+        if (!wrap) return;
+        const item = getBestCopilotItem();
+        // Build markup: suggestion (if any) and blocked list
+        const iconUrl = item ? getIconUrl(item.icon) || '' : '';
+        let suggestionHtml = '';
+        if (item) {
+            // Calculate cost to buy buy limit (if available)
+            const unitPrice = item.buyPrice || item.sellPrice || 0;
+            const limit = item.limit || 0;
+            const totalCost = unitPrice && limit ? unitPrice * limit : null;
+            suggestionHtml = `
+                <div class="copilot-item">
+                    <div class="icon"><img src="${iconUrl}" alt="" style="width:36px;height:36px;object-fit:contain;border-radius:6px;" onerror="this.style.display='none'"></div>
+                    <div class="meta">
+                        <div class="name">${escapeHtml(item.name)}</div>
+                        <div class="sub">Margin: <span class="copilot-margin">${formatGp(item.margin, true)}</span> &nbsp;•&nbsp; Volume: ${item.volume ? item.volume.toLocaleString() : '-'}</div>
+                        <div class="sub">Buy: <strong>${formatGp(unitPrice, true)}</strong></div>
+                        <div class="sub">Sell: <strong>${formatGp(item.sellPrice || 0, true)}</strong></div>
+                    </div>
+                </div>
+                <div class="copilot-actions">
+                    <button class="copilot-open" data-item-id="${item.id}">Open</button>
+                    <button class="copilot-skip" data-action="skip" data-item-id="${item.id}">Skip</button>
+                    <button class="copilot-block" data-action="block" data-item-id="${item.id}">Block</button>
+                </div>
+            `;
+        } else {
+            suggestionHtml = `<div class="copilot-empty">No flipping opportunities (volume ≥ 150) found.</div>`;
+        }
+        // Blocked list
+        const blockedArr = [...copilotBlocked];
+        let blockedHtml = '';
+        if (blockedArr.length) {
+            blockedHtml += `<div class="copilot-blocked-header"><strong>Blocked in CoPilot</strong> <button class="copilot-clear-blocks" style="float:right">Clear</button></div>`;
+            blockedHtml += '<div class="copilot-blocked-list">';
+            for (const bid of blockedArr) {
+                const it = allItems.find(x => String(x.id) === String(bid));
+                const name = it ? escapeHtml(it.name) : `Item ${bid}`;
+                const icon = it ? getIconUrl(it.icon) : '';
+                blockedHtml += `
+                    <div class="copilot-blocked-item" data-block-id="${bid}">
+                        <div class="icon"><img src="${icon || ''}" alt="" style="width:28px;height:28px;object-fit:contain;border-radius:6px;" onerror="this.style.display='none'"></div>
+                        <div class="meta"><div class="name">${name}</div></div>
+                        <div style="margin-left:auto"><button class="copilot-unblock" data-unblock-id="${bid}">Unblock</button></div>
+                    </div>
+                `;
+            }
+            blockedHtml += '</div>';
+        } else {
+            // when there are no blocked items, don't render the blocked section at all
+            blockedHtml = '';
+        }
+
+        // Combine suggestion + blocked into the content
+        let leftHtml = suggestionHtml;
+        if (blockedHtml) leftHtml += '<hr style="border:none;border-top:1px solid var(--border);margin:8px 0">' + blockedHtml;
+        wrap.innerHTML = leftHtml;
+
+        // detect suggestion change and flash the suggestion element
+        try {
+            const newId = item ? String(item.id) : null;
+            const changed = newId && newId !== copilotLastSuggestedId;
+            copilotLastSuggestedId = newId;
+            if (changed) {
+                const itemEl = wrap.querySelector('.copilot-item');
+                if (itemEl) {
+                    itemEl.classList.add('copilot-flash');
+                    // remove the class after animation completes
+                    setTimeout(() => { try { itemEl.classList.remove('copilot-flash'); } catch (e) {} }, 1200);
+                }
+            }
+        } catch (e) { /* ignore */ }
+        // attach handlers for suggestion
+        if (item) {
+            const openBtn = wrap.querySelector('.copilot-open');
+            if (openBtn) openBtn.addEventListener('click', () => {
+                const id = openBtn.dataset.itemId;
+                const it = allItems.find(x => String(x.id) === String(id));
+                if (it) {
+                    openModal(it);
+                    toggleCopilotDropdown(false);
+                }
+            });
+            wrap.querySelectorAll('[data-action="skip"]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const id = btn.dataset.itemId;
+                    copilotSessionSkipped.add(String(id));
+                    // re-render to show next best and keep menu open
+                    renderCopilotMenu();
+                });
+            });
+            wrap.querySelectorAll('[data-action="block"]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const id = btn.dataset.itemId;
+                    copilotBlocked.add(String(id));
+                    saveCopilotBlocked();
+                    // re-render to show next best and keep menu open
+                    renderCopilotMenu();
+                });
+            });
+            // add-to-queue feature removed
+        }
+
+        // blocked list handlers
+        wrap.querySelectorAll('.copilot-unblock').forEach(b => {
+            b.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const id = b.dataset.unblockId;
+                copilotBlocked.delete(String(id));
+                saveCopilotBlocked();
+                renderCopilotMenu();
+            });
+        });
+        const clearBtn = wrap.querySelector('.copilot-clear-blocks');
+        if (clearBtn) clearBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            copilotBlocked.clear();
+            saveCopilotBlocked();
+            renderCopilotMenu();
+        });
+
+        // queue feature fully removed
+    }
+
+    function toggleCopilotDropdown(show) {
+        const dd = dom.copilotDropdown;
+        if (!dd) return;
+        const isVisible = dd.style.display !== 'none' && dd.style.display !== '';
+        const want = (typeof show === 'boolean') ? show : !isVisible;
+        if (want) {
+            copilotBlocked = loadCopilotBlocked();
+            renderCopilotMenu();
+            // position dropdown: use saved position if available, otherwise position below button
+            const saved = (function(){ try { return JSON.parse(localStorage.getItem('copilot_pos')||'null'); } catch(e){ return null; }})();
+            if (saved && typeof saved.left === 'number' && typeof saved.top === 'number') {
+                dd.style.left = saved.left + 'px';
+                dd.style.top = saved.top + 'px';
+            } else if (dom.copilotBtn) {
+                const btnRect = dom.copilotBtn.getBoundingClientRect();
+                // position slightly below the button
+                dd.style.left = Math.max(8, btnRect.left) + 'px';
+                dd.style.top = (btnRect.bottom + 8) + 'px';
+            }
+            dd.style.display = 'block';
+        } else {
+            dd.style.display = 'none';
+        }
+    }
+
+    // Dragging logic for Copilot dropdown (pointer events)
+    (function initCopilotDrag() {
+        const handle = () => dom.copilotDragHandle;
+        const dd = () => dom.copilotDropdown;
+        if (!document) return;
+        let dragging = false;
+        let offsetX = 0, offsetY = 0;
+
+        function onPointerMove(e) {
+            if (!dragging) return;
+            const clientX = e.clientX;
+            const clientY = e.clientY;
+            const el = dd();
+            if (!el) return;
+            const w = el.offsetWidth;
+            const h = el.offsetHeight;
+            let left = clientX - offsetX;
+            let top = clientY - offsetY;
+            // clamp to viewport
+            left = Math.max(8, Math.min(window.innerWidth - w - 8, left));
+            top = Math.max(8, Math.min(window.innerHeight - h - 8, top));
+            el.style.left = left + 'px';
+            el.style.top = top + 'px';
+        }
+
+        function onPointerUp(e) {
+            if (!dragging) return;
+            dragging = false;
+            document.removeEventListener('pointermove', onPointerMove);
+            document.removeEventListener('pointerup', onPointerUp);
+            // save position
+            const el = dd();
+            if (el) {
+                try {
+                    localStorage.setItem('copilot_pos', JSON.stringify({ left: parseInt(el.style.left || 0, 10), top: parseInt(el.style.top || 0, 10) }));
+                } catch (e) { /* ignore */ }
+            }
+        }
+
+        // attach once when DOM ready
+        document.addEventListener('pointerdown', function (ev) {
+            const h = handle();
+            const el = dd();
+            if (!h || !el) return;
+            if (ev.target === h || h.contains(ev.target)) {
+                ev.preventDefault();
+                dragging = true;
+                const rect = el.getBoundingClientRect();
+                offsetX = ev.clientX - rect.left;
+                offsetY = ev.clientY - rect.top;
+                document.addEventListener('pointermove', onPointerMove);
+                document.addEventListener('pointerup', onPointerUp);
+            }
+        }, { passive: false });
+    })();
 
     function getItemRarity(item) {
         const price = item.buyPrice || item.sellPrice || 0;
@@ -1735,6 +1996,24 @@
                 e.preventDefault();
                 dom.searchInput.focus();
             }
+        });
+
+        // CoPilot button
+        if (dom.copilotBtn) {
+            dom.copilotBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleCopilotDropdown();
+            });
+        }
+
+        // Close Copilot dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const dd = dom.copilotDropdown;
+            const btn = dom.copilotBtn;
+            if (!dd || !btn) return;
+            if (dd.style.display === 'none' || dd.style.display === '') return;
+            if (e.target === dd || dd.contains(e.target) || e.target === btn || btn.contains(e.target)) return;
+            toggleCopilotDropdown(false);
         });
     }
 
@@ -4967,6 +5246,10 @@
             // Ensure shimmer appears immediately after refresh
             addLastUpdatedShimmer();
             updateCardValues(oldPrices);
+            // If the CoPilot dropdown is visible, re-render its suggestion so it stays current
+            try {
+                if (dom.copilotDropdown && dom.copilotDropdown.style.display === 'block') renderCopilotMenu();
+            } catch (e) { /* ignore */ }
             // Update bond display alongside other UI values
             try { updateBondDisplay(); } catch (e) { /* ignore */ }
         } catch (e) {
