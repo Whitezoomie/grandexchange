@@ -3971,21 +3971,9 @@ body.theme-transitioning *::after {
     -webkit-font-smoothing: antialiased;
 }
 
-/* Glimmer/shimmer effect: a moving highlight band over the badge text */
+/* Disabled glimmer/shimmer effect for badge-members (was a moving highlight band) */
 .badge-members::before {
-    content: "";
-    position: absolute;
-    top: -25%;
-    left: -150%;
-    width: 55%;
-    height: 150%;
-    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.95) 50%, transparent 100%);
-    transform: skewX(-25deg);
-    filter: blur(6px);
-    mix-blend-mode: screen;
-    opacity: 0.95;
-    pointer-events: none;
-    animation: glimmer 5s linear infinite;
+    display: none;
 }
 
 @keyframes glimmer {
