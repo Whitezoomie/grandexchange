@@ -5229,6 +5229,10 @@ body.theme-transitioning *::after {
     .theme-effects-chevron {
         display: none;
     }
+    /* Hide the compact bond price from header on mobile — too cramped */
+    .bond-compact {
+        display: none !important;
+    }
     /* Compact toolbar and search bar */
     .toolbar {
         padding: 10px 14px;
@@ -6116,6 +6120,23 @@ body.theme-transitioning *::after {
 }
 .flip-header-wrap.open .flip-header-dropdown {
     display: flex;
+}
+
+/* On mobile, centre both dropdowns across the full screen width */
+@media (max-width: 640px) {
+    .stats-header-dropdown,
+    .flip-header-dropdown {
+        position: fixed;
+        top: 75px;
+        left: 14px;
+        right: 14px;
+        width: auto;
+        max-width: none;
+    }
+    .stats-header-dropdown {
+        max-height: 55vh;
+        overflow-y: auto;
+    }
 }
 
 /* Body */
