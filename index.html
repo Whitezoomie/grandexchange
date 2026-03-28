@@ -319,6 +319,45 @@
                                 </button>
                             </div>
                         </div>
+                        <!-- Live Stats button -->
+                        <div class="stats-header-wrap" id="statsHeaderWrap">
+                            <button class="header-action-btn stats-header-btn" id="statsHeaderToggle" title="Live Stats">
+                                <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/></svg>
+                                <span>Live Stats</span>
+                                <span class="stats-live-badge">LIVE</span>
+                            </button>
+                            <div class="stats-header-dropdown" id="statsHeaderDropdown">
+                                <div class="stats-panel">
+                                    <div class="stat-card" id="statsCardPlayers">
+                                        <div class="stat-card-label">Players Online (OSRS)</div>
+                                        <div class="stat-card-value" id="statsPlayerCount"><span class="stats-loading-dots">loading...</span></div>
+                                        <canvas class="stat-sparkline" id="statsPlayerGraph"></canvas>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-card-label">24h Tax Collected (GE)</div>
+                                        <div class="stat-card-value" id="statsTaxCollected">—</div>
+                                        <div class="stat-card-sub">sum of 2% tax × daily volume across all items</div>
+                                        <canvas class="stat-sparkline" id="statsTaxGraph"></canvas>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-card-label">24h GE Trade Volume</div>
+                                        <div class="stat-card-value" id="statsTradeVolume">—</div>
+                                        <div class="stat-card-sub">total gp traded in last 24h</div>
+                                        <canvas class="stat-sparkline" id="statsVolumeGraph"></canvas>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-card-label">Most Traded Item (24h)</div>
+                                        <div class="stat-card-value stat-card-name" id="statsMostTraded">—</div>
+                                        <div class="stat-card-sub" id="statsMostTradedSub"></div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-card-label">Best Flip Right Now</div>
+                                        <div class="stat-card-value stat-card-name" id="statsBestMargin">—</div>
+                                        <div class="stat-card-sub" id="statsBestMarginSub"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <!-- Flip Pick button -->
                         <div class="flip-header-wrap" id="flipHeaderWrap" style="display:none">
                             <button class="header-action-btn flip-header-btn" id="flipHeaderToggle" title="Best Flip Pick">
@@ -361,45 +400,6 @@
                             <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
                             <span>Player Highlights</span>
                         </button>
-                        <div class="hamburger-stats" id="hamburgerStats">
-                            <div class="sidebar-header collapsed" data-collapse-toggle="statsFeed">
-                                <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/></svg>
-                                <h3>Live Stats</h3>
-                                <span class="sidebar-header-hint">click to expand</span>
-                                <span class="stats-live-badge">LIVE</span>
-                            </div>
-                            <div class="sidebar-feed collapsed" id="statsFeed">
-                                <div class="stats-panel">
-                                    <div class="stat-card" id="statsCardPlayers">
-                                        <div class="stat-card-label">Players Online (OSRS)</div>
-                                        <div class="stat-card-value" id="statsPlayerCount"><span class="stats-loading-dots">loading...</span></div>
-                                        <canvas class="stat-sparkline" id="statsPlayerGraph"></canvas>
-                                    </div>
-                                    <div class="stat-card">
-                                        <div class="stat-card-label">24h Tax Collected (GE)</div>
-                                        <div class="stat-card-value" id="statsTaxCollected">—</div>
-                                        <div class="stat-card-sub">sum of 2% tax × daily volume across all items</div>
-                                        <canvas class="stat-sparkline" id="statsTaxGraph"></canvas>
-                                    </div>
-                                    <div class="stat-card">
-                                        <div class="stat-card-label">24h GE Trade Volume</div>
-                                        <div class="stat-card-value" id="statsTradeVolume">—</div>
-                                        <div class="stat-card-sub">total gp traded in last 24h</div>
-                                        <canvas class="stat-sparkline" id="statsVolumeGraph"></canvas>
-                                    </div>
-                                    <div class="stat-card">
-                                        <div class="stat-card-label">Most Traded Item (24h)</div>
-                                        <div class="stat-card-value stat-card-name" id="statsMostTraded">—</div>
-                                        <div class="stat-card-sub" id="statsMostTradedSub"></div>
-                                    </div>
-                                    <div class="stat-card">
-                                        <div class="stat-card-label">Best Flip Right Now</div>
-                                        <div class="stat-card-value stat-card-name" id="statsBestMargin">—</div>
-                                        <div class="stat-card-sub" id="statsBestMarginSub"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                         <div class="hamburger-changelog" id="hamburgerChangelog">
                             <button class="hamburger-menu-item sidebar-header collapsed" id="changelogToggle" data-collapse-toggle="changelogFeed" title="Changelog">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M3 5h18v14H3z"/><path d="M7 9h10M7 13h6"/></svg>

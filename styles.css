@@ -6049,6 +6049,35 @@ body.theme-transitioning *::after {
     }
 }
 
+/* ===== LIVE STATS — header dropdown ===== */
+.stats-header-wrap {
+    position: relative;
+}
+.stats-header-wrap.open .stats-header-btn {
+    background: var(--bg-card-hover);
+    border-color: var(--green);
+    color: var(--green);
+}
+.stats-header-btn {
+    color: var(--green);
+}
+.stats-header-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 280px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    z-index: 400;
+    display: none;
+    overflow: hidden;
+}
+.stats-header-wrap.open .stats-header-dropdown {
+    display: block;
+}
+
 /* ===== FLIP SUGGESTER — header dropdown ===== */
 .flip-header-wrap {
     position: relative;

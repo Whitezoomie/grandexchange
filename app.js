@@ -3765,20 +3765,26 @@
     }
 
     function initStatsPanel() {
-        const statsHeader = document.querySelector('.sidebar-header[data-collapse-toggle="statsFeed"]');
-        if (!statsHeader) return;
-        statsHeader.addEventListener('click', function() {
-            setTimeout(function() {
-                const feed = document.getElementById('statsFeed');
-                if (!feed) return;
-                if (!feed.classList.contains('collapsed')) {
-                    updateStatsPanel();
-                    if (!statsInterval) statsInterval = setInterval(updateStatsPanel, 5000);
-                } else {
-                    clearInterval(statsInterval);
-                    statsInterval = null;
-                }
-            }, 0);
+        const btn = document.getElementById('statsHeaderToggle');
+        const wrap = document.getElementById('statsHeaderWrap');
+        if (!btn || !wrap) return;
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const isOpen = wrap.classList.toggle('open');
+            if (isOpen) {
+                updateStatsPanel();
+                if (!statsInterval) statsInterval = setInterval(updateStatsPanel, 5000);
+            } else {
+                clearInterval(statsInterval);
+                statsInterval = null;
+            }
+        });
+        document.addEventListener('click', function(e) {
+            if (!wrap.contains(e.target) && wrap.classList.contains('open')) {
+                wrap.classList.remove('open');
+                clearInterval(statsInterval);
+                statsInterval = null;
+            }
         });
     }
 
