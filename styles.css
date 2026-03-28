@@ -846,7 +846,7 @@ body {
     padding: 20px 24px;
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 1050;
     backdrop-filter: blur(12px);
     transition: background 0.4s ease;
 }
@@ -954,15 +954,20 @@ body {
     position: absolute;
     top: calc(100% + 6px);
     right: 0px;
-    /* slightly narrower by default */
     min-width: 160px;
     width: 240px;
     max-width: 320px;
+    max-height: 80vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-light) transparent;
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     box-shadow: var(--shadow-lg);
-    z-index: 200;
+    z-index: 1100;
     padding: 6px;
     animation: themeDropdownIn 0.15s ease-out;
 }
@@ -980,8 +985,11 @@ body {
     background: none;
     border: none;
     border-radius: var(--radius-sm);
-    color: var(--text-primary);
-    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     font-family: inherit;
     cursor: pointer;
     transition: all var(--transition);
@@ -990,7 +998,7 @@ body {
 
 .hamburger-menu-item:hover {
     background: var(--bg-hover);
-    color: var(--accent);
+    color: var(--text-primary);
 }
 
 .hamburger-menu-item svg {
@@ -1008,10 +1016,12 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 10px 12px;
-    color: var(--text-primary);
-    font-size: 0.85rem;
+    padding: 8px 12px;
+    color: var(--text-muted);
+    font-size: 0.65rem;
     font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     cursor: pointer;
     border-radius: var(--radius-sm);
 }
@@ -1027,9 +1037,9 @@ body {
 
 /* When a sidebar header is used as a hamburger menu item, match the menu item's weight/size */
 .hamburger-dropdown .sidebar-header.hamburger-menu-item {
-    font-weight: 400; /* match other hamburger items */
-    color: var(--text-primary);
-    padding: 10px 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding: 8px 12px;
 }
 
 /* Make hamburger rows skinnier and consistent */
@@ -1038,7 +1048,11 @@ body {
 .hamburger-dropdown .sidebar-header {
     padding: 8px 12px;
     min-height: 36px;
-    font-size: 0.85rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
     align-items: center;
 }
 
@@ -1150,6 +1164,21 @@ body {
     color: var(--text-primary);
     line-height: 1.2;
     word-break: break-word;
+}
+
+.stat-card-bond-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.bond-icon-sm {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    image-rendering: pixelated;
+    flex-shrink: 0;
 }
 
 .stat-card-value.stat-card-name {
@@ -1800,12 +1829,12 @@ body {
     align-items: center;
     gap: 10px;
     width: 100%;
-    padding: 8px 10px;
+    padding: 8px 12px;
     background: none;
     border: 2px solid transparent;
     border-radius: var(--radius-sm);
     color: var(--text-secondary);
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-family: inherit;
     cursor: pointer;
     transition: all var(--transition);
@@ -4292,7 +4321,7 @@ body.theme-transitioning *::after {
     bottom: 0;
     background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(4px);
-    z-index: 1000;
+    z-index: 1200;
     display: none;
     align-items: center;
     justify-content: center;
@@ -5806,11 +5835,12 @@ body.theme-transitioning *::after {
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: 0;
+    padding: 8px 12px;
     background: none;
     border: none;
     cursor: pointer;
     font-family: inherit;
+    font-size: 0.85rem;
 }
 .effects-dropdown-toggle .effects-dropdown-header {
     pointer-events: none;
@@ -5848,14 +5878,14 @@ body.theme-transitioning *::after {
 .effects-toggle-option {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     width: 100%;
-    padding: 7px 10px;
+    padding: 8px 12px;
     background: none;
     border: 2px solid transparent;
     border-radius: var(--radius-sm);
     color: var(--text-secondary);
-    font-size: 0.78rem;
+    font-size: 0.85rem;
     font-family: inherit;
     cursor: pointer;
     transition: all var(--transition);
@@ -5912,14 +5942,14 @@ body.theme-transitioning *::after {
 .cursor-option {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     width: 100%;
-    padding: 5px 10px;
+    padding: 8px 12px;
     background: none;
     border: 2px solid transparent;
     border-radius: var(--radius-sm);
     color: var(--text-secondary);
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     font-family: inherit;
     cursor: pointer;
     transition: all var(--transition);
@@ -5988,14 +6018,14 @@ body.theme-transitioning *::after {
 .pet-option {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     width: 100%;
-    padding: 5px 10px;
+    padding: 8px 12px;
     background: none;
     border: 2px solid transparent;
     border-radius: var(--radius-sm);
     color: var(--text-secondary);
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     font-family: inherit;
     cursor: pointer;
     transition: all var(--transition);
@@ -6074,7 +6104,7 @@ body.theme-transitioning *::after {
     border: 1px solid var(--border);
     border-radius: var(--radius);
     box-shadow: var(--shadow-lg);
-    z-index: 400;
+    z-index: 1100;
     display: none;
     overflow: hidden;
 }
@@ -6107,13 +6137,14 @@ body.theme-transitioning *::after {
 .flip-header-dropdown {
     position: absolute;
     top: calc(100% + 8px);
-    left: 0;
+    right: 0;
+    left: auto;
     width: 240px;
     background: var(--bg-secondary);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     box-shadow: var(--shadow-lg);
-    z-index: 400;
+    z-index: 1100;
     display: none;
     flex-direction: column;
     overflow: hidden;

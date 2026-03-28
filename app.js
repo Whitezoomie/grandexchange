@@ -237,7 +237,6 @@
         favoritesStatBox: $('favoritesStatBox'),
         bondPrice: $('bondPrice'),
         bondIcon: $('bondIcon'),
-        themeEffectsSelector: $('themeEffectsSelector'),
         priceChart: $('priceChart'),
         volumeChart: $('volumeChart'),
         historyLoading: $('historyLoading'),
@@ -3802,9 +3801,6 @@
 
         toggle.addEventListener('click', function(e) {
             e.stopPropagation();
-            // Close settings dropdown if open
-            const effectsSel = document.getElementById('themeEffectsSelector');
-            if (effectsSel && effectsSel.classList.contains('open')) effectsSel.classList.remove('open');
             menu.classList.toggle('open');
         });
 
@@ -4694,8 +4690,6 @@
         const saved = localStorage.getItem('ge_theme') || 'dark';
         applyTheme(saved);
 
-        const selector = document.getElementById('themeEffectsSelector');
-        const dropdown = document.getElementById('themeEffectsDropdown');
         const themeOptions = document.getElementById('themeDropdownOptions');
 
         // Handle theme option clicks
@@ -4709,24 +4703,10 @@
                     applyTheme(theme);
                     localStorage.setItem('ge_theme', theme);
                     setTimeout(() => document.body.classList.remove('theme-transitioning'), 500);
-                    selector.classList.remove('open');
+                    document.getElementById('hamburgerMenu')?.classList.remove('open');
                 }
             });
         }
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!selector.contains(e.target)) {
-                selector.classList.remove('open');
-            }
-        });
-
-        // Close dropdown on Escape
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                selector.classList.remove('open');
-            }
-        });
     }
 
     function applyTheme(theme) {
@@ -4941,14 +4921,11 @@
     // ========================================
 
     function initEffects() {
-        const selector = document.getElementById('themeEffectsSelector');
-        const toggle = document.getElementById('themeEffectsToggle');
-        const dropdown = document.getElementById('themeEffectsDropdown');
         const onOffBtn = document.getElementById('effectsOnOffBtn');
         const onOffLabel = document.getElementById('effectsOnOffLabel');
         const statusDot = document.getElementById('effectsStatusDot');
 
-        if (!selector || !toggle || !dropdown || !onOffBtn) return;
+        if (!onOffBtn) return;
 
         // Init state
         if (!effectsEnabled) {
@@ -4960,20 +4937,6 @@
             onOffBtn.classList.add('active');
         }
 
-        // Toggle dropdown
-        toggle.addEventListener('click', function(e) {
-            e.stopPropagation();
-            // Close hamburger menu if open
-            const hamburger = document.getElementById('hamburgerMenu');
-            if (hamburger && hamburger.classList.contains('open')) hamburger.classList.remove('open');
-            selector.classList.toggle('open');
-        });
-
-        // Prevent clicks inside dropdown from closing it
-        dropdown.addEventListener('click', function(e) {
-            e.stopPropagation();
-        });
-
         // Effects on/off toggle
         onOffBtn.addEventListener('click', function() {
             effectsEnabled = !effectsEnabled;
@@ -4984,14 +4947,6 @@
             statusDot.classList.toggle('off', !effectsEnabled);
             // Hide/show pet when effects toggled
             if (petEl) petEl.style.display = effectsEnabled && currentPet !== 'none' ? '' : 'none';
-        });
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(e) {
-            if (!selector.contains(e.target)) selector.classList.remove('open');
-        });
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') selector.classList.remove('open');
         });
 
         // Collapsible sub-sections (Cursor Style, Pet Companion & Theme)
@@ -5098,10 +5053,9 @@
     let petVelY = (Math.random() - 0.5) * 7;  // Velocity Y with random initial direction
 
     function initPetCompanion() {
-        const selector = document.getElementById('themeEffectsSelector');
         const petList = document.getElementById('petList');
 
-        if (!selector || !petList) return;
+        if (!petList) return;
 
         // Build "None" option
         const noneBtn = document.createElement('button');
@@ -5396,54 +5350,7 @@
         }
     }
 
-    // Move/squish bond element next to Settings on narrow viewports
-    function repositionBondForMobile() {
-        const wrap = document.getElementById('bondPriceWrap');
-        const settings = dom.themeEffectsSelector;
-        if (!wrap || !settings) return;
-        const isMobile = window.innerWidth <= 720;
-        if (isMobile) {
-            if (!settings.querySelector('#bondPriceWrap')) {
-                wrap.classList.add('bond-compact');
-                    // Prefer placing the bond immediately to the right of the entire Settings control
-                    // (insert as a sibling after the `themeEffectsSelector` element). If that fails,
-                    // place the bond to the left of the Menu button as a fallback.
-                    try {
-                        // Insert after the settings container itself (not inside the button)
-                        settings.insertAdjacentElement('afterend', wrap);
-                    } catch (e) {
-                        const hamburgerToggle = document.getElementById('hamburgerToggle');
-                        if (hamburgerToggle && hamburgerToggle.parentElement) {
-                            hamburgerToggle.insertAdjacentElement('beforebegin', wrap);
-                        } else {
-                            // Fallback: append into settings if DOM insertion fails
-                            settings.appendChild(wrap);
-                        }
-                    }
-            }
-        } else {
-            // move back to original container (ge-radio parent)
-            const geRadio = document.getElementById('geRadio');
-            if (geRadio && !geRadio.querySelector('#bondPriceWrap')) {
-                wrap.classList.remove('bond-compact');
-                // place after the GE Radio toggle so it sits inline with radio
-                const radioToggle = geRadio.querySelector('#geRadioToggle');
-                if (radioToggle && radioToggle.parentElement === geRadio) {
-                    radioToggle.insertAdjacentElement('afterend', wrap);
-                } else {
-                    geRadio.appendChild(wrap);
-                }
-            }
-        }
-    }
 
-    // Run on load and resize
-    if (typeof window !== 'undefined') {
-        window.addEventListener('resize', debounce(repositionBondForMobile, 150));
-        document.addEventListener('DOMContentLoaded', repositionBondForMobile);
-        // call once now in case DOM is ready
-        setTimeout(repositionBondForMobile, 50);
-    }
 
     // ========================================
     // OSRS News Feed
@@ -5729,7 +5636,6 @@
             e.stopPropagation();
             // Close other open dropdowns (hamburger, settings)
             document.getElementById('hamburgerMenu')?.classList.remove('open');
-            document.getElementById('themeEffectsSelector')?.classList.remove('open');
             wrapEl.classList.toggle('open');
         });
 

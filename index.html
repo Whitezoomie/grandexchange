@@ -265,14 +265,6 @@
                         <div class="ge-radio-bars" id="geRadioBars"><span></span><span></span><span></span></div>
                         <span class="ge-radio-label" id="geRadioLabel">GE Radio</span>
                     </button>
-                    <div class="bond-price" id="bondPriceWrap" title="Current Bond price">
-                        <img id="bondIcon" src="" alt="Bond icon" class="bond-icon" style="display:none">
-                        <div class="bond-text">
-                            <span class="bond-label"></span>
-                            <span class="stat-value" id="bondPrice">-</span>
-                            <span class="price-change-indicator" id="bondPriceChange"> </span>
-                        </div>
-                    </div>
                     <div class="ge-radio-dropdown" id="geRadioDropdown">
                         <div class="ge-radio-dd-header">
                             <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
@@ -328,6 +320,14 @@
                             </button>
                             <div class="stats-header-dropdown" id="statsHeaderDropdown">
                                 <div class="stats-panel">
+                                    <div class="stat-card" id="statsCardBond">
+                                        <div class="stat-card-label">Bond Price</div>
+                                        <div class="stat-card-value stat-card-bond-row" id="bondPriceWrap">
+                                            <img id="bondIcon" src="" alt="Bond icon" class="bond-icon bond-icon-sm" style="display:none">
+                                            <span id="bondPrice">-</span>
+                                            <span class="price-change-indicator" id="bondPriceChange"> </span>
+                                        </div>
+                                    </div>
                                     <div class="stat-card" id="statsCardPlayers">
                                         <div class="stat-card-label">Players Online (OSRS)</div>
                                         <div class="stat-card-value" id="statsPlayerCount"><span class="stats-loading-dots">loading...</span></div>
@@ -458,16 +458,8 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div class="theme-effects-selector" id="themeEffectsSelector">
-                    <button class="header-action-btn" id="themeEffectsToggle" title="Theme & Effects">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M12 2a7 7 0 0 0 0 14h.5a5.5 5.5 0 0 0 0-11H12V2z"/><circle cx="12" cy="12" r="10" stroke-dasharray="2 2"/></svg>
-                        <span id="themeEffectsLabel">Settings</span>
-                        <svg class="theme-effects-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="6 9 12 15 18 9"/></svg>
-                    </button>
-                    <div class="theme-effects-dropdown" id="themeEffectsDropdown">
-                        <!-- Effects Section -->
+                        <div class="effects-dropdown-divider"></div>
+                        <!-- Settings Section -->
                         <div class="effects-dropdown-section">
                             <div class="effects-dropdown-header">Visual Effects</div>
                             <button class="effects-toggle-option" id="effectsOnOffBtn">
@@ -504,72 +496,72 @@
                                 <svg class="effects-section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="6 9 12 15 18 9"/></svg>
                             </button>
                             <div class="effects-section-body collapsed" id="themeSectionBody">
-                        <div class="theme-dropdown-options" id="themeDropdownOptions">
-                            <button class="theme-option" data-theme="dark">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #0f1117, #22263a)"></span>
-                                <span class="theme-option-name">Dark</span>
-                            </button>
-                            <button class="theme-option" data-theme="light">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #f5ebe0, #fdf8f0)"></span>
-                                <span class="theme-option-name">Light</span>
-                            </button>
-                            <button class="theme-option" data-theme="blood-moon">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #1a0a0a, #3d1111)"></span>
-                                <span class="theme-option-name">Blood Moon</span>
-                            </button>
-                            <button class="theme-option" data-theme="dark-green">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #0a1410, #132e1f)"></span>
-                                <span class="theme-option-name">Dark Forest</span>
-                            </button>
-                            <button class="theme-option" data-theme="ocean">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #0a1628, #142d4f)"></span>
-                                <span class="theme-option-name">Ocean Depths</span>
-                            </button>
-                            <button class="theme-option" data-theme="royal-purple">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #140a1e, #2a1540)"></span>
-                                <span class="theme-option-name">Royal Purple</span>
-                            </button>
-                            <button class="theme-option" data-theme="sunset">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #1a1008, #3d2810)"></span>
-                                <span class="theme-option-name">Sunset</span>
-                            </button>
-                            <button class="theme-option" data-theme="arctic">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #0d1f2d, #1a3350)"></span>
-                                <span class="theme-option-name">Arctic</span>
-                            </button>
-                            <button class="theme-option" data-theme="volcanic">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #121212, #262626)"></span>
-                                <span class="theme-option-name">Volcanic</span>
-                            </button>
-                            <button class="theme-option" data-theme="void">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #050508, #10101e)"></span>
-                                <span class="theme-option-name">Void Knight</span>
-                            </button>
-                            <button class="theme-option" data-theme="desert">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #1e1608, #3c2e18)"></span>
-                                <span class="theme-option-name">Desert</span>
-                            </button>
-                            <button class="theme-option" data-theme="cosmic">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #07040f, #180e32)"></span>
-                                <span class="theme-option-name">Cosmic</span>
-                            </button>
-                            <button class="theme-option" data-theme="toxic">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #080e08, #142014)"></span>
-                                <span class="theme-option-name">Toxic</span>
-                            </button>
-                            <button class="theme-option" data-theme="golden">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #16100a, #2e2010)"></span>
-                                <span class="theme-option-name">Golden</span>
-                            </button>
-                            <button class="theme-option" data-theme="marketplace-dashboard">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #0b0f12, #2b2f33)"></span>
-                                <span class="theme-option-name">Marketplace Dashboard</span>
-                            </button>
-                            <button class="theme-option" data-theme="midnight">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #080a10, #141830)"></span>
-                                <span class="theme-option-name">Midnight</span>
-                            </button>
-                        </div>
+                                <div class="theme-dropdown-options" id="themeDropdownOptions">
+                                    <button class="theme-option" data-theme="dark">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #0f1117, #22263a)"></span>
+                                        <span class="theme-option-name">Dark</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="light">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #f5ebe0, #fdf8f0)"></span>
+                                        <span class="theme-option-name">Light</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="blood-moon">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #1a0a0a, #3d1111)"></span>
+                                        <span class="theme-option-name">Blood Moon</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="dark-green">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #0a1410, #132e1f)"></span>
+                                        <span class="theme-option-name">Dark Forest</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="ocean">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #0a1628, #142d4f)"></span>
+                                        <span class="theme-option-name">Ocean Depths</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="royal-purple">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #140a1e, #2a1540)"></span>
+                                        <span class="theme-option-name">Royal Purple</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="sunset">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #1a1008, #3d2810)"></span>
+                                        <span class="theme-option-name">Sunset</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="arctic">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #0d1f2d, #1a3350)"></span>
+                                        <span class="theme-option-name">Arctic</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="volcanic">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #121212, #262626)"></span>
+                                        <span class="theme-option-name">Volcanic</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="void">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #050508, #10101e)"></span>
+                                        <span class="theme-option-name">Void Knight</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="desert">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #1e1608, #3c2e18)"></span>
+                                        <span class="theme-option-name">Desert</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="cosmic">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #07040f, #180e32)"></span>
+                                        <span class="theme-option-name">Cosmic</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="toxic">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #080e08, #142014)"></span>
+                                        <span class="theme-option-name">Toxic</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="golden">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #16100a, #2e2010)"></span>
+                                        <span class="theme-option-name">Golden</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="marketplace-dashboard">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #0b0f12, #2b2f33)"></span>
+                                        <span class="theme-option-name">Marketplace Dashboard</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="midnight">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #080a10, #141830)"></span>
+                                        <span class="theme-option-name">Midnight</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
