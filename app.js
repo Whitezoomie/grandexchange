@@ -14,7 +14,7 @@
     const DEBOUNCE_MS = 300;
 
     // ========================================
-    // FEEDBACK — replaces changelog
+    // FEEDBACK Ã¢â‚¬â€ replaces changelog
     // ========================================
 
     // ========================================
@@ -143,10 +143,6 @@
     let lastUpdatedInterval = null;
     let effectsEnabled = localStorage.getItem('ge_effects') !== 'off';
     let previousPrices = {};  // track old prices for pulse
-    let copilotBlocked = new Set(); // blocked item ids for Copilot menu (persisted)
-    let copilotSessionSkipped = new Set(); // runtime-only skipped ids for Copilot
-    let copilotLastSuggestedId = null; // track last suggestion to highlight changes
-
     // --- SEO Meta Helpers ---
     const DEFAULT_TITLE = 'OSRS Grand Exchange Tracker | Live Item Prices & Market Data';
     const DEFAULT_DESCRIPTION = 'Track OSRS Grand Exchange prices in real-time. Live price charts, buy/sell margins, flip alerts, and historical data for 4,000+ Old School RuneScape items. Free GE tracker.';
@@ -247,10 +243,6 @@
         historyLoading: $('historyLoading'),
         historyError: $('historyError'),
         backToTop: $('backToTop'),
-        copilotBtn: $('copilotBtn'),
-        copilotDropdown: $('copilotDropdown'),
-        copilotContent: $('copilotContent'),
-        copilotDragHandle: $('copilotDragHandle'),
     };
 
     
@@ -384,12 +376,10 @@
             // Yield to the browser before the heavy filter+render pass
             await new Promise(r => setTimeout(r, 0));
             applyFilters();
-            // If CoPilot dropdown is open, update its suggestion now that items are loaded
-            try {
-                if (dom.copilotDropdown && dom.copilotDropdown.style.display === 'block') renderCopilotMenu();
-            } catch (e) { /* ignore */ }
             // Update the bond display if present
             try { updateBondDisplay(); } catch (e) { /* ignore */ }
+            // Initialize flip suggester now that allItems is ready
+            try { initFlipSuggester(); } catch (e) { /* ignore */ }
 
             // Deep-link: open specific item if specified
             // First check for data-initial-item attribute (pre-rendered pages)
@@ -489,7 +479,7 @@
         if (pageItems.length === 0) {
             dom.itemsContainer.innerHTML = `
                 <div class="no-results">
-                    <div class="no-results-icon">🔍</div>
+                    <div class="no-results-icon">Ã°Å¸â€Â</div>
                     <h3>No items found</h3>
                     <p>Try adjusting your search or filters</p>
                 </div>`;
@@ -506,254 +496,6 @@
     }
 
     // ========================================
-    // CoPilot quick-suggest menu
-    // ========================================
-    function loadCopilotBlocked() {
-        try {
-            const raw = localStorage.getItem('copilot_blocked');
-            if (!raw) return new Set();
-            const arr = JSON.parse(raw);
-            return new Set(Array.isArray(arr) ? arr : []);
-        } catch (e) { return new Set(); }
-    }
-
-    function saveCopilotBlocked() {
-        try {
-            localStorage.setItem('copilot_blocked', JSON.stringify([...copilotBlocked]));
-        } catch (e) { /* ignore */ }
-    }
-
-    // copilot queue feature removed
-
-    function getBestCopilotItem() {
-        if (!allItems || !allItems.length) return null;
-        const candidates = allItems.filter(it => {
-            if (it.volume == null) return false;
-            if ((it.volume || 0) < 150) return false; // require >=150 daily volume
-            if (it.margin == null) return false;
-            if (copilotBlocked.has(String(it.id)) || copilotBlocked.has(Number(it.id))) return false;
-            if (copilotSessionSkipped.has(String(it.id)) || copilotSessionSkipped.has(Number(it.id))) return false;
-            // ensure there is price data
-            if (!it.buyPrice && !it.sellPrice) return false;
-            return true;
-        });
-        if (!candidates.length) return null;
-        candidates.sort((a, b) => (b.margin || 0) - (a.margin || 0));
-        return candidates[0];
-    }
-
-    function renderCopilotMenu() {
-        const wrap = dom.copilotContent;
-        if (!wrap) return;
-        const item = getBestCopilotItem();
-        // Build markup: suggestion (if any) and blocked list
-        const iconUrl = item ? getIconUrl(item.icon) || '' : '';
-        let suggestionHtml = '';
-        if (item) {
-            // Calculate cost to buy buy limit (if available)
-            const unitPrice = item.buyPrice || item.sellPrice || 0;
-            const limit = item.limit || 0;
-            const totalCost = unitPrice && limit ? unitPrice * limit : null;
-            suggestionHtml = `
-                <div class="copilot-item">
-                    <div class="icon"><img src="${iconUrl}" alt="" style="width:36px;height:36px;object-fit:contain;border-radius:6px;" onerror="this.style.display='none'"></div>
-                    <div class="meta">
-                        <div class="name">${escapeHtml(item.name)}</div>
-                        <div class="sub">Margin: <span class="copilot-margin">${formatGp(item.margin, true)}</span> &nbsp;•&nbsp; Volume: ${item.volume ? item.volume.toLocaleString() : '-'}</div>
-                        <div class="sub">Buy: <strong>${formatGp(unitPrice, true)}</strong></div>
-                        <div class="sub">Sell: <strong>${formatGp(item.sellPrice || 0, true)}</strong></div>
-                    </div>
-                </div>
-                <div class="copilot-actions">
-                    <button class="copilot-open" data-item-id="${item.id}">Open</button>
-                    <button class="copilot-skip" data-action="skip" data-item-id="${item.id}">Skip</button>
-                    <button class="copilot-block" data-action="block" data-item-id="${item.id}">Block</button>
-                </div>
-            `;
-        } else {
-            suggestionHtml = `<div class="copilot-empty">No flipping opportunities (volume ≥ 150) found.</div>`;
-        }
-        // Blocked list
-        const blockedArr = [...copilotBlocked];
-        let blockedHtml = '';
-        if (blockedArr.length) {
-            blockedHtml += `<div class="copilot-blocked-header"><strong>Blocked in CoPilot</strong> <button class="copilot-clear-blocks" style="float:right">Clear</button></div>`;
-            blockedHtml += '<div class="copilot-blocked-list">';
-            for (const bid of blockedArr) {
-                const it = allItems.find(x => String(x.id) === String(bid));
-                const name = it ? escapeHtml(it.name) : `Item ${bid}`;
-                const icon = it ? getIconUrl(it.icon) : '';
-                blockedHtml += `
-                    <div class="copilot-blocked-item" data-block-id="${bid}">
-                        <div class="icon"><img src="${icon || ''}" alt="" style="width:28px;height:28px;object-fit:contain;border-radius:6px;" onerror="this.style.display='none'"></div>
-                        <div class="meta"><div class="name">${name}</div></div>
-                        <div style="margin-left:auto"><button class="copilot-unblock" data-unblock-id="${bid}">Unblock</button></div>
-                    </div>
-                `;
-            }
-            blockedHtml += '</div>';
-        } else {
-            // when there are no blocked items, don't render the blocked section at all
-            blockedHtml = '';
-        }
-
-        // Combine suggestion + blocked into the content
-        let leftHtml = suggestionHtml;
-        if (blockedHtml) leftHtml += '<hr style="border:none;border-top:1px solid var(--border);margin:8px 0">' + blockedHtml;
-        wrap.innerHTML = leftHtml;
-
-        // detect suggestion change and flash the suggestion element
-        try {
-            const newId = item ? String(item.id) : null;
-            const changed = newId && newId !== copilotLastSuggestedId;
-            copilotLastSuggestedId = newId;
-            if (changed) {
-                const itemEl = wrap.querySelector('.copilot-item');
-                if (itemEl) {
-                    itemEl.classList.add('copilot-flash');
-                    // remove the class after animation completes
-                    setTimeout(() => { try { itemEl.classList.remove('copilot-flash'); } catch (e) {} }, 1200);
-                }
-            }
-        } catch (e) { /* ignore */ }
-        // attach handlers for suggestion
-        if (item) {
-            const openBtn = wrap.querySelector('.copilot-open');
-            if (openBtn) openBtn.addEventListener('click', () => {
-                const id = openBtn.dataset.itemId;
-                const it = allItems.find(x => String(x.id) === String(id));
-                if (it) {
-                    openModal(it);
-                    toggleCopilotDropdown(false);
-                }
-            });
-            wrap.querySelectorAll('[data-action="skip"]').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const id = btn.dataset.itemId;
-                    copilotSessionSkipped.add(String(id));
-                    // re-render to show next best and keep menu open
-                    renderCopilotMenu();
-                });
-            });
-            wrap.querySelectorAll('[data-action="block"]').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const id = btn.dataset.itemId;
-                    copilotBlocked.add(String(id));
-                    saveCopilotBlocked();
-                    // re-render to show next best and keep menu open
-                    renderCopilotMenu();
-                });
-            });
-            // add-to-queue feature removed
-        }
-
-        // blocked list handlers
-        wrap.querySelectorAll('.copilot-unblock').forEach(b => {
-            b.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const id = b.dataset.unblockId;
-                copilotBlocked.delete(String(id));
-                saveCopilotBlocked();
-                renderCopilotMenu();
-            });
-        });
-        const clearBtn = wrap.querySelector('.copilot-clear-blocks');
-        if (clearBtn) clearBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            copilotBlocked.clear();
-            saveCopilotBlocked();
-            renderCopilotMenu();
-        });
-
-        // queue feature fully removed
-    }
-
-    function toggleCopilotDropdown(show) {
-        const dd = dom.copilotDropdown;
-        if (!dd) return;
-        const isVisible = dd.style.display !== 'none' && dd.style.display !== '';
-        const want = (typeof show === 'boolean') ? show : !isVisible;
-        if (want) {
-            copilotBlocked = loadCopilotBlocked();
-            renderCopilotMenu();
-            // position dropdown: use saved position if available, otherwise position below button
-            const saved = (function(){ try { return JSON.parse(localStorage.getItem('copilot_pos')||'null'); } catch(e){ return null; }})();
-            if (saved && typeof saved.left === 'number' && typeof saved.top === 'number') {
-                dd.style.left = saved.left + 'px';
-                dd.style.top = saved.top + 'px';
-            } else if (dom.copilotBtn) {
-                const btnRect = dom.copilotBtn.getBoundingClientRect();
-                // position slightly below the button
-                dd.style.left = Math.max(8, btnRect.left) + 'px';
-                dd.style.top = (btnRect.bottom + 8) + 'px';
-            }
-            dd.style.display = 'block';
-        } else {
-            dd.style.display = 'none';
-        }
-    }
-
-    // Dragging logic for Copilot dropdown (pointer events)
-    (function initCopilotDrag() {
-        const handle = () => dom.copilotDragHandle;
-        const dd = () => dom.copilotDropdown;
-        if (!document) return;
-        let dragging = false;
-        let offsetX = 0, offsetY = 0;
-
-        function onPointerMove(e) {
-            if (!dragging) return;
-            const clientX = e.clientX;
-            const clientY = e.clientY;
-            const el = dd();
-            if (!el) return;
-            const w = el.offsetWidth;
-            const h = el.offsetHeight;
-            let left = clientX - offsetX;
-            let top = clientY - offsetY;
-            // clamp to viewport
-            left = Math.max(8, Math.min(window.innerWidth - w - 8, left));
-            top = Math.max(8, Math.min(window.innerHeight - h - 8, top));
-            el.style.left = left + 'px';
-            el.style.top = top + 'px';
-        }
-
-        function onPointerUp(e) {
-            if (!dragging) return;
-            dragging = false;
-            document.removeEventListener('pointermove', onPointerMove);
-            document.removeEventListener('pointerup', onPointerUp);
-            // save position
-            const el = dd();
-            if (el) {
-                try {
-                    localStorage.setItem('copilot_pos', JSON.stringify({ left: parseInt(el.style.left || 0, 10), top: parseInt(el.style.top || 0, 10) }));
-                } catch (e) { /* ignore */ }
-            }
-        }
-
-        // attach once when DOM ready
-        document.addEventListener('pointerdown', function (ev) {
-            const h = handle();
-            const el = dd();
-            if (!h || !el) return;
-            if (ev.target === h || h.contains(ev.target)) {
-                ev.preventDefault();
-                dragging = true;
-                const rect = el.getBoundingClientRect();
-                offsetX = ev.clientX - rect.left;
-                offsetY = ev.clientY - rect.top;
-                document.addEventListener('pointermove', onPointerMove);
-                document.addEventListener('pointerup', onPointerUp);
-            }
-        }, { passive: false });
-    })();
 
     function getItemRarity(item) {
         const price = item.buyPrice || item.sellPrice || 0;
@@ -784,7 +526,7 @@
             </button>
             <div class="item-card-header">
                 <img class="item-icon" src="${iconUrl}" alt="${escapeHtml(item.name)} icon" loading="lazy" 
-                     onerror="this.outerHTML='<div class=\\'item-icon placeholder\\'>📦</div>'">
+                     onerror="this.outerHTML='<div class=\\'item-icon placeholder\\'>Ã°Å¸â€œÂ¦</div>'">
                 <span class="item-name">${escapeHtml(item.name)}</span>
             </div>
             <div class="item-badges">
@@ -1177,7 +919,7 @@
                 case 'volume-desc':
                     return (b.volume || 0) - (a.volume || 0);
                 case 'best-flipping':
-                    // Score = margin% × volume. Requires volume >= 100. Higher margin + higher volume = better flipping opportunity
+                    // Score = margin% Ãƒâ€” volume. Requires volume >= 100. Higher margin + higher volume = better flipping opportunity
                     const volB = b.volume || 0;
                     const volA = a.volume || 0;
                     const scoreB = volB >= 100 ? (b.margin || 0) * volB : -Infinity;
@@ -1209,7 +951,7 @@
     function animateCardEntry() {
         if (!effectsEnabled) return;
         const cards = dom.itemsContainer.querySelectorAll('.item-card');
-        // Only animate the first 20 cards — animating 100 causes too much
+        // Only animate the first 20 cards Ã¢â‚¬â€ animating 100 causes too much
         // Style & Layout work on the main thread.
         const limit = Math.min(cards.length, 20);
         for (let i = 0; i < limit; i++) {
@@ -1724,7 +1466,7 @@
         updateFavoritesCount();
     }
 
-    // Item Spotlight removed — feature deprecated and markup hidden via CSS
+    // Item Spotlight removed Ã¢â‚¬â€ feature deprecated and markup hidden via CSS
 
     // ========================================
     // Event Listeners
@@ -1998,23 +1740,6 @@
             }
         });
 
-        // CoPilot button
-        if (dom.copilotBtn) {
-            dom.copilotBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                toggleCopilotDropdown();
-            });
-        }
-
-        // Close Copilot dropdown when clicking outside
-        document.addEventListener('click', (e) => {
-            const dd = dom.copilotDropdown;
-            const btn = dom.copilotBtn;
-            if (!dd || !btn) return;
-            if (dd.style.display === 'none' || dd.style.display === '') return;
-            if (e.target === dd || dd.contains(e.target) || e.target === btn || btn.contains(e.target)) return;
-            toggleCopilotDropdown(false);
-        });
     }
 
     function scrollToItems() {
@@ -2065,31 +1790,31 @@
         const month = now.getMonth(); // 0-indexed
         const day = now.getDate();
 
-        // Christmas: Dec 1 – Dec 31
+        // Christmas: Dec 1 Ã¢â‚¬â€œ Dec 31
         if (month === 11) {
-            return { id: 'christmas', emoji: '🎄', message: 'Happy Holidays, adventurer! May your drops be merry and bright.' };
+            return { id: 'christmas', emoji: 'Ã°Å¸Å½â€ž', message: 'Happy Holidays, adventurer! May your drops be merry and bright.' };
         }
-        // Halloween: Oct 15 – Oct 31
+        // Halloween: Oct 15 Ã¢â‚¬â€œ Oct 31
         if (month === 9 && day >= 15) {
-            return { id: 'halloween', emoji: '🎃', message: 'Spooky season in Gielinor! Watch out for revenants...' };
+            return { id: 'halloween', emoji: 'Ã°Å¸Å½Æ’', message: 'Spooky season in Gielinor! Watch out for revenants...' };
         }
         // Leagues: typically Nov (approximate)
         if (month === 10) {
-            return { id: 'leagues', emoji: '🏆', message: 'Leagues season is here! Check out the special game mode.' };
+            return { id: 'leagues', emoji: 'Ã°Å¸Ââ€ ', message: 'Leagues season is here! Check out the special game mode.' };
         }
         // Deadman Mode: typically Mar (approximate)
         if (month === 1) {
-            return { id: 'dmm', emoji: '💀', message: 'Deadman Mode is live! PvP prices may shift dramatically.' };
+            return { id: 'dmm', emoji: 'Ã°Å¸â€™â‚¬', message: 'Deadman Mode is live! PvP prices may shift dramatically.' };
         }
 
         return null;
     }
 
     // ========================================
-    // GE Radio — OSRS Ambient Soundtrack
+    // GE Radio Ã¢â‚¬â€ OSRS Ambient Soundtrack
     // ========================================
 
-    // Direct .ogg links from oldschool.runescape.wiki — all 834 OSRS music tracks
+    // Direct .ogg links from oldschool.runescape.wiki Ã¢â‚¬â€ all 834 OSRS music tracks
     const GE_RADIO_TRACKS = [
         { name: '7th Realm', url: 'https://oldschool.runescape.wiki/images/7th_Realm.ogg' },
         { name: 'Adventure', url: 'https://oldschool.runescape.wiki/images/Adventure.ogg' },
@@ -2995,7 +2720,7 @@
             ensureAudio();
             audio.src = track.url;
             audio.volume = volumeSlider.value / 100;
-            nowPlayingEl.textContent = '♫ ' + track.name;
+            nowPlayingEl.textContent = 'Ã¢â„¢Â« ' + track.name;
             labelEl.textContent = track.name;
             trackSelect.value = index;
         }
@@ -3079,7 +2804,7 @@
             if (shuffleCheck.checked) buildShufflePlaylist();
         });
 
-        // Track select dropdown — pick a specific song
+        // Track select dropdown Ã¢â‚¬â€ pick a specific song
         trackSelect.addEventListener('change', () => {
             const idx = parseInt(trackSelect.value, 10);
             if (idx >= 0 && idx < GE_RADIO_TRACKS.length) {
@@ -3088,7 +2813,7 @@
         });
     }
 
-    // Flip sentiment voting removed — functions deleted.
+    // Flip sentiment voting removed Ã¢â‚¬â€ functions deleted.
     // Remove any leftover flip-vote UI markup at runtime.
     document.addEventListener('DOMContentLoaded', function() {
         try {
@@ -3617,7 +3342,7 @@
     // ========================================
 
     // ========================================
-    // VISITOR COUNTER (WebSocket → Render)
+    // VISITOR COUNTER (WebSocket Ã¢â€ â€™ Render)
     // ========================================
     function initVisitorCounter() {
         // Use the feedback server URL if present (keeps backend host consistent).
@@ -3646,7 +3371,7 @@
                 totalVisitorsEl.textContent = (Number(data.total) + TOTAL_BASE).toLocaleString();
         }
 
-        // 1) HTTP fetch first — works reliably & wakes a sleeping Render instance
+        // 1) HTTP fetch first Ã¢â‚¬â€ works reliably & wakes a sleeping Render instance
         async function fetchStats() {
             try {
                 const res = await fetch(SERVER_URL);
@@ -4643,7 +4368,7 @@
     }
 
     // ========================================
-    // Custom Cursors — OSRS themed
+    // Custom Cursors Ã¢â‚¬â€ OSRS themed
     // ========================================
 
     const CURSOR_LIST = [
@@ -4816,7 +4541,7 @@
             // Use the PNG image directly from the OSRS wiki
             dataUri = `url("${cur.png}") ${cur.hotspot[0]} ${cur.hotspot[1]}, auto`;
         } else {
-            // Build a clean data URI — encode the SVG properly for use in CSS url()
+            // Build a clean data URI Ã¢â‚¬â€ encode the SVG properly for use in CSS url()
             const svgClean = cur.svg
                 .replace(/\n/g, '')
                 .replace(/\s{2,}/g, ' ')
@@ -5246,14 +4971,12 @@
             // Ensure shimmer appears immediately after refresh
             addLastUpdatedShimmer();
             updateCardValues(oldPrices);
-            // If the CoPilot dropdown is visible, re-render its suggestion so it stays current
-            try {
-                if (dom.copilotDropdown && dom.copilotDropdown.style.display === 'block') renderCopilotMenu();
-            } catch (e) { /* ignore */ }
             // Update bond display alongside other UI values
             try { updateBondDisplay(); } catch (e) { /* ignore */ }
+            // Refresh flip suggestion with updated prices
+            try { refreshFlipSuggestion(); } catch (e) { /* ignore */ }
         } catch (e) {
-            // Silent fail — next refresh will try again
+            // Silent fail Ã¢â‚¬â€ next refresh will try again
         }
     }
 
@@ -5418,4 +5141,278 @@
     } else {
         init();
     }
+
+    // ========================================
+    // Flip Suggester
+    // ========================================
+
+    let flipBlockList = (function () {
+        try {
+            const s = localStorage.getItem('ge_flip_blocklist');
+            return s ? new Set(JSON.parse(s)) : new Set();
+        } catch { return new Set(); }
+    })();
+
+    // Session-only skip set (resets on page reload)
+    let flipSkipSet = new Set();
+    let flipCurrentItem = null;
+    let flipSuggesterReady = false;
+
+    function saveFlipBlockList() {
+        localStorage.setItem('ge_flip_blocklist', JSON.stringify([...flipBlockList]));
+    }
+
+    function getBestFlipCandidates() {
+        return allItems
+            .filter(item =>
+                item.volume >= 150 &&
+                item.margin > 0 &&
+                item.buyPrice > 0 &&
+                item.sellPrice > 0 &&
+                !flipBlockList.has(item.id) &&
+                !flipSkipSet.has(item.id)
+            )
+            .sort((a, b) => (b.margin || 0) - (a.margin || 0));
+    }
+
+    function showFlipSuggestion() {
+        const bodyEl = document.getElementById('flipPanelBody');
+        const actionsEl = document.getElementById('flipPanelActions');
+        if (!bodyEl || !actionsEl) return;
+
+        let candidates = getBestFlipCandidates();
+
+        // If skips have exhausted all options, silently reset skip set and retry
+        if (candidates.length === 0 && flipSkipSet.size > 0) {
+            flipSkipSet.clear();
+            candidates = getBestFlipCandidates();
+        }
+
+        if (candidates.length === 0) {
+            bodyEl.innerHTML = `<div class="flip-no-results">No items found with ≥150 daily volume and a positive margin.</div>`;
+            actionsEl.style.display = 'none';
+            flipCurrentItem = null;
+            return;
+        }
+
+        flipCurrentItem = candidates[0];
+        actionsEl.style.display = '';
+
+        const marginPct = flipCurrentItem.buyPrice > 0
+            ? ((flipCurrentItem.margin / flipCurrentItem.buyPrice) * 100).toFixed(2)
+            : '0.00';
+        const pct = parseFloat(marginPct);
+        const roiClass = pct >= 5 ? 'positive' : pct >= 2 ? 'neutral-flip' : 'weak-flip';
+        const iconUrl = getIconUrl(flipCurrentItem.icon);
+        const limitProfit = flipCurrentItem.limit > 0
+            ? formatGp(flipCurrentItem.margin * flipCurrentItem.limit)
+            : '—';
+
+        bodyEl.innerHTML = `
+            <div class="flip-suggestion-card">
+                <div class="flip-item-header">
+                    <img class="flip-item-icon" src="${iconUrl}" alt="${escapeHtml(flipCurrentItem.name)}"
+                         onerror="this.style.display='none'">
+                    <span class="flip-item-name">${escapeHtml(flipCurrentItem.name)}</span>
+                </div>
+                <div class="flip-stats">
+                    <div class="flip-stat">
+                        <span class="flip-stat-label">Margin</span>
+                        <span class="flip-stat-value positive" id="flipLiveMargin">${formatGp(flipCurrentItem.margin, true)}</span>
+                    </div>
+                    <div class="flip-stat">
+                        <span class="flip-stat-label">ROI</span>
+                        <span class="flip-stat-value ${roiClass}" id="flipLiveRoi">${marginPct}%</span>
+                    </div>
+                    <div class="flip-stat">
+                        <span class="flip-stat-label">Buy</span>
+                        <span class="flip-stat-value" id="flipLiveBuy">${formatGp(flipCurrentItem.buyPrice)}</span>
+                    </div>
+                    <div class="flip-stat">
+                        <span class="flip-stat-label">Sell</span>
+                        <span class="flip-stat-value" id="flipLiveSell">${formatGp(flipCurrentItem.sellPrice)}</span>
+                    </div>
+                    <div class="flip-stat">
+                        <span class="flip-stat-label">Volume</span>
+                        <span class="flip-stat-value" id="flipLiveVolume">${flipCurrentItem.volume.toLocaleString()}<span class="flip-stat-unit">/day</span></span>
+                    </div>
+                    <div class="flip-stat">
+                        <span class="flip-stat-label">Buy Limit</span>
+                        <span class="flip-stat-value">${flipCurrentItem.limit > 0 ? flipCurrentItem.limit.toLocaleString() : '—'}</span>
+                    </div>
+                    <div class="flip-stat flip-stat-wide">
+                        <span class="flip-stat-label">Max Limit Profit</span>
+                        <span class="flip-stat-value positive" id="flipLiveLimitProfit">${limitProfit}</span>
+                    </div>
+                </div>
+            </div>`;
+    }
+
+    // Called on every price refresh — updates numbers in-place without switching items
+    function refreshFlipSuggestion() {
+        if (!flipSuggesterReady) return;
+
+        // If current item is no longer valid (margin gone ≤0 or volume dropped below threshold),
+        // or there is no current item, do a full re-pick
+        if (!flipCurrentItem ||
+            flipCurrentItem.margin <= 0 ||
+            flipCurrentItem.volume < 150 ||
+            flipBlockList.has(flipCurrentItem.id) ||
+            flipSkipSet.has(flipCurrentItem.id)) {
+            showFlipSuggestion();
+            return;
+        }
+
+        // Update the live stat elements in-place
+        const marginPct = flipCurrentItem.buyPrice > 0
+            ? ((flipCurrentItem.margin / flipCurrentItem.buyPrice) * 100).toFixed(2)
+            : '0.00';
+        const pct = parseFloat(marginPct);
+        const roiClass = pct >= 5 ? 'positive' : pct >= 2 ? 'neutral-flip' : 'weak-flip';
+        const limitProfit = flipCurrentItem.limit > 0
+            ? formatGp(flipCurrentItem.margin * flipCurrentItem.limit)
+            : '—';
+
+        const set = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+        const setClass = (id, cls) => { const el = document.getElementById(id); if (el) { el.className = 'flip-stat-value ' + cls; } };
+
+        set('flipLiveMargin', formatGp(flipCurrentItem.margin, true));
+        set('flipLiveRoi', marginPct + '%');
+        setClass('flipLiveRoi', roiClass);
+        set('flipLiveBuy', formatGp(flipCurrentItem.buyPrice));
+        set('flipLiveSell', formatGp(flipCurrentItem.sellPrice));
+        set('flipLiveVolume', flipCurrentItem.volume.toLocaleString());
+        set('flipLiveLimitProfit', limitProfit);
+    }
+
+    function updateFlipBlockCount() {
+        const el = document.getElementById('flipBlockCount');
+        if (el) el.textContent = flipBlockList.size;
+    }
+
+    function renderFlipBlockListModal() {
+        const listEl = document.getElementById('flipBlockListItems');
+        if (!listEl) return;
+
+        if (flipBlockList.size === 0) {
+            listEl.innerHTML = `<p class="flip-blocklist-empty">No items blocked yet.</p>`;
+            return;
+        }
+
+        listEl.innerHTML = '';
+        [...flipBlockList].forEach(itemId => {
+            const item = allItems.find(i => i.id === itemId);
+            const name = item ? item.name : `Item #${itemId}`;
+            const iconUrl = item ? getIconUrl(item.icon) : '';
+            const row = document.createElement('div');
+            row.className = 'flip-blocklist-row';
+            row.innerHTML = `
+                ${iconUrl ? `<img class="flip-blocklist-icon" src="${iconUrl}" alt="" onerror="this.style.display='none'">` : ''}
+                <span class="flip-blocklist-name">${escapeHtml(name)}</span>
+                <button class="flip-blocklist-remove" data-item-id="${escapeHtml(String(itemId))}" title="Remove from block list">✕</button>`;
+            listEl.appendChild(row);
+        });
+
+        listEl.querySelectorAll('.flip-blocklist-remove').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const rawId = btn.dataset.itemId;
+                const id = isNaN(rawId) ? rawId : parseInt(rawId, 10);
+                flipBlockList.delete(id);
+                saveFlipBlockList();
+                updateFlipBlockCount();
+                renderFlipBlockListModal();
+                showFlipSuggestion();
+            });
+        });
+    }
+
+    function initFlipSuggester() {
+        if (flipSuggesterReady) {
+            showFlipSuggestion();
+            return;
+        }
+        flipSuggesterReady = true;
+
+        const wrapEl = document.getElementById('flipHeaderWrap');
+        const toggleBtn = document.getElementById('flipHeaderToggle');
+        const dropdown = document.getElementById('flipHeaderDropdown');
+        const viewBtn = document.getElementById('flipViewBtn');
+        const skipBtn = document.getElementById('flipSkipBtn');
+        const blockBtn = document.getElementById('flipBlockBtn');
+        const blockListBtn = document.getElementById('flipBlockListBtn');
+        const blockListOverlay = document.getElementById('flipBlockListOverlay');
+        const blockListClose = document.getElementById('flipBlockListClose');
+
+        if (!wrapEl || !toggleBtn || !dropdown) return;
+
+        // Show the header button now that data is ready
+        wrapEl.style.display = '';
+        updateFlipBlockCount();
+        showFlipSuggestion();
+
+        // Toggle dropdown
+        toggleBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            // Close other open dropdowns (hamburger, settings)
+            document.getElementById('hamburgerMenu')?.classList.remove('open');
+            document.getElementById('themeEffectsSelector')?.classList.remove('open');
+            wrapEl.classList.toggle('open');
+        });
+
+        // Prevent clicks inside the dropdown from closing it
+        dropdown.addEventListener('click', e => e.stopPropagation());
+
+        // Close on outside click
+        document.addEventListener('click', () => wrapEl.classList.remove('open'));
+
+        // Close on Escape
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') wrapEl.classList.remove('open');
+        });
+
+        viewBtn && viewBtn.addEventListener('click', () => {
+            if (flipCurrentItem) {
+                wrapEl.classList.remove('open');
+                openModal(flipCurrentItem);
+            }
+        });
+
+        skipBtn && skipBtn.addEventListener('click', () => {
+            if (flipCurrentItem) {
+                flipSkipSet.add(flipCurrentItem.id);
+                showFlipSuggestion();
+            }
+        });
+
+        blockBtn && blockBtn.addEventListener('click', () => {
+            if (flipCurrentItem) {
+                flipBlockList.add(flipCurrentItem.id);
+                saveFlipBlockList();
+                updateFlipBlockCount();
+                showFlipSuggestion();
+            }
+        });
+
+        blockListBtn && blockListOverlay && blockListBtn.addEventListener('click', () => {
+            wrapEl.classList.remove('open');
+            renderFlipBlockListModal();
+            blockListOverlay.classList.add('active');
+        });
+
+        blockListClose && blockListClose.addEventListener('click', () => {
+            blockListOverlay.classList.remove('active');
+        });
+
+        blockListOverlay && blockListOverlay.addEventListener('click', e => {
+            if (e.target === blockListOverlay) blockListOverlay.classList.remove('active');
+        });
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && blockListOverlay?.classList.contains('active')) {
+                blockListOverlay.classList.remove('active');
+            }
+        });
+    }
+
 })();
+
