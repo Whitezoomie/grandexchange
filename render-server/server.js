@@ -229,9 +229,9 @@ async function refreshPlayerCount() {
     }
 }
 
-// Kick off immediately and then every 30 s
+// Kick off immediately and then every 5 s
 refreshPlayerCount();
-setInterval(refreshPlayerCount, 30000);
+setInterval(refreshPlayerCount, 5000);
 
 // --- Parse JSON body helper ---
 function parseBody(req, maxBytes) {
