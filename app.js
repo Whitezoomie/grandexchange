@@ -3421,10 +3421,13 @@
 
     const playerCountHistory = [];
     const MAX_PLAYER_HISTORY = 60;
+    const taxCountHistory = [];
+    const MAX_TAX_HISTORY = 60;
     let statsInterval = null;
     // remembered previous numeric values for smooth animation
     const _statsPrev = {
         playerCount: null,
+        taxValue: null,
         totalTax: null,
         totalVolume: null,
         mostTradedVol: null,
@@ -3511,6 +3514,54 @@
         ctx.fill();
     }
 
+    function drawTaxSparkline(history) {
+        const canvas = document.getElementById('statsTaxGraph');
+        if (!canvas || history.length < 2) return;
+        const dpr = window.devicePixelRatio || 1;
+        const w = canvas.offsetWidth || 220;
+        const h = canvas.offsetHeight || 52;
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+        ctx.clearRect(0, 0, w, h);
+        const min = Math.min.apply(null, history);
+        const max = Math.max.apply(null, history);
+        const range = (max - min) || 1;
+        const padX = 4, padY = 6;
+        const chartW = w - padX * 2;
+        const chartH = h - padY * 2;
+        function px(i) { return padX + (i / (Math.max(history.length - 1, 1))) * chartW; }
+        function py(v) { return padY + chartH - ((v - min) / range) * chartH; }
+
+        const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#c8aa6e';
+        const grad = ctx.createLinearGradient(0, padY, 0, padY + chartH);
+        grad.addColorStop(0, 'rgba(200,170,110,0.22)');
+        grad.addColorStop(1, 'rgba(200,170,110,0.0)');
+
+        ctx.beginPath();
+        ctx.moveTo(px(0), py(history[0]));
+        for (let i = 1; i < history.length; i++) ctx.lineTo(px(i), py(history[i]));
+        ctx.lineTo(px(history.length - 1), padY + chartH);
+        ctx.lineTo(px(0), padY + chartH);
+        ctx.closePath();
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(px(0), py(history[0]));
+        for (let i = 1; i < history.length; i++) ctx.lineTo(px(i), py(history[i]));
+        ctx.strokeStyle = accentColor;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        const lx = px(history.length - 1), ly = py(history[history.length - 1]);
+        ctx.beginPath();
+        ctx.arc(lx, ly, 3, 0, Math.PI * 2);
+        ctx.fillStyle = accentColor;
+        ctx.fill();
+    }
+
     function animateStatNumber(el, from, to, suffix, showSign) {
         if (!el) return;
         if (from === null || from === undefined || !effectsEnabled) {
@@ -3571,13 +3622,42 @@
             if (el && _statsPrev.playerCount === null) el.textContent = 'unavailable';
         }
 
+        // --- Tax history from server (Supabase-backed) ---
+        try {
+            const ctrl2 = new AbortController();
+            const timer2 = setTimeout(() => ctrl2.abort(), 7000);
+            let taxData;
+            try {
+                const res2 = await fetch(FEEDBACK_SERVER + '/tax-history', { signal: ctrl2.signal });
+                if (!res2.ok) throw new Error('HTTP ' + res2.status);
+                taxData = await res2.json();
+            } finally {
+                clearTimeout(timer2);
+            }
+            if (typeof taxData.value === 'number') {
+                if (taxData.history && taxData.history.length > taxCountHistory.length) {
+                    taxCountHistory.length = 0;
+                    taxData.history.forEach(function(pt) { taxCountHistory.push(pt.value); });
+                    const taxEl = document.getElementById('statsTaxCollected');
+                    if (taxEl) animateGpValue(taxEl, _statsPrev.taxValue, taxData.value, false);
+                    _statsPrev.taxValue = taxData.value;
+                    drawTaxSparkline(taxCountHistory);
+                } else if (taxData.value !== _statsPrev.taxValue) {
+                    taxCountHistory.push(taxData.value);
+                    if (taxCountHistory.length > MAX_TAX_HISTORY) taxCountHistory.shift();
+                    const taxEl = document.getElementById('statsTaxCollected');
+                    if (taxEl) animateGpValue(taxEl, _statsPrev.taxValue, taxData.value, false);
+                    _statsPrev.taxValue = taxData.value;
+                    drawTaxSparkline(taxCountHistory);
+                }
+            }
+        } catch(e) {
+            // fall through — tax el stays at last value
+        }
+
         // --- GE stats from loaded item data ---
         const stats = computeGeStats();
         if (!stats) return;
-
-        const taxEl = document.getElementById('statsTaxCollected');
-        if (taxEl) animateGpValue(taxEl, _statsPrev.totalTax, Math.round(stats.totalTax), false);
-        _statsPrev.totalTax = Math.round(stats.totalTax);
 
         const volEl = document.getElementById('statsTradeVolume');
         if (volEl) animateGpValue(volEl, _statsPrev.totalVolume, Math.round(stats.totalVolume), false);

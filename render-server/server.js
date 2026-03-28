@@ -93,6 +93,27 @@ async function initializeData() {
             console.log(`[player-count] loaded ${_pc.history.length} history rows from DB, latest: ${_pc.count}`);
         }
 
+        // Ensure tax history table exists
+        await dbQuery(`CREATE TABLE IF NOT EXISTS tax_history (
+            id SERIAL PRIMARY KEY,
+            total_tax BIGINT NOT NULL,
+            recorded_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+        )`);
+        // Load last 120 data points into memory
+        const taxHist = await dbQuery(
+            'SELECT total_tax, recorded_at FROM tax_history ORDER BY recorded_at DESC LIMIT 120'
+        );
+        if (taxHist && taxHist.rows.length > 0) {
+            _tax.history = taxHist.rows.reverse().map(r => ({
+                value: parseInt(r.total_tax, 10),
+                ts: new Date(r.recorded_at).getTime()
+            }));
+            const latestTax = _tax.history[_tax.history.length - 1];
+            _tax.value     = latestTax.value;
+            _tax.fetchedAt = latestTax.ts;
+            console.log(`[tax] loaded ${_tax.history.length} history rows from DB, latest: ${_tax.value}`);
+        }
+
         // Load total visitors
         const vRes = await dbQuery('SELECT total FROM visitors LIMIT 1');
         if (vRes && vRes.rows.length > 0) totalVisitors = vRes.rows[0].total || 0;
@@ -162,6 +183,11 @@ function generateToken() {
 // --- OSRS player count cache + history ---
 const _pc = { count: null, fetchedAt: 0, history: [] };
 const https = require('https');
+
+// --- GE 24h tax estimate cache + history ---
+const _tax = { value: null, fetchedAt: 0, history: [] };
+const WIKI_API = 'https://prices.runescape.wiki/api/v1/osrs';
+const WIKI_UA  = { headers: { 'User-Agent': 'OSRS-GE-Tracker/1.0 +https://osrs-ge-tracker.com' } };
 
 function httpsGet(url, opts, timeoutMs) {
     return new Promise((resolve, reject) => {
@@ -233,6 +259,42 @@ async function refreshPlayerCount() {
 refreshPlayerCount();
 setInterval(refreshPlayerCount, 5000);
 
+// --- GE tax estimate refresh (runs every 60 s — OSRS Wiki prices update ~1 min) ---
+async function refreshTaxData() {
+    try {
+        const [latestRaw, volumesRaw] = await Promise.all([
+            httpsGet(WIKI_API + '/latest',  WIKI_UA, 14000),
+            httpsGet(WIKI_API + '/volumes', WIKI_UA, 14000),
+        ]);
+        const priceData  = (JSON.parse(latestRaw).data  || {});
+        const volData    = (JSON.parse(volumesRaw).data  || {});
+        let total = 0;
+        for (const id of Object.keys(priceData)) {
+            const p   = priceData[id];
+            const vol = volData[id] || 0;
+            if (!p || !p.high || vol <= 0) continue;
+            total += Math.min(Math.floor(p.high * 0.02), 5000000) * vol;
+        }
+        if (total > 0) {
+            _tax.value     = total;
+            _tax.fetchedAt = Date.now();
+            _tax.history.push({ value: total, ts: _tax.fetchedAt });
+            if (_tax.history.length > 120) _tax.history.shift();
+            console.log('[tax] updated:', total.toLocaleString());
+            dbQuery(
+                'INSERT INTO tax_history (total_tax, recorded_at) VALUES ($1, NOW())',
+                [total]
+            ).catch(e => console.warn('[tax] db save:', e.message));
+        }
+    } catch (e) {
+        console.warn('[tax] refresh failed:', e.message);
+    }
+}
+
+// Kick off immediately and then every 60 s
+refreshTaxData();
+setInterval(refreshTaxData, 60000);
+
 // --- Parse JSON body helper ---
 function parseBody(req, maxBytes) {
     maxBytes = maxBytes || 1e6;
@@ -288,6 +350,25 @@ const server = http.createServer(async (req, res) => {
         }
         res.writeHead(503, headers);
         return res.end(JSON.stringify({ error: 'player count not available yet, try again shortly' }));
+    }
+
+    // --- GE 24h tax estimate (served from server-side cache, history from Supabase) ---
+    if (path === '/tax-history' && req.method === 'GET') {
+        if (_tax.value !== null) {
+            res.writeHead(200, headers);
+            return res.end(JSON.stringify({
+                value: _tax.value,
+                age: Math.round((Date.now() - _tax.fetchedAt) / 1000),
+                history: _tax.history.slice(-60)
+            }));
+        }
+        try { await refreshTaxData(); } catch(e) { /* ignore */ }
+        if (_tax.value !== null) {
+            res.writeHead(200, headers);
+            return res.end(JSON.stringify({ value: _tax.value, age: 0, history: _tax.history.slice(-60) }));
+        }
+        res.writeHead(503, headers);
+        return res.end(JSON.stringify({ error: 'tax data not available yet, try again shortly' }));
     }
 
     // --- Get votes for an item ---
