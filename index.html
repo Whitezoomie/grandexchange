@@ -258,21 +258,19 @@
                     <span class="stat-label">Favorites</span>
                     <span class="stat-value" id="favoritesCount">0</span>
                 </div>
-                <!-- Portfolio stat removed -->
                 <!-- GE Radio (compact, header-inline) -->
                 <div class="ge-radio" id="geRadio">
-                    <button class="ge-radio-toggle" id="geRadioToggle" title="GE Radio � OSRS Soundtrack">
+                    <button class="ge-radio-toggle" id="geRadioToggle" title="GE Radio – OSRS Soundtrack">
                         <svg class="ge-radio-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
                         <div class="ge-radio-bars" id="geRadioBars"><span></span><span></span><span></span></div>
                         <span class="ge-radio-label" id="geRadioLabel">GE Radio</span>
                     </button>
-                    <!-- Current Bond price (next to GE Radio) -->
-                    <div class="bond-price" id="bondPriceWrap" title="Current Bond price" style="display:flex;align-items:center;margin-left:8px;">
-                        <img id="bondIcon" src="" alt="Bond icon" style="width:22px;height:22px;object-fit:contain;margin-right:8px;display:none">
-                        <div class="bond-text" style="display:flex;flex-direction:column;line-height:1;">
-                            <span class="bond-label" style="font-size:11px;color:var(--muted);"></span>
+                    <div class="bond-price" id="bondPriceWrap" title="Current Bond price">
+                        <img id="bondIcon" src="" alt="Bond icon" class="bond-icon" style="display:none">
+                        <div class="bond-text">
+                            <span class="bond-label"></span>
                             <span class="stat-value" id="bondPrice">-</span>
-                            <span class="price-change-indicator" id="bondPriceChange" style="font-size:11px;color:var(--muted);margin-top:2px;"> </span>
+                            <span class="price-change-indicator" id="bondPriceChange"> </span>
                         </div>
                     </div>
                     <div class="ge-radio-dropdown" id="geRadioDropdown">
@@ -311,6 +309,16 @@
                 </div>
             </div>
                         <div class="header-actions">
+                        <div class="header-view">
+                            <div class="view-toggle header-view-toggle">
+                                <button class="view-btn active" data-view="grid" title="Grid View">
+                                    <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                                </button>
+                                <button class="view-btn" data-view="list" title="List View">
+                                    <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><rect x="3" y="4" width="18" height="3" rx="1"/><rect x="3" y="10.5" width="18" height="3" rx="1"/><rect x="3" y="17" width="18" height="3" rx="1"/></svg>
+                                </button>
+                            </div>
+                        </div>
                         <!-- Flip Pick button -->
                         <div class="flip-header-wrap" id="flipHeaderWrap" style="display:none">
                             <button class="header-action-btn flip-header-btn" id="flipHeaderToggle" title="Best Flip Pick">
@@ -334,20 +342,6 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Changelog + Hamburger Menu -->
-                        <!-- View toggle (moved here) -->
-                        <div class="header-view">
-                            <div class="view-label">View</div>
-                            <div class="view-toggle header-view-toggle">
-                                <button class="view-btn active" data-view="grid" title="Grid View">
-                                    <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-                                </button>
-                                <button class="view-btn" data-view="list" title="List View">
-                                    <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><rect x="3" y="4" width="18" height="3" rx="1"/><rect x="3" y="10.5" width="18" height="3" rx="1"/><rect x="3" y="17" width="18" height="3" rx="1"/></svg>
-                                </button>
-                            </div>
-                        </div>
-                        <!-- Changelog was moved into the hamburger dropdown (above Feedback) -->
                         <!-- Hamburger Menu -->
                         <div class="hamburger-menu" id="hamburgerMenu">
                     <button class="header-action-btn hamburger-btn" id="hamburgerToggle" title="Menu">
@@ -631,17 +625,6 @@
                     <input type="text" id="maxBuyLimit" placeholder="0, 10k, 1m..." inputmode="numeric" autocomplete="one-time-code">
                 </div>
 
-                
-
-                <!-- 'Show' filter removed -->
-
-                <!-- View toggle moved to header for easier access -->
-
-                <!-- Save/Reset buttons removed: filters now autosave -->
-
-                
-
-                <!-- Item Spotlight removed -->
             </div>
         </div>
     </nav>
