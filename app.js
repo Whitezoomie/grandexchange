@@ -3686,14 +3686,13 @@
                 clearTimeout(timer2);
             }
             if (typeof taxData.value === 'number') {
+                // Sync history from server silently whenever it has more data
                 if (taxData.history && taxData.history.length > taxCountHistory.length) {
                     taxCountHistory.length = 0;
                     taxData.history.forEach(function(pt) { taxCountHistory.push(pt.value); });
-                    const taxEl = document.getElementById('statsTaxCollected');
-                    if (taxEl) animateGpValue(taxEl, _statsPrev.taxValue, taxData.value, false);
-                    _statsPrev.taxValue = taxData.value;
-                    drawTaxSparkline(taxCountHistory);
-                } else if (taxData.value !== _statsPrev.taxValue) {
+                }
+                // Only animate + redraw when the value actually changed
+                if (taxData.value !== _statsPrev.taxValue) {
                     taxCountHistory.push(taxData.value);
                     if (taxCountHistory.length > MAX_TAX_HISTORY) taxCountHistory.shift();
                     const taxEl = document.getElementById('statsTaxCollected');
@@ -3723,14 +3722,13 @@
                 clearTimeout(timer3);
             }
             if (typeof volData.value === 'number') {
+                // Sync history from server silently whenever it has more data
                 if (volData.history && volData.history.length > volCountHistory.length) {
                     volCountHistory.length = 0;
                     volData.history.forEach(function(pt) { volCountHistory.push(pt.value); });
-                    const volEl = document.getElementById('statsTradeVolume');
-                    if (volEl) animateGpValue(volEl, _statsPrev.volValue, volData.value, false);
-                    _statsPrev.volValue = volData.value;
-                    drawVolumeSparkline(volCountHistory);
-                } else if (volData.value !== _statsPrev.volValue) {
+                }
+                // Only animate + redraw when the value actually changed
+                if (volData.value !== _statsPrev.volValue) {
                     volCountHistory.push(volData.value);
                     if (volCountHistory.length > MAX_VOL_HISTORY) volCountHistory.shift();
                     const volEl = document.getElementById('statsTradeVolume');
