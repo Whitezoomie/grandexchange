@@ -80,7 +80,7 @@ async function initializeData() {
         )`);
         // Load last 120 data points into memory
         const pcHist = await dbQuery(
-            'SELECT count, recorded_at FROM player_count_history ORDER BY recorded_at DESC LIMIT 120'
+            'SELECT count, recorded_at FROM player_count_history ORDER BY recorded_at DESC LIMIT 720'
         );
         if (pcHist && pcHist.rows.length > 0) {
             _pc.history = pcHist.rows.reverse().map(r => ({
@@ -99,20 +99,6 @@ async function initializeData() {
             total_tax BIGINT NOT NULL,
             recorded_at TIMESTAMP WITH TIME ZONE DEFAULT now()
         )`);
-        // Load last 120 data points into memory
-        const taxHist = await dbQuery(
-            'SELECT total_tax, recorded_at FROM tax_history ORDER BY recorded_at DESC LIMIT 120'
-        );
-        if (taxHist && taxHist.rows.length > 0) {
-            _tax.history = taxHist.rows.reverse().map(r => ({
-                value: parseInt(r.total_tax, 10),
-                ts: new Date(r.recorded_at).getTime()
-            }));
-            const latestTax = _tax.history[_tax.history.length - 1];
-            _tax.value     = latestTax.value;
-            _tax.fetchedAt = latestTax.ts;
-            console.log(`[tax] loaded ${_tax.history.length} history rows from DB, latest: ${_tax.value}`);
-        }
 
         // Ensure trade volume history table exists
         await dbQuery(`CREATE TABLE IF NOT EXISTS volume_history (
@@ -120,19 +106,6 @@ async function initializeData() {
             total_volume BIGINT NOT NULL,
             recorded_at TIMESTAMP WITH TIME ZONE DEFAULT now()
         )`);
-        const volHist = await dbQuery(
-            'SELECT total_volume, recorded_at FROM volume_history ORDER BY recorded_at DESC LIMIT 120'
-        );
-        if (volHist && volHist.rows.length > 0) {
-            _vol.history = volHist.rows.reverse().map(r => ({
-                value: parseInt(r.total_volume, 10),
-                ts: new Date(r.recorded_at).getTime()
-            }));
-            const latestVol = _vol.history[_vol.history.length - 1];
-            _vol.value     = latestVol.value;
-            _vol.fetchedAt = latestVol.ts;
-            console.log(`[volume] loaded ${_vol.history.length} history rows from DB, latest: ${_vol.value}`);
-        }
 
         // Load total visitors
         const vRes = await dbQuery('SELECT total FROM visitors LIMIT 1');
@@ -267,7 +240,7 @@ async function refreshPlayerCount() {
         _pc.count = count;
         _pc.fetchedAt = Date.now();
         _pc.history.push({ count, ts: _pc.fetchedAt });
-        if (_pc.history.length > 120) _pc.history.shift();
+        if (_pc.history.length > 720) _pc.history.shift();
         console.log('[player-count] updated:', count);
         // Persist to DB (fire and forget)
         dbQuery(
@@ -305,43 +278,49 @@ async function refreshTaxData() {
         }
         const now = Date.now();
         if (totalTax > 0) {
+            const taxChanged = totalTax !== _tax.value;
             _tax.value     = totalTax;
             _tax.fetchedAt = now;
-            _tax.history.push({ value: totalTax, ts: now });
-            if (_tax.history.length > 120) _tax.history.shift();
-            console.log('[tax] updated:', totalTax.toLocaleString());
-            dbQuery(
-                'INSERT INTO tax_history (total_tax, recorded_at) VALUES ($1, NOW())',
-                [totalTax]
-            ).catch(e => console.warn('[tax] db save:', e.message));
-            // Prune rows older than 90 days
-            dbQuery(
-                "DELETE FROM tax_history WHERE recorded_at < NOW() - INTERVAL '90 days'"
-            ).catch(() => {});
+            if (taxChanged) {
+                _tax.history.push({ value: totalTax, ts: now });
+                if (_tax.history.length > 120) _tax.history.shift();
+                console.log('[tax] updated:', totalTax.toLocaleString());
+                dbQuery(
+                    'INSERT INTO tax_history (total_tax, recorded_at) VALUES ($1, NOW())',
+                    [totalTax]
+                ).catch(e => console.warn('[tax] db save:', e.message));
+                // Prune rows older than 90 days
+                dbQuery(
+                    "DELETE FROM tax_history WHERE recorded_at < NOW() - INTERVAL '90 days'"
+                ).catch(() => {});
+            }
         }
         if (totalVol > 0) {
+            const volChanged = totalVol !== _vol.value;
             _vol.value     = totalVol;
             _vol.fetchedAt = now;
-            _vol.history.push({ value: totalVol, ts: now });
-            if (_vol.history.length > 120) _vol.history.shift();
-            console.log('[volume] updated:', totalVol.toLocaleString());
-            dbQuery(
-                'INSERT INTO volume_history (total_volume, recorded_at) VALUES ($1, NOW())',
-                [totalVol]
-            ).catch(e => console.warn('[volume] db save:', e.message));
-            // Prune rows older than 90 days
-            dbQuery(
-                "DELETE FROM volume_history WHERE recorded_at < NOW() - INTERVAL '90 days'"
-            ).catch(() => {});
+            if (volChanged) {
+                _vol.history.push({ value: totalVol, ts: now });
+                if (_vol.history.length > 120) _vol.history.shift();
+                console.log('[volume] updated:', totalVol.toLocaleString());
+                dbQuery(
+                    'INSERT INTO volume_history (total_volume, recorded_at) VALUES ($1, NOW())',
+                    [totalVol]
+                ).catch(e => console.warn('[volume] db save:', e.message));
+                // Prune rows older than 90 days
+                dbQuery(
+                    "DELETE FROM volume_history WHERE recorded_at < NOW() - INTERVAL '90 days'"
+                ).catch(() => {});
+            }
         }
     } catch (e) {
         console.warn('[tax/volume] refresh failed:', e.message);
     }
 }
 
-// Kick off immediately and then every 5 s
+// Kick off immediately and then every 30 s
 refreshTaxData();
-setInterval(refreshTaxData, 5000);
+setInterval(refreshTaxData, 30000);
 
 // --- Parse JSON body helper ---
 function parseBody(req, maxBytes) {
@@ -385,7 +364,7 @@ const server = http.createServer(async (req, res) => {
             return res.end(JSON.stringify({
                 count: _pc.count,
                 age: Math.round((Date.now() - _pc.fetchedAt) / 1000),
-                history: _pc.history.slice(-60)
+                history: _pc.history.slice(-720)
             }));
         }
         // Cache not ready yet — trigger a fetch now and wait for it
@@ -394,7 +373,7 @@ const server = http.createServer(async (req, res) => {
         } catch (e) { /* ignore */ }
         if (_pc.count !== null) {
             res.writeHead(200, headers);
-            return res.end(JSON.stringify({ count: _pc.count, age: 0, history: _pc.history.slice(-60) }));
+            return res.end(JSON.stringify({ count: _pc.count, age: 0, history: _pc.history.slice(-720) }));
         }
         res.writeHead(503, headers);
         return res.end(JSON.stringify({ error: 'player count not available yet, try again shortly' }));

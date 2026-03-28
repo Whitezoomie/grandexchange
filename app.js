@@ -3419,7 +3419,8 @@
     // ========================================
 
     const playerCountHistory = [];
-    const MAX_PLAYER_HISTORY = 60;
+    const playerCountTimestamps = [];
+    const MAX_PLAYER_HISTORY = 720;
     const taxCountHistory = [];
     const MAX_TAX_HISTORY = 60;
     const volCountHistory = [];
@@ -3468,7 +3469,7 @@
         return { totalTax, totalVolume, mostTradedItem, bestMarginItem };
     }
 
-    function drawPlayerSparkline(history) {
+    function drawPlayerSparkline(history, hoverIdx) {
         const canvas = document.getElementById('statsPlayerGraph');
         if (!canvas || history.length < 2) return;
         const dpr = window.devicePixelRatio || 1;
@@ -3509,11 +3510,88 @@
         ctx.lineWidth = 1.5;
         ctx.stroke();
 
-        const lx = px(history.length - 1), ly = py(history[history.length - 1]);
-        ctx.beginPath();
-        ctx.arc(lx, ly, 3, 0, Math.PI * 2);
-        ctx.fillStyle = greenColor;
-        ctx.fill();
+        if (hoverIdx !== undefined && hoverIdx >= 0 && hoverIdx < history.length) {
+            const hx = px(hoverIdx), hy = py(history[hoverIdx]);
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(hx, padY);
+            ctx.lineTo(hx, padY + chartH);
+            ctx.setLineDash([3, 3]);
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            ctx.stroke();
+            ctx.restore();
+            ctx.beginPath();
+            ctx.arc(hx, hy, 3.5, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(hx, hy, 2, 0, Math.PI * 2);
+            ctx.fillStyle = greenColor;
+            ctx.fill();
+        } else {
+            const lx = px(history.length - 1), ly = py(history[history.length - 1]);
+            ctx.beginPath();
+            ctx.arc(lx, ly, 3, 0, Math.PI * 2);
+            ctx.fillStyle = greenColor;
+            ctx.fill();
+        }
+    }
+
+    let _playerSparklineHoverSetup = false;
+
+    function getOrCreateSparklineTooltip() {
+        let el = document.getElementById('sparkline-tooltip');
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 'sparkline-tooltip';
+            el.className = 'sparkline-tooltip';
+            document.body.appendChild(el);
+        }
+        return el;
+    }
+
+    function formatSparklineTime(d) {
+        const h = d.getHours();
+        const m = d.getMinutes().toString().padStart(2, '0');
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        const h12 = (h % 12) || 12;
+        return h12 + ':' + m + ' ' + ampm;
+    }
+
+    function initPlayerSparklineHover() {
+        if (_playerSparklineHoverSetup) return;
+        const canvas = document.getElementById('statsPlayerGraph');
+        if (!canvas) return;
+        _playerSparklineHoverSetup = true;
+        getOrCreateSparklineTooltip();
+        canvas.style.cursor = 'crosshair';
+        canvas.addEventListener('mousemove', function(e) {
+            if (playerCountHistory.length < 2) return;
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const padX = 4;
+            const chartW = rect.width - padX * 2;
+            const rawIdx = (mouseX - padX) / chartW * (playerCountHistory.length - 1);
+            const idx = Math.max(0, Math.min(playerCountHistory.length - 1, Math.round(rawIdx)));
+            drawPlayerSparkline(playerCountHistory, idx);
+            const count = playerCountHistory[idx];
+            const ts = playerCountTimestamps[idx];
+            const tooltip = getOrCreateSparklineTooltip();
+            let label = count != null ? count.toLocaleString() + ' players' : '';
+            if (ts) {
+                label += '<br><span class="sparkline-tooltip-time">' + formatSparklineTime(new Date(ts)) + '</span>';
+            }
+            tooltip.innerHTML = label;
+            tooltip.style.display = 'block';
+            tooltip.style.left = e.clientX + 'px';
+            tooltip.style.top = (e.clientY - 58) + 'px';
+        });
+        canvas.addEventListener('mouseleave', function() {
+            drawPlayerSparkline(playerCountHistory);
+            const tooltip = document.getElementById('sparkline-tooltip');
+            if (tooltip) tooltip.style.display = 'none';
+        });
     }
 
     function drawTaxSparkline(history) {
@@ -3652,19 +3730,23 @@
                 // Seed history from server if we have more data there than locally
                 if (data.history && data.history.length > playerCountHistory.length) {
                     playerCountHistory.length = 0;
-                    data.history.forEach(function(pt) { playerCountHistory.push(pt.count); });
+                    playerCountTimestamps.length = 0;
+                    data.history.forEach(function(pt) { playerCountHistory.push(pt.count); playerCountTimestamps.push(pt.ts || Date.now()); });
                     const el = document.getElementById('statsPlayerCount');
                     if (el) animateStatNumber(el, _statsPrev.playerCount, data.count, '');
                     _statsPrev.playerCount = data.count;
                     drawPlayerSparkline(playerCountHistory);
+                    initPlayerSparklineHover();
                 } else if (data.count !== _statsPrev.playerCount) {
                     // Only push + redraw when the count actually changed
                     playerCountHistory.push(data.count);
-                    if (playerCountHistory.length > MAX_PLAYER_HISTORY) playerCountHistory.shift();
+                    playerCountTimestamps.push(Date.now());
+                    if (playerCountHistory.length > MAX_PLAYER_HISTORY) { playerCountHistory.shift(); playerCountTimestamps.shift(); }
                     const el = document.getElementById('statsPlayerCount');
                     if (el) animateStatNumber(el, _statsPrev.playerCount, data.count, '');
                     _statsPrev.playerCount = data.count;
                     drawPlayerSparkline(playerCountHistory);
+                    initPlayerSparklineHover();
                 }
             }
         } catch(e) {
