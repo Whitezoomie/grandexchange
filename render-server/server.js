@@ -174,7 +174,7 @@ function generateToken() {
 }
 
 // --- OSRS player count cache + history ---
-const _pc = { count: null, fetchedAt: 0, history: [] };
+const _pc = { count: null, fetchedAt: 0, history: [], lastHistoryTs: 0 };
 const https = require('https');
 
 // --- GE 24h tax estimate cache + history ---
@@ -237,20 +237,25 @@ async function refreshPlayerCount() {
     let count = await tryPlayerCountJs();
     if (count === null) count = await tryScrapePage();
     if (count !== null && count > 0) {
+        const now = Date.now();
         _pc.count = count;
-        _pc.fetchedAt = Date.now();
-        _pc.history.push({ count, ts: _pc.fetchedAt });
-        if (_pc.history.length > 720) _pc.history.shift();
-        console.log('[player-count] updated:', count);
-        // Persist to DB (fire and forget)
-        dbQuery(
-            'INSERT INTO player_count_history (count, recorded_at) VALUES ($1, NOW())',
-            [count]
-        ).catch(e => console.warn('[player-count] db save:', e.message));
-        // Prune rows older than 90 days
-        dbQuery(
-            "DELETE FROM player_count_history WHERE recorded_at < NOW() - INTERVAL '90 days'"
-        ).catch(() => {});
+        _pc.fetchedAt = now;
+        // Only add a history point once per minute (1-min resolution = 720 pts = 12h)
+        if (now - _pc.lastHistoryTs >= 60000) {
+            _pc.lastHistoryTs = now;
+            _pc.history.push({ count, ts: now });
+            if (_pc.history.length > 720) _pc.history.shift();
+            console.log('[player-count] updated:', count);
+            // Persist to DB (fire and forget)
+            dbQuery(
+                'INSERT INTO player_count_history (count, recorded_at) VALUES ($1, NOW())',
+                [count]
+            ).catch(e => console.warn('[player-count] db save:', e.message));
+            // Prune rows older than 90 days
+            dbQuery(
+                "DELETE FROM player_count_history WHERE recorded_at < NOW() - INTERVAL '90 days'"
+            ).catch(() => {});
+        }
     }
 }
 
