@@ -1,4 +1,19 @@
-﻿/* ===== RESET & BASE ===== */
+﻿/* Experimental label shown inside the Copilot dropdown */
+.copilot-experimental-label {
+    display:inline-block;
+    background: #ff4d4f; /* vivid red */
+    color: #ffffff;
+    border: 1px solid rgba(0,0,0,0.06);
+    padding:6px 55px;
+    border-radius:6px;
+    font-size:12px;
+    font-weight:700;
+    white-space:nowrap;
+    align-self:flex-start;
+    margin-bottom:6px;
+    box-shadow: inset 0 -1px 0 rgba(0,0,0,0.06);
+}
+/* ===== RESET & BASE ===== */
 *, *::before, *::after {
     margin: 0;
     padding: 0;
@@ -659,23 +674,7 @@
 
 /* shimmer keyframes removed */
 
-/* Hover tooltip warning that this is experimental */
-.copilot-btn::after { content: ''; }
-.copilot-btn:hover::after {
-    content: 'Experimental feature — use with caution';
-    position: absolute;
-    top: calc(100% + 10px);
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(12,12,16,0.95);
-    color: #fff;
-    padding:6px 8px;
-    border-radius:6px;
-    font-size:12px;
-    white-space:nowrap;
-    z-index: 1400;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.45);
-}
+
 .copilot-btn:hover::before {
     content: '';
     position: absolute;
