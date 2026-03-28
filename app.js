@@ -3552,14 +3552,19 @@
                 if (data.history && data.history.length > playerCountHistory.length) {
                     playerCountHistory.length = 0;
                     data.history.forEach(function(pt) { playerCountHistory.push(pt.count); });
-                } else {
+                    const el = document.getElementById('statsPlayerCount');
+                    if (el) animateStatNumber(el, _statsPrev.playerCount, data.count, '');
+                    _statsPrev.playerCount = data.count;
+                    drawPlayerSparkline(playerCountHistory);
+                } else if (data.count !== _statsPrev.playerCount) {
+                    // Only push + redraw when the count actually changed
                     playerCountHistory.push(data.count);
                     if (playerCountHistory.length > MAX_PLAYER_HISTORY) playerCountHistory.shift();
+                    const el = document.getElementById('statsPlayerCount');
+                    if (el) animateStatNumber(el, _statsPrev.playerCount, data.count, '');
+                    _statsPrev.playerCount = data.count;
+                    drawPlayerSparkline(playerCountHistory);
                 }
-                const el = document.getElementById('statsPlayerCount');
-                if (el) animateStatNumber(el, _statsPrev.playerCount, data.count, '');
-                _statsPrev.playerCount = data.count;
-                drawPlayerSparkline(playerCountHistory);
             }
         } catch(e) {
             const el = document.getElementById('statsPlayerCount');
