@@ -78,12 +78,12 @@ async function initializeData() {
             count INTEGER NOT NULL,
             recorded_at TIMESTAMP WITH TIME ZONE DEFAULT now()
         )`);
-        // Load up to 720 rows from the last 12 hours
+        // Load last 720 data points into memory
         const pcHist = await dbQuery(
-            "SELECT count, recorded_at FROM player_count_history WHERE recorded_at >= NOW() - INTERVAL '12 hours' ORDER BY recorded_at ASC LIMIT 720"
+            'SELECT count, recorded_at FROM player_count_history ORDER BY recorded_at DESC LIMIT 720'
         );
         if (pcHist && pcHist.rows.length > 0) {
-            _pc.history = pcHist.rows.map(r => ({
+            _pc.history = pcHist.rows.reverse().map(r => ({
                 count: r.count,
                 ts: new Date(r.recorded_at).getTime()
             }));
