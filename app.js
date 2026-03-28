@@ -3423,11 +3423,14 @@
     const MAX_PLAYER_HISTORY = 60;
     const taxCountHistory = [];
     const MAX_TAX_HISTORY = 60;
+    const volCountHistory = [];
+    const MAX_VOL_HISTORY = 60;
     let statsInterval = null;
     // remembered previous numeric values for smooth animation
     const _statsPrev = {
         playerCount: null,
         taxValue: null,
+        volValue: null,
         totalTax: null,
         totalVolume: null,
         mostTradedVol: null,
@@ -3562,6 +3565,54 @@
         ctx.fill();
     }
 
+    function drawVolumeSparkline(history) {
+        const canvas = document.getElementById('statsVolumeGraph');
+        if (!canvas || history.length < 2) return;
+        const dpr = window.devicePixelRatio || 1;
+        const w = canvas.offsetWidth || 220;
+        const h = canvas.offsetHeight || 52;
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+        ctx.clearRect(0, 0, w, h);
+        const min = Math.min.apply(null, history);
+        const max = Math.max.apply(null, history);
+        const range = (max - min) || 1;
+        const padX = 4, padY = 6;
+        const chartW = w - padX * 2;
+        const chartH = h - padY * 2;
+        function px(i) { return padX + (i / (Math.max(history.length - 1, 1))) * chartW; }
+        function py(v) { return padY + chartH - ((v - min) / range) * chartH; }
+
+        const blueColor = '#5b8dee';
+        const grad = ctx.createLinearGradient(0, padY, 0, padY + chartH);
+        grad.addColorStop(0, 'rgba(91,141,238,0.22)');
+        grad.addColorStop(1, 'rgba(91,141,238,0.0)');
+
+        ctx.beginPath();
+        ctx.moveTo(px(0), py(history[0]));
+        for (let i = 1; i < history.length; i++) ctx.lineTo(px(i), py(history[i]));
+        ctx.lineTo(px(history.length - 1), padY + chartH);
+        ctx.lineTo(px(0), padY + chartH);
+        ctx.closePath();
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(px(0), py(history[0]));
+        for (let i = 1; i < history.length; i++) ctx.lineTo(px(i), py(history[i]));
+        ctx.strokeStyle = blueColor;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        const lx = px(history.length - 1), ly = py(history[history.length - 1]);
+        ctx.beginPath();
+        ctx.arc(lx, ly, 3, 0, Math.PI * 2);
+        ctx.fillStyle = blueColor;
+        ctx.fill();
+    }
+
     function animateStatNumber(el, from, to, suffix, showSign) {
         if (!el) return;
         if (from === null || from === undefined || !effectsEnabled) {
@@ -3659,9 +3710,38 @@
         const stats = computeGeStats();
         if (!stats) return;
 
-        const volEl = document.getElementById('statsTradeVolume');
-        if (volEl) animateGpValue(volEl, _statsPrev.totalVolume, Math.round(stats.totalVolume), false);
-        _statsPrev.totalVolume = Math.round(stats.totalVolume);
+        // --- Volume history from server (Supabase-backed) ---
+        try {
+            const ctrl3 = new AbortController();
+            const timer3 = setTimeout(() => ctrl3.abort(), 7000);
+            let volData;
+            try {
+                const res3 = await fetch(FEEDBACK_SERVER + '/volume-history', { signal: ctrl3.signal });
+                if (!res3.ok) throw new Error('HTTP ' + res3.status);
+                volData = await res3.json();
+            } finally {
+                clearTimeout(timer3);
+            }
+            if (typeof volData.value === 'number') {
+                if (volData.history && volData.history.length > volCountHistory.length) {
+                    volCountHistory.length = 0;
+                    volData.history.forEach(function(pt) { volCountHistory.push(pt.value); });
+                    const volEl = document.getElementById('statsTradeVolume');
+                    if (volEl) animateGpValue(volEl, _statsPrev.volValue, volData.value, false);
+                    _statsPrev.volValue = volData.value;
+                    drawVolumeSparkline(volCountHistory);
+                } else if (volData.value !== _statsPrev.volValue) {
+                    volCountHistory.push(volData.value);
+                    if (volCountHistory.length > MAX_VOL_HISTORY) volCountHistory.shift();
+                    const volEl = document.getElementById('statsTradeVolume');
+                    if (volEl) animateGpValue(volEl, _statsPrev.volValue, volData.value, false);
+                    _statsPrev.volValue = volData.value;
+                    drawVolumeSparkline(volCountHistory);
+                }
+            }
+        } catch(e) {
+            // fall through — volume el stays at last value
+        }
 
         const tradedEl = document.getElementById('statsMostTraded');
         const tradedSubEl = document.getElementById('statsMostTradedSub');

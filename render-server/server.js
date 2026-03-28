@@ -114,6 +114,26 @@ async function initializeData() {
             console.log(`[tax] loaded ${_tax.history.length} history rows from DB, latest: ${_tax.value}`);
         }
 
+        // Ensure trade volume history table exists
+        await dbQuery(`CREATE TABLE IF NOT EXISTS volume_history (
+            id SERIAL PRIMARY KEY,
+            total_volume BIGINT NOT NULL,
+            recorded_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+        )`);
+        const volHist = await dbQuery(
+            'SELECT total_volume, recorded_at FROM volume_history ORDER BY recorded_at DESC LIMIT 120'
+        );
+        if (volHist && volHist.rows.length > 0) {
+            _vol.history = volHist.rows.reverse().map(r => ({
+                value: parseInt(r.total_volume, 10),
+                ts: new Date(r.recorded_at).getTime()
+            }));
+            const latestVol = _vol.history[_vol.history.length - 1];
+            _vol.value     = latestVol.value;
+            _vol.fetchedAt = latestVol.ts;
+            console.log(`[volume] loaded ${_vol.history.length} history rows from DB, latest: ${_vol.value}`);
+        }
+
         // Load total visitors
         const vRes = await dbQuery('SELECT total FROM visitors LIMIT 1');
         if (vRes && vRes.rows.length > 0) totalVisitors = vRes.rows[0].total || 0;
@@ -186,6 +206,8 @@ const https = require('https');
 
 // --- GE 24h tax estimate cache + history ---
 const _tax = { value: null, fetchedAt: 0, history: [] };
+// --- GE 24h trade volume cache + history ---
+const _vol = { value: null, fetchedAt: 0, history: [] };
 const WIKI_API = 'https://prices.runescape.wiki/api/v1/osrs';
 const WIKI_UA  = { headers: { 'User-Agent': 'OSRS-GE-Tracker/1.0 +https://osrs-ge-tracker.com' } };
 
@@ -268,26 +290,40 @@ async function refreshTaxData() {
         ]);
         const priceData  = (JSON.parse(latestRaw).data  || {});
         const volData    = (JSON.parse(volumesRaw).data  || {});
-        let total = 0;
+        let totalTax = 0;
+        let totalVol = 0;
         for (const id of Object.keys(priceData)) {
             const p   = priceData[id];
             const vol = volData[id] || 0;
             if (!p || !p.high || vol <= 0) continue;
-            total += Math.min(Math.floor(p.high * 0.02), 5000000) * vol;
+            totalTax += Math.min(Math.floor(p.high * 0.02), 5000000) * vol;
+            totalVol += p.high * vol;
         }
-        if (total > 0) {
-            _tax.value     = total;
-            _tax.fetchedAt = Date.now();
-            _tax.history.push({ value: total, ts: _tax.fetchedAt });
+        const now = Date.now();
+        if (totalTax > 0) {
+            _tax.value     = totalTax;
+            _tax.fetchedAt = now;
+            _tax.history.push({ value: totalTax, ts: now });
             if (_tax.history.length > 120) _tax.history.shift();
-            console.log('[tax] updated:', total.toLocaleString());
+            console.log('[tax] updated:', totalTax.toLocaleString());
             dbQuery(
                 'INSERT INTO tax_history (total_tax, recorded_at) VALUES ($1, NOW())',
-                [total]
+                [totalTax]
             ).catch(e => console.warn('[tax] db save:', e.message));
         }
+        if (totalVol > 0) {
+            _vol.value     = totalVol;
+            _vol.fetchedAt = now;
+            _vol.history.push({ value: totalVol, ts: now });
+            if (_vol.history.length > 120) _vol.history.shift();
+            console.log('[volume] updated:', totalVol.toLocaleString());
+            dbQuery(
+                'INSERT INTO volume_history (total_volume, recorded_at) VALUES ($1, NOW())',
+                [totalVol]
+            ).catch(e => console.warn('[volume] db save:', e.message));
+        }
     } catch (e) {
-        console.warn('[tax] refresh failed:', e.message);
+        console.warn('[tax/volume] refresh failed:', e.message);
     }
 }
 
@@ -369,6 +405,25 @@ const server = http.createServer(async (req, res) => {
         }
         res.writeHead(503, headers);
         return res.end(JSON.stringify({ error: 'tax data not available yet, try again shortly' }));
+    }
+
+    // --- GE 24h trade volume (served from server-side cache, history from Supabase) ---
+    if (path === '/volume-history' && req.method === 'GET') {
+        if (_vol.value !== null) {
+            res.writeHead(200, headers);
+            return res.end(JSON.stringify({
+                value: _vol.value,
+                age: Math.round((Date.now() - _vol.fetchedAt) / 1000),
+                history: _vol.history.slice(-60)
+            }));
+        }
+        try { await refreshTaxData(); } catch(e) { /* ignore */ }
+        if (_vol.value !== null) {
+            res.writeHead(200, headers);
+            return res.end(JSON.stringify({ value: _vol.value, age: 0, history: _vol.history.slice(-60) }));
+        }
+        res.writeHead(503, headers);
+        return res.end(JSON.stringify({ error: 'volume data not available yet, try again shortly' }));
     }
 
     // --- Get votes for an item ---
