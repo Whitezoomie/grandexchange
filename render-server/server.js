@@ -72,6 +72,27 @@ async function initializeData() {
             set_date TIMESTAMP WITH TIME ZONE DEFAULT now()
         )`);
 
+        // Ensure player count history table exists
+        await dbQuery(`CREATE TABLE IF NOT EXISTS player_count_history (
+            id SERIAL PRIMARY KEY,
+            count INTEGER NOT NULL,
+            recorded_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+        )`);
+        // Load last 120 data points into memory
+        const pcHist = await dbQuery(
+            'SELECT count, recorded_at FROM player_count_history ORDER BY recorded_at DESC LIMIT 120'
+        );
+        if (pcHist && pcHist.rows.length > 0) {
+            _pc.history = pcHist.rows.reverse().map(r => ({
+                count: r.count,
+                ts: new Date(r.recorded_at).getTime()
+            }));
+            const latest = _pc.history[_pc.history.length - 1];
+            _pc.count = latest.count;
+            _pc.fetchedAt = latest.ts;
+            console.log(`[player-count] loaded ${_pc.history.length} history rows from DB, latest: ${_pc.count}`);
+        }
+
         // Load total visitors
         const vRes = await dbQuery('SELECT total FROM visitors LIMIT 1');
         if (vRes && vRes.rows.length > 0) totalVisitors = vRes.rows[0].total || 0;
@@ -138,36 +159,79 @@ function generateToken() {
     return crypto.randomBytes(32).toString('hex');
 }
 
-// --- OSRS player count cache (refreshed every 15 seconds server-side) ---
-const _pc = { count: null, fetchedAt: 0 };
+// --- OSRS player count cache + history ---
+const _pc = { count: null, fetchedAt: 0, history: [] };
 const https = require('https');
 
-function refreshPlayerCount() {
-    const req2 = https.get(
-        'https://oldschool.runescape.com/player_count.js?varname=_c',
-        { headers: { 'User-Agent': 'OSRS-GE-Tracker/1.0' } },
-        (r) => {
+function httpsGet(url, opts, timeoutMs) {
+    return new Promise((resolve, reject) => {
+        const req2 = https.get(url, opts || {}, (r) => {
+            // Follow one redirect
+            if (r.statusCode >= 300 && r.statusCode < 400 && r.headers.location) {
+                r.resume();
+                return httpsGet(r.headers.location, opts, timeoutMs).then(resolve).catch(reject);
+            }
             let body = '';
             r.on('data', d => { body += d; });
-            r.on('end', () => {
-                const m = body.match(/=\s*(\d+)/);
-                if (m) {
-                    _pc.count = parseInt(m[1], 10);
-                    _pc.fetchedAt = Date.now();
-                    console.log('[player-count] updated:', _pc.count);
-                } else {
-                    console.warn('[player-count] unexpected response:', body.slice(0, 60));
-                }
-            });
-        }
-    );
-    req2.on('error', e => console.warn('[player-count] fetch error:', e.message));
-    req2.setTimeout(8000, () => req2.destroy());
+            r.on('end', () => resolve(body));
+            r.on('error', reject);
+        });
+        req2.on('error', reject);
+        req2.setTimeout(timeoutMs || 8000, () => { req2.destroy(); reject(new Error('timeout')); });
+    });
 }
 
-// Kick off immediately and then every 15 s
+async function tryPlayerCountJs() {
+    try {
+        const body = await httpsGet(
+            'https://oldschool.runescape.com/player_count.js?varname=_c',
+            { headers: { 'User-Agent': 'Mozilla/5.0 OSRS-GE-Tracker/1.0' } }
+        );
+        const m = body.match(/=\s*(\d+)/);
+        if (m) return parseInt(m[1], 10);
+        console.warn('[player-count] player_count.js unexpected:', body.slice(0, 80));
+    } catch (e) {
+        console.warn('[player-count] player_count.js failed:', e.message);
+    }
+    return null;
+}
+
+async function tryScrapePage() {
+    try {
+        const body = await httpsGet(
+            'https://oldschool.runescape.com/',
+            { headers: { 'User-Agent': 'Mozilla/5.0 OSRS-GE-Tracker/1.0', 'Accept': 'text/html' } }
+        );
+        // "There are currently 81,053 people playing!"
+        const m = body.match(/there are currently ([\d,]+) people playing/i);
+        if (m) return parseInt(m[1].replace(/,/g, ''), 10);
+        console.warn('[player-count] homepage parse failed, snippet:', body.slice(0, 120));
+    } catch (e) {
+        console.warn('[player-count] homepage scrape failed:', e.message);
+    }
+    return null;
+}
+
+async function refreshPlayerCount() {
+    let count = await tryPlayerCountJs();
+    if (count === null) count = await tryScrapePage();
+    if (count !== null && count > 0) {
+        _pc.count = count;
+        _pc.fetchedAt = Date.now();
+        _pc.history.push({ count, ts: _pc.fetchedAt });
+        if (_pc.history.length > 120) _pc.history.shift();
+        console.log('[player-count] updated:', count);
+        // Persist to DB (fire and forget)
+        dbQuery(
+            'INSERT INTO player_count_history (count, recorded_at) VALUES ($1, NOW())',
+            [count]
+        ).catch(e => console.warn('[player-count] db save:', e.message));
+    }
+}
+
+// Kick off immediately and then every 30 s
 refreshPlayerCount();
-setInterval(refreshPlayerCount, 15000);
+setInterval(refreshPlayerCount, 30000);
 
 // --- Parse JSON body helper ---
 function parseBody(req, maxBytes) {
@@ -204,33 +268,26 @@ const server = http.createServer(async (req, res) => {
         return res.end(JSON.stringify({ online: clients.size, total: totalVisitors }));
     }
 
-    // --- OSRS player count (served from server-side cache, always instant) ---
+    // --- OSRS player count (served from server-side cache, history from Supabase) ---
     if (path === '/player-count' && req.method === 'GET') {
         if (_pc.count !== null) {
             res.writeHead(200, headers);
-            return res.end(JSON.stringify({ count: _pc.count, age: Math.round((Date.now() - _pc.fetchedAt) / 1000) }));
+            return res.end(JSON.stringify({
+                count: _pc.count,
+                age: Math.round((Date.now() - _pc.fetchedAt) / 1000),
+                history: _pc.history.slice(-60)
+            }));
         }
-        // Cache not populated yet (server just started) — do a blocking fetch once
+        // Cache not ready yet — trigger a fetch now and wait for it
         try {
-            const pcBody = await new Promise((resolve, reject) => {
-                const req2 = https.get(
-                    'https://oldschool.runescape.com/player_count.js?varname=_c',
-                    { headers: { 'User-Agent': 'OSRS-GE-Tracker/1.0' } },
-                    (r) => { let b = ''; r.on('data', d => { b += d; }); r.on('end', () => resolve(b)); }
-                );
-                req2.on('error', reject);
-                req2.setTimeout(8000, () => { req2.destroy(); reject(new Error('timeout')); });
-            });
-            const m = pcBody.match(/=\s*(\d+)/);
-            if (!m) throw new Error('parse failed');
-            _pc.count = parseInt(m[1], 10);
-            _pc.fetchedAt = Date.now();
+            await refreshPlayerCount();
+        } catch (e) { /* ignore */ }
+        if (_pc.count !== null) {
             res.writeHead(200, headers);
-            return res.end(JSON.stringify({ count: _pc.count, age: 0 }));
-        } catch (e) {
-            res.writeHead(502, headers);
-            return res.end(JSON.stringify({ error: e.message }));
+            return res.end(JSON.stringify({ count: _pc.count, age: 0, history: _pc.history.slice(-60) }));
         }
+        res.writeHead(503, headers);
+        return res.end(JSON.stringify({ error: 'player count not available yet, try again shortly' }));
     }
 
     // --- Get votes for an item ---

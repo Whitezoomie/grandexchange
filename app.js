@@ -3432,19 +3432,7 @@
     };
 
     async function fetchOsrsPlayerCount() {
-        // Route through our own server to avoid CORS / MIME-type issues.
-        // Use a 7-second abort timeout so we never block forever.
-        const ctrl = new AbortController();
-        const timer = setTimeout(() => ctrl.abort(), 7000);
-        try {
-            const res = await fetch(FEEDBACK_SERVER + '/player-count', { signal: ctrl.signal });
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            const data = await res.json();
-            if (typeof data.count !== 'number') throw new Error('no count');
-            return data.count;
-        } finally {
-            clearTimeout(timer);
-        }
+        // kept for compatibility — logic now handled inline in updateStatsPanel
     }
 
     function computeGeStats() {
@@ -3549,15 +3537,30 @@
     async function updateStatsPanel() {
         // --- Player count ---
         try {
-            const count = await fetchOsrsPlayerCount();
-            playerCountHistory.push(count);
-            if (playerCountHistory.length > MAX_PLAYER_HISTORY) playerCountHistory.shift();
-            const el = document.getElementById('statsPlayerCount');
-            if (el) {
-                animateStatNumber(el, _statsPrev.playerCount, count, '');
+            const ctrl = new AbortController();
+            const timer = setTimeout(() => ctrl.abort(), 7000);
+            let data;
+            try {
+                const res = await fetch(FEEDBACK_SERVER + '/player-count', { signal: ctrl.signal });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                data = await res.json();
+            } finally {
+                clearTimeout(timer);
             }
-            _statsPrev.playerCount = count;
-            drawPlayerSparkline(playerCountHistory);
+            if (typeof data.count === 'number') {
+                // Seed history from server if we have more data there than locally
+                if (data.history && data.history.length > playerCountHistory.length) {
+                    playerCountHistory.length = 0;
+                    data.history.forEach(function(pt) { playerCountHistory.push(pt.count); });
+                } else {
+                    playerCountHistory.push(data.count);
+                    if (playerCountHistory.length > MAX_PLAYER_HISTORY) playerCountHistory.shift();
+                }
+                const el = document.getElementById('statsPlayerCount');
+                if (el) animateStatNumber(el, _statsPrev.playerCount, data.count, '');
+                _statsPrev.playerCount = data.count;
+                drawPlayerSparkline(playerCountHistory);
+            }
         } catch(e) {
             const el = document.getElementById('statsPlayerCount');
             if (el && _statsPrev.playerCount === null) el.textContent = 'unavailable';
