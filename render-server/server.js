@@ -274,6 +274,10 @@ async function refreshPlayerCount() {
             'INSERT INTO player_count_history (count, recorded_at) VALUES ($1, NOW())',
             [count]
         ).catch(e => console.warn('[player-count] db save:', e.message));
+        // Prune rows older than 90 days
+        dbQuery(
+            "DELETE FROM player_count_history WHERE recorded_at < NOW() - INTERVAL '90 days'"
+        ).catch(() => {});
     }
 }
 
@@ -310,6 +314,10 @@ async function refreshTaxData() {
                 'INSERT INTO tax_history (total_tax, recorded_at) VALUES ($1, NOW())',
                 [totalTax]
             ).catch(e => console.warn('[tax] db save:', e.message));
+            // Prune rows older than 90 days
+            dbQuery(
+                "DELETE FROM tax_history WHERE recorded_at < NOW() - INTERVAL '90 days'"
+            ).catch(() => {});
         }
         if (totalVol > 0) {
             _vol.value     = totalVol;
@@ -321,6 +329,10 @@ async function refreshTaxData() {
                 'INSERT INTO volume_history (total_volume, recorded_at) VALUES ($1, NOW())',
                 [totalVol]
             ).catch(e => console.warn('[volume] db save:', e.message));
+            // Prune rows older than 90 days
+            dbQuery(
+                "DELETE FROM volume_history WHERE recorded_at < NOW() - INTERVAL '90 days'"
+            ).catch(() => {});
         }
     } catch (e) {
         console.warn('[tax/volume] refresh failed:', e.message);
