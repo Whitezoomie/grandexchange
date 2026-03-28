@@ -138,6 +138,37 @@ function generateToken() {
     return crypto.randomBytes(32).toString('hex');
 }
 
+// --- OSRS player count cache (refreshed every 15 seconds server-side) ---
+const _pc = { count: null, fetchedAt: 0 };
+const https = require('https');
+
+function refreshPlayerCount() {
+    const req2 = https.get(
+        'https://oldschool.runescape.com/player_count.js?varname=_c',
+        { headers: { 'User-Agent': 'OSRS-GE-Tracker/1.0' } },
+        (r) => {
+            let body = '';
+            r.on('data', d => { body += d; });
+            r.on('end', () => {
+                const m = body.match(/=\s*(\d+)/);
+                if (m) {
+                    _pc.count = parseInt(m[1], 10);
+                    _pc.fetchedAt = Date.now();
+                    console.log('[player-count] updated:', _pc.count);
+                } else {
+                    console.warn('[player-count] unexpected response:', body.slice(0, 60));
+                }
+            });
+        }
+    );
+    req2.on('error', e => console.warn('[player-count] fetch error:', e.message));
+    req2.setTimeout(8000, () => req2.destroy());
+}
+
+// Kick off immediately and then every 15 s
+refreshPlayerCount();
+setInterval(refreshPlayerCount, 15000);
+
 // --- Parse JSON body helper ---
 function parseBody(req, maxBytes) {
     maxBytes = maxBytes || 1e6;
@@ -171,6 +202,35 @@ const server = http.createServer(async (req, res) => {
     if (path === '/' && req.method === 'GET') {
         res.writeHead(200, headers);
         return res.end(JSON.stringify({ online: clients.size, total: totalVisitors }));
+    }
+
+    // --- OSRS player count (served from server-side cache, always instant) ---
+    if (path === '/player-count' && req.method === 'GET') {
+        if (_pc.count !== null) {
+            res.writeHead(200, headers);
+            return res.end(JSON.stringify({ count: _pc.count, age: Math.round((Date.now() - _pc.fetchedAt) / 1000) }));
+        }
+        // Cache not populated yet (server just started) — do a blocking fetch once
+        try {
+            const pcBody = await new Promise((resolve, reject) => {
+                const req2 = https.get(
+                    'https://oldschool.runescape.com/player_count.js?varname=_c',
+                    { headers: { 'User-Agent': 'OSRS-GE-Tracker/1.0' } },
+                    (r) => { let b = ''; r.on('data', d => { b += d; }); r.on('end', () => resolve(b)); }
+                );
+                req2.on('error', reject);
+                req2.setTimeout(8000, () => { req2.destroy(); reject(new Error('timeout')); });
+            });
+            const m = pcBody.match(/=\s*(\d+)/);
+            if (!m) throw new Error('parse failed');
+            _pc.count = parseInt(m[1], 10);
+            _pc.fetchedAt = Date.now();
+            res.writeHead(200, headers);
+            return res.end(JSON.stringify({ count: _pc.count, age: 0 }));
+        } catch (e) {
+            res.writeHead(502, headers);
+            return res.end(JSON.stringify({ error: e.message }));
+        }
     }
 
     // --- Get votes for an item ---

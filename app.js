@@ -3416,6 +3416,207 @@
     }
 
     // ========================================
+    // Live Stats Panel
+    // ========================================
+
+    const playerCountHistory = [];
+    const MAX_PLAYER_HISTORY = 60;
+    let statsInterval = null;
+    // remembered previous numeric values for smooth animation
+    const _statsPrev = {
+        playerCount: null,
+        totalTax: null,
+        totalVolume: null,
+        mostTradedVol: null,
+        bestMarginVal: null,
+    };
+
+    async function fetchOsrsPlayerCount() {
+        // Route through our own server to avoid CORS / MIME-type issues.
+        // Use a 7-second abort timeout so we never block forever.
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 7000);
+        try {
+            const res = await fetch(FEEDBACK_SERVER + '/player-count', { signal: ctrl.signal });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+            if (typeof data.count !== 'number') throw new Error('no count');
+            return data.count;
+        } finally {
+            clearTimeout(timer);
+        }
+    }
+
+    function computeGeStats() {
+        if (!allItems || allItems.length === 0) return null;
+        let totalTax = 0;
+        let totalVolume = 0;
+        let mostTradedItem = null;
+        let maxVolume = 0;
+        let bestMarginItem = null;
+        let maxMargin = 0;
+        allItems.forEach(function(item) {
+            const vol = item.volume || 0;
+            if (vol > 0) {
+                totalTax += (item.tax || 0) * vol;
+                const avgPrice = item.buyPrice || item.sellPrice || 0;
+                totalVolume += avgPrice * vol;
+                if (vol > maxVolume) {
+                    maxVolume = vol;
+                    mostTradedItem = item;
+                }
+            }
+            // Best flip: must have margin > 0 AND 150+ daily volume
+            if (item.margin && item.margin > 0 && (item.volume || 0) >= 150 && item.margin > maxMargin) {
+                maxMargin = item.margin;
+                bestMarginItem = item;
+            }
+        });
+        return { totalTax, totalVolume, mostTradedItem, bestMarginItem };
+    }
+
+    function drawPlayerSparkline(history) {
+        const canvas = document.getElementById('statsPlayerGraph');
+        if (!canvas || history.length < 2) return;
+        const dpr = window.devicePixelRatio || 1;
+        const w = canvas.offsetWidth || 220;
+        const h = canvas.offsetHeight || 52;
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+        ctx.clearRect(0, 0, w, h);
+        const min = Math.min.apply(null, history);
+        const max = Math.max.apply(null, history);
+        const range = (max - min) || 1;
+        const padX = 4, padY = 6;
+        const chartW = w - padX * 2;
+        const chartH = h - padY * 2;
+        function px(i) { return padX + (i / (Math.max(history.length - 1, 1))) * chartW; }
+        function py(v) { return padY + chartH - ((v - min) / range) * chartH; }
+
+        const greenColor = getComputedStyle(document.documentElement).getPropertyValue('--green').trim() || '#2ecc71';
+        const grad = ctx.createLinearGradient(0, padY, 0, padY + chartH);
+        grad.addColorStop(0, 'rgba(46,204,113,0.22)');
+        grad.addColorStop(1, 'rgba(46,204,113,0.0)');
+
+        ctx.beginPath();
+        ctx.moveTo(px(0), py(history[0]));
+        for (let i = 1; i < history.length; i++) ctx.lineTo(px(i), py(history[i]));
+        ctx.lineTo(px(history.length - 1), padY + chartH);
+        ctx.lineTo(px(0), padY + chartH);
+        ctx.closePath();
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(px(0), py(history[0]));
+        for (let i = 1; i < history.length; i++) ctx.lineTo(px(i), py(history[i]));
+        ctx.strokeStyle = greenColor;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        const lx = px(history.length - 1), ly = py(history[history.length - 1]);
+        ctx.beginPath();
+        ctx.arc(lx, ly, 3, 0, Math.PI * 2);
+        ctx.fillStyle = greenColor;
+        ctx.fill();
+    }
+
+    function animateStatNumber(el, from, to, suffix, showSign) {
+        if (!el) return;
+        if (from === null || from === undefined || !effectsEnabled) {
+            el.textContent = typeof to === 'number' ? to.toLocaleString() + (suffix || '') : (to || '-');
+            return;
+        }
+        from = Math.round(from);
+        to = Math.round(to);
+        if (from === to) return;
+        const duration = 700;
+        const start = performance.now();
+        const diff = to - from;
+        function tick(now) {
+            const elapsed = now - start;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - (1 - progress) * (1 - progress);
+            const current = Math.round(from + diff * eased);
+            el.textContent = current.toLocaleString() + (suffix || '');
+            if (progress < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+    }
+
+    async function updateStatsPanel() {
+        // --- Player count ---
+        try {
+            const count = await fetchOsrsPlayerCount();
+            playerCountHistory.push(count);
+            if (playerCountHistory.length > MAX_PLAYER_HISTORY) playerCountHistory.shift();
+            const el = document.getElementById('statsPlayerCount');
+            if (el) {
+                animateStatNumber(el, _statsPrev.playerCount, count, '');
+            }
+            _statsPrev.playerCount = count;
+            drawPlayerSparkline(playerCountHistory);
+        } catch(e) {
+            const el = document.getElementById('statsPlayerCount');
+            if (el && _statsPrev.playerCount === null) el.textContent = 'unavailable';
+        }
+
+        // --- GE stats from loaded item data ---
+        const stats = computeGeStats();
+        if (!stats) return;
+
+        const taxEl = document.getElementById('statsTaxCollected');
+        if (taxEl) animateGpValue(taxEl, _statsPrev.totalTax, Math.round(stats.totalTax), false);
+        _statsPrev.totalTax = Math.round(stats.totalTax);
+
+        const volEl = document.getElementById('statsTradeVolume');
+        if (volEl) animateGpValue(volEl, _statsPrev.totalVolume, Math.round(stats.totalVolume), false);
+        _statsPrev.totalVolume = Math.round(stats.totalVolume);
+
+        const tradedEl = document.getElementById('statsMostTraded');
+        const tradedSubEl = document.getElementById('statsMostTradedSub');
+        if (tradedEl && stats.mostTradedItem) {
+            tradedEl.textContent = stats.mostTradedItem.name;
+            if (tradedSubEl) {
+                const vol = stats.mostTradedItem.volume;
+                animateStatNumber(tradedSubEl, _statsPrev.mostTradedVol, vol, ' trades/day', false);
+                _statsPrev.mostTradedVol = vol;
+            }
+        }
+
+        const marginEl = document.getElementById('statsBestMargin');
+        const marginSubEl = document.getElementById('statsBestMarginSub');
+        if (marginEl && stats.bestMarginItem) {
+            marginEl.textContent = stats.bestMarginItem.name;
+            if (marginSubEl) {
+                const m = stats.bestMarginItem.margin;
+                animateStatNumber(marginSubEl, _statsPrev.bestMarginVal, m, ' gp profit', false);
+                _statsPrev.bestMarginVal = m;
+            }
+        }
+    }
+
+    function initStatsPanel() {
+        const statsHeader = document.querySelector('.sidebar-header[data-collapse-toggle="statsFeed"]');
+        if (!statsHeader) return;
+        statsHeader.addEventListener('click', function() {
+            setTimeout(function() {
+                const feed = document.getElementById('statsFeed');
+                if (!feed) return;
+                if (!feed.classList.contains('collapsed')) {
+                    updateStatsPanel();
+                    if (!statsInterval) statsInterval = setInterval(updateStatsPanel, 5000);
+                } else {
+                    clearInterval(statsInterval);
+                    statsInterval = null;
+                }
+            }, 0);
+        });
+    }
+
+    // ========================================
     // Hamburger Menu
     // ========================================
 
@@ -4217,6 +4418,7 @@
         initTheme();
         initEffects();
         initHamburgerMenu();
+        initStatsPanel();
         initDeathCoffer();
         initHeatmap();
         initHighlight();
