@@ -327,9 +327,9 @@ async function refreshTaxData() {
     }
 }
 
-// Kick off immediately and then every 60 s
+// Kick off immediately and then every 5 s
 refreshTaxData();
-setInterval(refreshTaxData, 60000);
+setInterval(refreshTaxData, 5000);
 
 // --- Parse JSON body helper ---
 function parseBody(req, maxBytes) {
