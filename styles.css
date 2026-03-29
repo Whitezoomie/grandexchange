@@ -1278,10 +1278,41 @@ body {
     position: relative;
     padding: 16px 18px 18px;
 }
+
+/* Day-of-week tab bar */
+.player-graph-day-tabs {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+}
+.player-graph-day-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    border-radius: 4px;
+    padding: 3px 11px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+    line-height: 1.6;
+}
+.player-graph-day-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--green);
+}
+.player-graph-day-btn.active {
+    background: var(--green);
+    color: #fff;
+    border-color: var(--green);
+}
 #playerGraphExpanded {
     display: block;
     width: 100%;
-    height: 260px;
+    height: 280px;
     border-radius: 6px;
 }
 .player-graph-expanded-tooltip {

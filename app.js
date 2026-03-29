@@ -3446,7 +3446,10 @@
     const playerCountTimestamps = [];
     let playerGraphZoomStart = 0;
     let playerGraphZoomEnd = -1;
-    const MAX_PLAYER_HISTORY = 720;
+    const MAX_PLAYER_HISTORY = 1440;
+    const MAX_DAILY_POINTS = 1440; // 24h at 1-min intervals
+    let playerDailyData = {};      // keyed by 'day-0'..'day-6', 'meta-0'..'meta-6'
+    let playerGraphModalDay = -1;  // -1 = live view, 0=Sun..6=Sat
     const taxCountHistory = [];
     const MAX_TAX_HISTORY = 60;
     const volCountHistory = [];
@@ -3586,36 +3589,109 @@
     }
 
     function drawExpandedPlayerGraph(canvas, hoverIdx) {
-        if (!canvas || playerCountHistory.length < 2) return;
+        if (!canvas) return;
+        const _activeDH = getActiveDayHistory();
+        const _activeHistory = _activeDH.history;
+        const _activeTimestamps = _activeDH.timestamps;
         const dpr = window.devicePixelRatio || 1;
         const w = canvas.offsetWidth || 700;
-        const h = canvas.offsetHeight || 260;
+        const h = canvas.offsetHeight || 280;
         canvas.width = Math.round(w * dpr);
         canvas.height = Math.round(h * dpr);
         const ctx = canvas.getContext('2d');
         ctx.scale(dpr, dpr);
         ctx.clearRect(0, 0, w, h);
-        const _fullLen = playerCountHistory.length;
+        const mutedColor = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || '#888';
+        const greenColor = getComputedStyle(document.documentElement).getPropertyValue('--green').trim() || '#2ecc71';
+        if (_activeHistory.length < 2) {
+            ctx.font = '13px sans-serif';
+            ctx.fillStyle = mutedColor;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('No data recorded for this day yet.', w / 2, h / 2);
+            return;
+        }
+        const _fullLen = _activeHistory.length;
         const _pZS = Math.max(0, playerGraphZoomStart);
         const _pZE = (playerGraphZoomEnd >= 0 && playerGraphZoomEnd < _fullLen) ? playerGraphZoomEnd : _fullLen - 1;
-        const history = playerCountHistory.slice(_pZS, _pZE + 1);
+        const history = _activeHistory.slice(_pZS, _pZE + 1);
+        const timestamps = _activeTimestamps.slice(_pZS, _pZE + 1);
         const min = Math.min.apply(null, history);
         const max = Math.max.apply(null, history);
         const range = (max - min) || 1;
-        const padX = 10, padY = 16;
-        const chartW = w - padX * 2;
-        const chartH = h - padY * 2;
-        function px(i) { return padX + (i / (Math.max(history.length - 1, 1))) * chartW; }
-        function py(v) { return padY + chartH - ((v - min) / range) * chartH; }
-        const greenColor = getComputedStyle(document.documentElement).getPropertyValue('--green').trim() || '#2ecc71';
-        const grad = ctx.createLinearGradient(0, padY, 0, padY + chartH);
+        const padLeft = 52, padRight = 10, padTop = 12, padBottom = 28;
+        const chartW = w - padLeft - padRight;
+        const chartH = h - padTop - padBottom;
+        function px(i) { return padLeft + (i / (Math.max(history.length - 1, 1))) * chartW; }
+        function py(v) { return padTop + chartH - ((v - min) / range) * chartH; }
+
+        // --- Y-axis gridlines & labels ---
+        const rawStep = range / 4;
+        const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep || 1)));
+        const niceStep = Math.ceil(rawStep / magnitude) * magnitude || 10000;
+        const gridBase = Math.floor(min / niceStep) * niceStep;
+        ctx.save();
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.font = '10px sans-serif';
+        ctx.fillStyle = mutedColor;
+        for (let v = gridBase; v <= max + niceStep; v += niceStep) {
+            if (v < min - niceStep * 0.5) continue;
+            const gy = py(v);
+            if (gy < padTop - 4 || gy > padTop + chartH + 4) continue;
+            ctx.beginPath();
+            ctx.moveTo(padLeft, gy);
+            ctx.lineTo(padLeft + chartW, gy);
+            ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            const label = v >= 1000 ? (v / 1000).toFixed(v % 1000 === 0 ? 0 : 1) + 'k' : String(Math.round(v));
+            ctx.fillText(label, padLeft - 5, gy);
+        }
+        ctx.restore();
+
+        // --- X-axis time labels ---
+        if (timestamps.length >= 2) {
+            const tsFirst = timestamps[0];
+            const tsLast = timestamps[timestamps.length - 1];
+            const totalMs = tsLast - tsFirst || 1;
+            const rangeHours = totalMs / 3600000;
+            const stepHours = rangeHours > 12 ? 3 : rangeHours > 4 ? 1 : 0.5;
+            const stepMs = stepHours * 3600000;
+            const firstTickTs = Math.ceil(tsFirst / stepMs) * stepMs;
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            ctx.font = '10px sans-serif';
+            ctx.fillStyle = mutedColor;
+            for (let t = firstTickTs; t <= tsLast; t += stepMs) {
+                const frac = (t - tsFirst) / totalMs;
+                const gx = padLeft + frac * chartW;
+                if (gx < padLeft + 10 || gx > padLeft + chartW - 10) continue;
+                ctx.beginPath();
+                ctx.moveTo(gx, padTop + chartH);
+                ctx.lineTo(gx, padTop + chartH + 4);
+                ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                const d = new Date(t);
+                const hh = d.getHours(), mm = d.getMinutes();
+                const h12 = (hh % 12) || 12;
+                const ampm = hh < 12 ? 'am' : 'pm';
+                ctx.fillText(mm === 0 ? h12 + ampm : h12 + ':' + String(mm).padStart(2,'0'), gx, padTop + chartH + 6);
+            }
+            ctx.restore();
+        }
+
+        // --- Gradient fill ---
+        const grad = ctx.createLinearGradient(0, padTop, 0, padTop + chartH);
         grad.addColorStop(0, 'rgba(46,204,113,0.18)');
         grad.addColorStop(1, 'rgba(46,204,113,0.0)');
         ctx.beginPath();
         ctx.moveTo(px(0), py(history[0]));
         for (let i = 1; i < history.length; i++) ctx.lineTo(px(i), py(history[i]));
-        ctx.lineTo(px(history.length - 1), padY + chartH);
-        ctx.lineTo(px(0), padY + chartH);
+        ctx.lineTo(px(history.length - 1), padTop + chartH);
+        ctx.lineTo(px(0), padTop + chartH);
         ctx.closePath();
         ctx.fillStyle = grad;
         ctx.fill();
@@ -3629,8 +3705,8 @@
             const hx = px(hoverIdx), hy = py(history[hoverIdx]);
             ctx.save();
             ctx.beginPath();
-            ctx.moveTo(hx, padY);
-            ctx.lineTo(hx, padY + chartH);
+            ctx.moveTo(hx, padTop);
+            ctx.lineTo(hx, padTop + chartH);
             ctx.setLineDash([4, 4]);
             ctx.lineWidth = 1;
             ctx.strokeStyle = 'rgba(255,255,255,0.3)';
@@ -3662,11 +3738,21 @@
             overlay.innerHTML = `
                 <div class="player-graph-modal">
                     <div class="player-graph-modal-header">
-                        <span class="player-graph-modal-title">Players Online (OSRS) — Last 12 Hours</span>
+                        <span class="player-graph-modal-title" id="playerGraphModalTitle">Players Online (OSRS) — Last 24 Hours</span>
                         <div style="display:flex;align-items:center;gap:8px;">
                             <button id="playerGraphResetZoom" class="reset-zoom-btn" style="position:static;display:none;">Reset Zoom</button>
                             <button class="player-graph-modal-close" id="playerGraphModalClose" aria-label="Close">&times;</button>
                         </div>
+                    </div>
+                    <div class="player-graph-day-tabs" id="playerGraphDayTabs">
+                        <button class="player-graph-day-btn active" data-day="-1">Live</button>
+                        <button class="player-graph-day-btn" data-day="0">Sun</button>
+                        <button class="player-graph-day-btn" data-day="1">Mon</button>
+                        <button class="player-graph-day-btn" data-day="2">Tue</button>
+                        <button class="player-graph-day-btn" data-day="3">Wed</button>
+                        <button class="player-graph-day-btn" data-day="4">Thu</button>
+                        <button class="player-graph-day-btn" data-day="5">Fri</button>
+                        <button class="player-graph-day-btn" data-day="6">Sat</button>
                     </div>
                     <div class="player-graph-modal-body">
                         <canvas id="playerGraphExpanded"></canvas>
@@ -3682,6 +3768,32 @@
                 this.style.display = 'none';
                 drawExpandedPlayerGraph(document.getElementById('playerGraphExpanded'));
             });
+
+            // Day tab buttons
+            document.getElementById('playerGraphDayTabs').addEventListener('click', function(e) {
+                const btn = e.target.closest('.player-graph-day-btn');
+                if (!btn) return;
+                const day = parseInt(btn.getAttribute('data-day'), 10);
+                playerGraphModalDay = day;
+                playerGraphZoomStart = 0;
+                playerGraphZoomEnd = -1;
+                const resetBtn = document.getElementById('playerGraphResetZoom');
+                if (resetBtn) resetBtn.style.display = 'none';
+                document.querySelectorAll('.player-graph-day-btn').forEach(function(b) { b.classList.remove('active'); });
+                btn.classList.add('active');
+                const titleEl = document.getElementById('playerGraphModalTitle');
+                if (titleEl) {
+                    const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+                    const _metaDate = day >= 0 ? playerDailyData['meta-' + day] : null;
+                    const _dateLabel = _metaDate ? ', ' + new Date(_metaDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+                    titleEl.textContent = day < 0
+                        ? 'Players Online (OSRS) \u2014 Last 24 Hours'
+                        : 'Players Online (OSRS) \u2014 ' + dayNames[day] + _dateLabel;
+                }
+                document.getElementById('playerGraphExpandedTooltip').style.display = 'none';
+                drawExpandedPlayerGraph(document.getElementById('playerGraphExpanded'));
+            });
+
             overlay.addEventListener('click', function(e) {
                 if (e.target === overlay) closePlayerGraphModal();
             });
@@ -3693,16 +3805,16 @@
             expCanvas.style.cursor = 'crosshair';
             expCanvas.addEventListener('wheel', function(e) {
                 e.preventDefault();
-                const fullLen = playerCountHistory.length;
+                const fullLen = getActiveDayHistory().history.length;
                 if (fullLen < 2) return;
                 const zs = Math.max(0, playerGraphZoomStart);
                 const ze = (playerGraphZoomEnd >= 0 && playerGraphZoomEnd < fullLen) ? playerGraphZoomEnd : fullLen - 1;
                 const sliceLen = ze - zs + 1;
                 const rect = expCanvas.getBoundingClientRect();
                 const mouseX = e.clientX - rect.left;
-                const padX = 10;
-                const chartW = rect.width - padX * 2;
-                const frac = Math.max(0, Math.min(1, (mouseX - padX) / chartW));
+                const padLeft = 52, padRight = 10;
+                const chartW = rect.width - padLeft - padRight;
+                const frac = Math.max(0, Math.min(1, (mouseX - padLeft) / chartW));
                 const zoomFactor = e.deltaY < 0 ? 0.7 : 1.4;
                 const newLen = Math.max(10, Math.min(fullLen, Math.round(sliceLen * zoomFactor)));
                 const center = zs + frac * (sliceLen - 1);
@@ -3727,7 +3839,7 @@
                 _dragActive = true;
                 _dragStartX = e.clientX;
                 _dragZoomStartAtDrag = playerGraphZoomStart;
-                _dragZoomEndAtDrag = (playerGraphZoomEnd >= 0) ? playerGraphZoomEnd : playerCountHistory.length - 1;
+                _dragZoomEndAtDrag = (playerGraphZoomEnd >= 0) ? playerGraphZoomEnd : getActiveDayHistory().history.length - 1;
                 expCanvas.style.cursor = 'grabbing';
             });
             window.addEventListener('mouseup', function() {
@@ -3739,10 +3851,10 @@
 
             expCanvas.addEventListener('mousemove', function(e) {
                 if (_dragActive) {
-                    const fullLen = playerCountHistory.length;
+                    const fullLen = getActiveDayHistory().history.length;
                     if (fullLen < 2) return;
                     const rect = expCanvas.getBoundingClientRect();
-                    const chartW = rect.width - 20;
+                    const chartW = rect.width - 62;
                     const sliceLen = _dragZoomEndAtDrag - _dragZoomStartAtDrag + 1;
                     const deltaX = e.clientX - _dragStartX;
                     const deltaIdx = -Math.round(deltaX / chartW * sliceLen);
@@ -3759,21 +3871,22 @@
                     document.getElementById('playerGraphExpandedTooltip').style.display = 'none';
                     return;
                 }
-                if (playerCountHistory.length < 2) return;
+                const _adh = getActiveDayHistory();
+                if (_adh.history.length < 2) return;
                 const rect = expCanvas.getBoundingClientRect();
                 const mouseX = e.clientX - rect.left;
-                const padX = 10;
-                const chartW = rect.width - padX * 2;
-                const fullLen = playerCountHistory.length;
+                const padLeft = 52, padRight = 10;
+                const chartW = rect.width - padLeft - padRight;
+                const fullLen = _adh.history.length;
                 const zs = Math.max(0, playerGraphZoomStart);
                 const ze = (playerGraphZoomEnd >= 0 && playerGraphZoomEnd < fullLen) ? playerGraphZoomEnd : fullLen - 1;
                 const sliceLen = ze - zs + 1;
-                const rawIdx = (mouseX - padX) / chartW * (sliceLen - 1);
+                const rawIdx = (mouseX - padLeft) / chartW * (sliceLen - 1);
                 const sliceIdx = Math.max(0, Math.min(sliceLen - 1, Math.round(rawIdx)));
                 drawExpandedPlayerGraph(expCanvas, sliceIdx);
                 const realIdx = zs + sliceIdx;
-                const count = playerCountHistory[realIdx];
-                const ts = playerCountTimestamps[realIdx];
+                const count = _adh.history[realIdx];
+                const ts = _adh.timestamps[realIdx];
                 const tip = document.getElementById('playerGraphExpandedTooltip');
                 let label = count != null ? count.toLocaleString() + ' players' : '';
                 if (ts) label += '<br><span class="sparkline-tooltip-time">' + formatSparklineTime(new Date(ts)) + '</span>';
@@ -3789,11 +3902,18 @@
             });
         }
 
-        // Reset zoom on each open
+        // Reset zoom and day selection on each open
         playerGraphZoomStart = 0;
         playerGraphZoomEnd = -1;
+        playerGraphModalDay = -1;
         const resetBtn = document.getElementById('playerGraphResetZoom');
         if (resetBtn) resetBtn.style.display = 'none';
+        // Restore Live button as active
+        document.querySelectorAll('.player-graph-day-btn').forEach(function(b) {
+            b.classList.toggle('active', b.getAttribute('data-day') === '-1');
+        });
+        const titleEl = document.getElementById('playerGraphModalTitle');
+        if (titleEl) titleEl.textContent = 'Players Online (OSRS) \u2014 Last 24 Hours';
 
         overlay.classList.add('active');
         document.body.style.overflow = 'hidden';
@@ -3806,6 +3926,40 @@
         const overlay = document.getElementById('playerGraphModalOverlay');
         if (overlay) overlay.classList.remove('active');
         document.body.style.overflow = '';
+    }
+
+    function loadPlayerDailyData() {
+        try {
+            const stored = localStorage.getItem('ge-player-daily-history');
+            if (stored) playerDailyData = JSON.parse(stored);
+        } catch(e) { playerDailyData = {}; }
+    }
+
+    function savePlayerDailyPoint(count, ts) {
+        const d = new Date(ts);
+        const dayIdx = d.getDay();
+        const dateStr = d.toISOString().slice(0, 10);
+        const key = 'day-' + dayIdx;
+        const metaKey = 'meta-' + dayIdx;
+        if (!playerDailyData[key] || playerDailyData[metaKey] !== dateStr) {
+            playerDailyData[key] = [];
+            playerDailyData[metaKey] = dateStr;
+        }
+        playerDailyData[key].push({ count: count, ts: ts });
+        if (playerDailyData[key].length > MAX_DAILY_POINTS) playerDailyData[key].shift();
+        try { localStorage.setItem('ge-player-daily-history', JSON.stringify(playerDailyData)); } catch(e) {}
+    }
+
+    function getActiveDayHistory() {
+        if (playerGraphModalDay < 0) {
+            return { history: playerCountHistory, timestamps: playerCountTimestamps };
+        }
+        const key = 'day-' + playerGraphModalDay;
+        const pts = (playerDailyData[key] && playerDailyData[key].length) ? playerDailyData[key] : [];
+        return {
+            history: pts.map(function(p) { return p.count; }),
+            timestamps: pts.map(function(p) { return p.ts; })
+        };
     }
 
     function initPlayerSparklineHover() {
@@ -3981,7 +4135,13 @@
                 if (data.history && data.history.length > playerCountHistory.length) {
                     playerCountHistory.length = 0;
                     playerCountTimestamps.length = 0;
-                    data.history.forEach(function(pt) { playerCountHistory.push(pt.count); playerCountTimestamps.push(pt.ts || Date.now()); });
+                    data.history.forEach(function(pt) {
+                        playerCountHistory.push(pt.count);
+                        const ts = pt.ts || Date.now();
+                        playerCountTimestamps.push(ts);
+                        // Do NOT call savePlayerDailyPoint here — server history re-seeds on
+                        // every page refresh which would append duplicates to localStorage.
+                    });
                     const el = document.getElementById('statsPlayerCount');
                     if (el) animateStatNumber(el, _statsPrev.playerCount, data.count, '');
                     _statsPrev.playerCount = data.count;
@@ -3991,6 +4151,7 @@
                     // Only push + redraw when the count actually changed
                     playerCountHistory.push(data.count);
                     playerCountTimestamps.push(Date.now());
+                    savePlayerDailyPoint(data.count, Date.now());
                     if (playerCountHistory.length > MAX_PLAYER_HISTORY) { playerCountHistory.shift(); playerCountTimestamps.shift(); }
                     const el = document.getElementById('statsPlayerCount');
                     if (el) animateStatNumber(el, _statsPrev.playerCount, data.count, '');
@@ -4096,6 +4257,7 @@
     }
 
     function initStatsPanel() {
+        loadPlayerDailyData();
         const btn = document.getElementById('statsHeaderToggle');
         const wrap = document.getElementById('statsHeaderWrap');
         if (!btn || !wrap) return;
