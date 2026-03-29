@@ -1,6 +1,6 @@
 # Robots.txt for OSRS Grand Exchange Tracker
 # https://therealge.com
-# Last updated: 2026-03-04
+# Last updated: 2026-03-29
 
 # Allow all search engine bots to crawl the site
 User-agent: *

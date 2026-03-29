@@ -43,7 +43,7 @@ function escapeHtml(text) {
   return text.replace(/[&<>"']/g, m => map[m]);
 }
 
-function generateHtmlPage(item, prices, indexHtml) {
+function generateHtmlPage(item, prices, indexHtml, allItems) {
   const slug = slugify(item.name);
   const currentPrice = prices?.data?.[item.id]?.high || 0;
   const avgPrice = prices?.data?.[item.id]?.avgHighPrice || currentPrice;
@@ -53,12 +53,11 @@ function generateHtmlPage(item, prices, indexHtml) {
   const imageUrl = `https://oldschool.runescape.wiki/images/${item.icon || 'Item_None.png'}`;
   
   // Use index.html as a base and inject item metadata into the <head>
-  // Replace the title and add item-specific meta tags
   let html = indexHtml;
   
   // Insert title
   html = html.replace(
-    /<title>OSRS Grand Exchange Tracker<\/title>/,
+    /<title>[^<]*<\/title>/,
     `<title>${escapeHtml(title)}</title>`
   );
   
@@ -137,8 +136,44 @@ function generateHtmlPage(item, prices, indexHtml) {
   
   html = html.replace('</head>', metaTags + '\n</head>');
   
-  // Set data-initial-item attribute on body
-  html = html.replace('<body>', `<body data-initial-item="${item.id}">`);
+  // Set data-initial-item attribute on body (match any existing body tag)
+  html = html.replace(/<body[^>]*>/, `<body data-initial-item="${item.id}">`);
+  
+  // Build noscript fallback content + internal links for crawlers
+  const priceStr = currentPrice ? formatPrice(currentPrice) : 'N/A';
+  const memberStr = item.members ? 'Members' : 'Free-to-Play';
+  const examineStr = item.examine ? escapeHtml(item.examine) : '';
+  
+  // Pick related items: same first letter, capped at 20 links for crawlability
+  const firstChar = item.name.charAt(0).toLowerCase();
+  const related = allItems
+    .filter(other => other.name.charAt(0).toLowerCase() === firstChar && slugify(other.name) !== slug)
+    .slice(0, 20);
+  
+  let relatedLinks = related.map(other => {
+    const otherSlug = slugify(other.name);
+    const otherPrice = prices?.data?.[other.id]?.high;
+    const otherPriceStr = otherPrice ? formatPrice(otherPrice) : '';
+    return `<li><a href="/${otherSlug}">${escapeHtml(other.name)}</a>${otherPriceStr ? ' - ' + otherPriceStr + ' gp' : ''}</li>`;
+  }).join('\n');
+  
+  const noscriptBlock = `
+    <noscript>
+    <div class="seo-fallback">
+      <h1>${escapeHtml(item.name)} - OSRS Grand Exchange Price</h1>
+      <p>Current price: <strong>${priceStr} gp</strong> | ${memberStr} item</p>
+      ${examineStr ? '<p>' + examineStr + '</p>' : ''}
+      <p>Track real-time prices, margins, volume, and historical price charts for ${escapeHtml(item.name)} on the Old School RuneScape Grand Exchange.</p>
+      <p><a href="/">Back to Grand Exchange Tracker</a> | <a href="/sitemap-index">All Items</a></p>
+      ${related.length > 0 ? '<h2>Related Items</h2><ul>' + relatedLinks + '</ul>' : ''}
+    </div>
+    </noscript>`;
+  
+  // Insert SEO H1 + noscript block right after <body>
+  html = html.replace(
+    /(<body[^>]*>)/,
+    `$1\n    <h1 class="seo-item-title">${escapeHtml(item.name)} - OSRS Grand Exchange Price</h1>${noscriptBlock}`
+  );
   
   return html;
 }
@@ -170,7 +205,7 @@ function generateHtmlPage(item, prices, indexHtml) {
       if (!slug) continue;
       
       try {
-        const html = generateHtmlPage(item, latest, indexHtml);
+        const html = generateHtmlPage(item, latest, indexHtml, filtered);
         const filePath = path.join(outputDir, `${slug}.html`);
         fs.writeFileSync(filePath, html, 'utf8');
         successCount++;

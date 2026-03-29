@@ -2080,6 +2080,19 @@ body.theme-transitioning *::after {
     border: 0;
 }
 
+.seo-fallback {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+    font-family: system-ui, sans-serif;
+    color: #e0e0e0;
+}
+.seo-fallback h1 { color: #f5c842; }
+.seo-fallback h2 { color: #f5c842; margin-top: 24px; }
+.seo-fallback a { color: #7cb3ff; }
+.seo-fallback ul { columns: 2; list-style: none; padding: 0; }
+.seo-fallback li { padding: 2px 0; break-inside: avoid; }
+
 .logo-text .subtitle {
     font-size: 0.8rem;
     color: var(--text-secondary);

@@ -1,4 +1,4 @@
-
+﻿
 
 <!DOCTYPE html>
 <html lang="en">
@@ -10,29 +10,37 @@
     <title>Opal | OSRS Price Tracker</title>
     
     <!-- Essential Meta Tags for SEO -->
-    <meta name="description" content="Track OSRS Opal prices. Current price: 219 gp. View price history, trends, and market data.">
-    <meta name="keywords" content="OSRS, Grand Exchange, Opal, price, tracker">
+    <meta name="description" content="Track OSRS Grand Exchange prices in real-time. Live price charts, buy/sell margins, flip alerts, and historical data for 4,000+ Old School RuneScape items. Free GE tracker.">
+    <meta name="keywords" content="OSRS, Grand Exchange, price tracker, RuneScape, GE prices, item prices, market trends, price history, OSRS flipping, GE tracker, Old School RuneScape trading">
     <meta name="author" content="Zoomie">
     <meta name="rating" content="general">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <meta name="theme-color" content="#0f1117">
+    <meta property="og:locale" content="en_US">
+    
     <!-- Open Graph Tags for Social Media Sharing -->
-    <!-- Twitter Card Tags -->
-    <!-- Canonical URL -->
-    <link rel="canonical" href="https://therealge.com/opal">
-    
-    
-    
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Opal | OSRS Price Tracker">
-    <meta name="twitter:description" content="Track OSRS Opal prices. Current price: 219 gp. View price history, trends, and market data.">
-    <meta name="twitter:image" content="https://oldschool.runescape.wiki/images/Opal.png"><meta property="og:type" content="website">
-    <meta property="og:title" content="Opal | OSRS Price Tracker">
-    <meta property="og:description" content="Track OSRS Opal prices. Current price: 219 gp. View price history, trends, and market data.">
-    <meta property="og:image" content="https://oldschool.runescape.wiki/images/Opal.png">
-    <meta property="og:url" content="https://therealge.com/opal">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="OSRS Grand Exchange Tracker | Live Item Prices & Market Data">
+    <meta property="og:description" content="Track OSRS Grand Exchange prices in real-time. Monitor item trends, price history, and market data for Old School RuneScape.">
+    <meta property="og:url" content="https://therealge.com/">
     <meta property="og:site_name" content="OSRS Grand Exchange Tracker">
-    <meta property="og:locale" content="en_US"><!-- Apple Mobile Web App -->
+    <meta property="og:image" content="https://therealge.com/site-image.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="OSRS Grand Exchange Tracker - Live item prices and market data for Old School RuneScape">
+    
+    <!-- Twitter Card Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="OSRS Grand Exchange Tracker | Live Item Prices & Market Data">
+    <meta name="twitter:description" content="Track OSRS Grand Exchange prices in real-time. Monitor item trends, price history, and market data.">
+    <meta name="twitter:image" content="https://therealge.com/site-image.jpg">
+    <meta name="twitter:image:alt" content="OSRS Grand Exchange Tracker - Live item prices and market data for Old School RuneScape">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://therealge.com/">
+    
+    <!-- Apple Mobile Web App -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="TheRealGE">
@@ -53,34 +61,188 @@
     <style>
         /* Prevent FOUC by hiding unstyled content briefly - disabled for debugging */
         html { display: block; }
+
+        /* Hide scrollbar while splash is active */
+        body.splash-active { overflow: hidden; }
+
+        /* Splash screen */
+        #splashScreen {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: radial-gradient(ellipse at 50% 45%, #1a1d27 0%, #0f1117 65%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.35s ease;
+        }
+        #splashScreen.splash-hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .splash-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+        }
+        /* Glow orb behind icon */
+        .splash-glow {
+            position: absolute;
+            top: -28px;
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(200,170,110,0.22) 0%, transparent 70%);
+            animation: splashGlowPulse 1.4s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes splashGlowPulse {
+            0%, 100% { transform: scale(1);    opacity: 0.8; }
+            50%       { transform: scale(1.18); opacity: 1; }
+        }
+        .splash-logo {
+            width: 64px;
+            height: 64px;
+            image-rendering: pixelated;
+            position: relative;
+            animation: splashCoinFlip 0.5s ease-out;
+            filter: drop-shadow(0 0 8px rgba(200,170,110,0.45));
+        }
+        @keyframes splashCoinFlip {
+            0%   { transform: rotateY(90deg) scale(0.8); opacity: 0; }
+            60%  { transform: rotateY(-8deg) scale(1.05); opacity: 1; }
+            100% { transform: rotateY(0deg)  scale(1);    opacity: 1; }
+        }
+        .splash-title {
+            font-family: Inter, sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #c8aa6e;
+            letter-spacing: 0.02em;
+            margin: 4px 0 0;
+            animation: splashFadeUp 0.4s 0.15s ease-out both;
+        }
+        .splash-divider {
+            width: 90px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #c8aa6e 40%, #dfc08a 50%, #c8aa6e 60%, transparent);
+            animation: splashFadeUp 0.4s 0.22s ease-out both;
+        }
+        .splash-sub {
+            font-family: Inter, sans-serif;
+            font-size: 0.8125rem;
+            color: #9ca0b0;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            margin: 0;
+            animation: splashFadeUp 0.4s 0.28s ease-out both;
+        }
+        @keyframes splashFadeUp {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        /* Progress bar under subtitle */
+        .splash-bar-track {
+            width: 180px;
+            height: 3px;
+            background: rgba(200,170,110,0.15);
+            border-radius: 2px;
+            overflow: hidden;
+            animation: splashFadeUp 0.4s 0.34s ease-out both;
+        }
+        .splash-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #c8aa6e, #dfc08a 50%, #c8aa6e);
+            animation: splashBarFill 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            box-shadow: 0 0 8px rgba(200,170,110,0.6);
+        }
+        @keyframes splashBarFill {
+            from { width: 0%; }
+            to   { width: 100%; }
+        }
+        /* OSRS-style loading tip */
+        .splash-tip {
+            font-family: Inter, sans-serif;
+            font-size: 0.83rem;
+            color: #8a90a8;
+            text-align: center;
+            max-width: 300px;
+            margin: 0;
+            letter-spacing: 0.03em;
+            font-style: italic;
+            min-height: 1.8em;
+            line-height: 1.5;
+            animation: splashFadeUp 0.4s 0.42s ease-out both;
+        }
     </style>
     <noscript><style>html { display: block !important; }</style></noscript>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=optional" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     
     <!-- JSON-LD Schema Markup -->
-    <!-- Organization Schema -->
-    <!-- WebSite Schema for Sitelinks Search -->
-    <!-- BreadcrumbList Schema -->
-    <!-- ItemList Schema for Rich Results -->
-    <!-- FAQ Schema for Featured Snippets -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "Product",
-      "brand": {"@type": "Brand", "name": "Old School RuneScape"},
-      "category": "OSRS Grand Exchange Items",
-      "name": "Opal",
-      "description": "Track OSRS Opal prices. Current price: 219 gp. View price history, trends, and market data.",
-      "image": "https://oldschool.runescape.wiki/images/Opal.png",
+      "@type": "WebApplication",
+      "name": "OSRS Grand Exchange Tracker",
+      "description": "Real-time price tracker for Old School RuneScape Grand Exchange items",
+      "url": "https://therealge.com/",
+      "image": "https://therealge.com/og-image.png",
+      "creator": {
+        "@type": "Person",
+        "name": "Zoomie"
+      },
+      "applicationCategory": "UtilityApplication",
+      "isAccessibleForFree": true,
       "offers": {
         "@type": "Offer",
-        "priceCurrency": "GP",
-        "price": "219",
-        "availability": "https://schema.org/InStock"
+        "price": "0",
+        "priceCurrency": "USD"
       },
-      "url": "https://therealge.com/opal"
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "500"
+      }
     }
     </script>
+    
+    <!-- Organization Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "OSRS Grand Exchange Tracker",
+      "url": "https://therealge.com/",
+      "image": "https://therealge.com/og-image.png",
+      "sameAs": [
+        "https://therealge.com/"
+      ]
+    }
+    </script>
+    
+    <!-- WebSite Schema for Sitelinks Search -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "OSRS Grand Exchange Tracker",
+      "url": "https://therealge.com/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://therealge.com/?search={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <!-- BreadcrumbList Schema -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -89,7 +251,136 @@
         {
           "@type": "ListItem",
           "position": 1,
-          "name": "Grand Exchange",
+          "name": "Home",
+          "item": "https://therealge.com/"
+        }
+      ]
+    }
+    </script>
+
+    <!-- ItemList Schema for Rich Results -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "OSRS Grand Exchange Items",
+      "description": "Browse over 4,000 tradeable Old School RuneScape items with live Grand Exchange prices",
+      "numberOfItems": 4000,
+      "itemListOrder": "https://schema.org/ItemListUnordered",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Twisted bow",
+          "url": "https://therealge.com/twisted-bow"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Scythe of vitur",
+          "url": "https://therealge.com/scythe-of-vitur"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Abyssal whip",
+          "url": "https://therealge.com/abyssal-whip"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "Dragon claws",
+          "url": "https://therealge.com/dragon-claws"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "Bandos godsword",
+          "url": "https://therealge.com/bandos-godsword"
+        }
+      ]
+    }
+    </script>
+
+    <!-- FAQ Schema for Featured Snippets -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is the OSRS Grand Exchange?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The Grand Exchange (GE) is the main trading system in Old School RuneScape where players buy and sell items. Prices fluctuate based on supply and demand across all game worlds."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How often are Grand Exchange prices updated?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Grand Exchange prices on therealge.com are updated in real-time using data from the official RuneScape Wiki API. Price data refreshes continuously throughout the day."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I flip items on the Grand Exchange?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Item flipping involves buying items at a low price and selling at a higher price on the Grand Exchange. Use therealge.com to track buy/sell margins, daily volume, and price trends to identify profitable flipping opportunities."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How many items are tradeable on the OSRS Grand Exchange?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "There are over 4,000 tradeable items on the Old School RuneScape Grand Exchange, including weapons, armour, runes, food, potions, and skilling supplies. therealge.com tracks prices for all of them."
+          }
+        }
+      ]
+    }
+    </script>
+
+
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <meta name="description" content="Track Opal price on the OSRS Grand Exchange. Current price: 159 gp. View live price history, margins, volume, and market trends for Old School RuneScape.">
+    <meta name="keywords" content="OSRS, Grand Exchange, Opal, price, tracker, market data, price history">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    
+    <!-- Open Graph Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Opal | OSRS Price Tracker">
+    <meta property="og:description" content="Track Opal price on the OSRS Grand Exchange. Current price: 159 gp. View live price history, margins, volume, and market trends for Old School RuneScape.">
+    <meta property="og:image" content="https://oldschool.runescape.wiki/images/Opal.png">
+    <meta property="og:image:alt" content="Opal - OSRS Grand Exchange item">
+    <meta property="og:url" content="https://therealge.com/opal">
+    <meta property="og:site_name" content="OSRS Grand Exchange Tracker">
+    <meta property="og:locale" content="en_US">
+    
+    <!-- Twitter Card Tags -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Opal | OSRS Price Tracker">
+    <meta name="twitter:description" content="Track Opal price on the OSRS Grand Exchange. Current price: 159 gp. View live price history, margins, volume, and market trends for Old School RuneScape.">
+    <meta name="twitter:image" content="https://oldschool.runescape.wiki/images/Opal.png">
+    <meta name="twitter:image:alt" content="Opal - OSRS Grand Exchange item">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://therealge.com/opal">
+    
+    <!-- BreadcrumbList Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
           "item": "https://therealge.com/"
         },
         {
@@ -101,9 +392,106 @@
       ]
     }
     </script>
+
+    <!-- Product Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": "Opal",
+      "description": "A semi precious stone.",
+      "image": "https://oldschool.runescape.wiki/images/Opal.png",
+      "url": "https://therealge.com/opal",
+      "brand": {
+        "@type": "Brand",
+        "name": "Old School RuneScape"
+      },
+      "category": "Members OSRS Item",
+      "offers": {
+        "@type": "Offer",
+        "priceCurrency": "GP",
+        "price": "159",
+        "availability": "https://schema.org/InStock",
+        "url": "https://therealge.com/opal"
+      }
+    }
+    </script>
+    
 </head>
 <body data-initial-item="1609">
     <h1 class="seo-item-title">Opal - OSRS Grand Exchange Price</h1>
+    <noscript>
+    <div class="seo-fallback">
+      <h1>Opal - OSRS Grand Exchange Price</h1>
+      <p>Current price: <strong>159 gp</strong> | Members item</p>
+      <p>A semi precious stone.</p>
+      <p>Track real-time prices, margins, volume, and historical price charts for Opal on the Old School RuneScape Grand Exchange.</p>
+      <p><a href="/">Back to Grand Exchange Tracker</a> | <a href="/sitemap-index.html">All Items</a></p>
+      <h2>Related Items</h2><ul><li><a href="/oak-armchair-flatpack">Oak armchair (flatpack)</a> - 54 gp</li>
+<li><a href="/oak-armour-case-flatpack">Oak armour case (flatpack)</a> - 19 gp</li>
+<li><a href="/oak-bed-flatpack">Oak bed (flatpack)</a> - 38.0K gp</li>
+<li><a href="/oak-bench-flatpack">Oak bench (flatpack)</a> - 90 gp</li>
+<li><a href="/oak-bird-house">Oak bird house</a> - 435 gp</li>
+<li><a href="/oak-blackjack-d">Oak blackjack(d)</a> - 790 gp</li>
+<li><a href="/oak-blackjack-o">Oak blackjack(o)</a> - 1.9K gp</li>
+<li><a href="/oak-bookcase-flatpack">Oak bookcase (flatpack)</a> - 1 gp</li>
+<li><a href="/oak-cape-rack-flatpack">Oak cape rack (flatpack)</a> - 28 gp</li>
+<li><a href="/oak-chair-flatpack">Oak chair (flatpack)</a> - 3.0K gp</li>
+<li><a href="/oak-clock-flatpack">Oak clock (flatpack)</a> - 2 gp</li>
+<li><a href="/oak-dining-table-flatpack">Oak dining table (flatpack)</a> - 14 gp</li>
+<li><a href="/oak-drawers-flatpack">Oak drawers (flatpack)</a> - 33 gp</li>
+<li><a href="/oak-dresser-flatpack">Oak dresser (flatpack)</a> - 140 gp</li>
+<li><a href="/oak-fancy-dress-box-flatpack">Oak fancy dress box (flatpack)</a> - 22 gp</li>
+<li><a href="/oak-hull-parts">Oak hull parts</a> - 159 gp</li>
+<li><a href="/oak-kitchen-table-flatpack">Oak kitchen table (flatpack)</a> - 15 gp</li>
+<li><a href="/oak-leaves">Oak leaves</a> - 159 gp</li>
+<li><a href="/oak-logs">Oak logs</a> - 26 gp</li>
+<li><a href="/oak-longbow">Oak longbow</a> - 36 gp</li></ul>
+    </div>
+    </noscript>
+    <!-- Splash Screen -->
+    <div id="splashScreen" aria-hidden="true">
+        <div class="splash-inner">
+            <div class="splash-glow"></div>
+            <img src="coins_10000.png" alt="" class="splash-logo" width="64" height="64">
+            <h1 class="splash-title">TheRealGE</h1>
+            <div class="splash-divider"></div>
+            <p class="splash-sub">OSRS Grand Exchange Tracker</p>
+            <div class="splash-bar-track"><div class="splash-bar-fill"></div></div>
+            <p class="splash-tip" id="splashTip"></p>
+        </div>
+    </div>
+    <script>
+        // Random OSRS-style loading tip
+        (function () {
+            var tips = [
+                'Tip: Always check the buy limit before investing heavily in an item.',
+                'Tip: Prices often spike within hours of a new game update — act fast.',
+                'Tip: High Alchemy value sets a natural price floor for many items.',
+                'Tip: Patience is the most profitable skill in Old School RuneScape.',
+                'Tip: GE trade limits reset every 4 hours. Use them wisely.',
+                'Tip: Members-only items tend to have less price competition.',
+                'Tip: Items tied to popular quests often rise in value after update weeks.',
+                'Tip: Use the price history chart to spot support and resistance levels.',
+                'Tip: Add items to favourites to monitor your portfolio at a glance.',
+                'Tip: Low-volume items can move big on small buys — approach carefully.',
+                'Tip: Seasonal events drive demand for specific skilling supplies.',
+                'Tip: Checking the wiki drop tables can reveal underpriced items.',
+            ];
+            var el = document.getElementById('splashTip');
+            if (el) el.textContent = tips[Math.floor(Math.random() * tips.length)];
+        })();
+
+        setTimeout(function () {
+            var s = document.getElementById('splashScreen');
+            if (s) {
+                s.classList.add('splash-hide');
+                document.body.classList.remove('splash-active');
+                setTimeout(function () { s.style.display = 'none'; }, 375);
+            }
+        }, 1500);
+    </script>
+
     <!-- Header -->
     <header class="header">
         <div class="header-inner">
@@ -119,24 +507,20 @@
                     <span class="stat-value" id="totalItems">-</span>
                 </div>
                 <div class="stat-box">
-                    <span class="stat-label">Last Updated</span>
-                    <span class="stat-value" id="lastUpdated">-</span>
-                </div>
-                <div class="stat-box">
                     <span class="stat-label">Shown</span>
                     <span class="stat-value" id="shownItems">-</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Last Updated</span>
+                    <span class="stat-value" id="lastUpdated">-</span>
                 </div>
                 <div class="stat-box favorites-stat" id="favoritesStatBox">
                     <span class="stat-label">Favorites</span>
                     <span class="stat-value" id="favoritesCount">0</span>
                 </div>
-                <div class="stat-box portfolio-stat" id="portfolioStatBox">
-                    <span class="stat-label">Favorite Value</span>
-                    <span class="stat-value portfolio-value" id="portfolioValue">-</span>
-                </div>
                 <!-- GE Radio (compact, header-inline) -->
                 <div class="ge-radio" id="geRadio">
-                    <button class="ge-radio-toggle" id="geRadioToggle" title="GE Radio ? OSRS Soundtrack">
+                    <button class="ge-radio-toggle" id="geRadioToggle" title="GE Radio – OSRS Soundtrack">
                         <svg class="ge-radio-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
                         <div class="ge-radio-bars" id="geRadioBars"><span></span><span></span><span></span></div>
                         <span class="ge-radio-label" id="geRadioLabel">GE Radio</span>
@@ -177,10 +561,7 @@
                 </div>
             </div>
                         <div class="header-actions">
-                        <!-- Changelog + Hamburger Menu -->
-                        <!-- View toggle (moved here) -->
                         <div class="header-view">
-                            <div class="view-label">View</div>
                             <div class="view-toggle header-view-toggle">
                                 <button class="view-btn active" data-view="grid" title="Grid View">
                                     <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -190,7 +571,76 @@
                                 </button>
                             </div>
                         </div>
-                        <!-- Changelog was moved into the hamburger dropdown (above Feedback) -->
+                        <!-- Live Stats button -->
+                        <div class="stats-header-wrap" id="statsHeaderWrap">
+                            <button class="header-action-btn stats-header-btn" id="statsHeaderToggle" title="Live Stats">
+                                <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/></svg>
+                                <span>Live Stats</span>
+                                <span class="stats-live-badge">LIVE</span>
+                            </button>
+                            <div class="stats-header-dropdown" id="statsHeaderDropdown">
+                                <div class="stats-panel">
+                                    <div class="stat-card" id="statsCardBond">
+                                        <div class="stat-card-label">Bond Price</div>
+                                        <div class="stat-card-value stat-card-bond-row" id="bondPriceWrap">
+                                            <img id="bondIcon" src="" alt="Bond icon" class="bond-icon bond-icon-sm" style="display:none">
+                                            <span id="bondPrice">-</span>
+                                            <span class="price-change-indicator" id="bondPriceChange"> </span>
+                                        </div>
+                                    </div>
+                                    <div class="stat-card" id="statsCardPlayers">
+                                        <div class="stat-card-label">Players Online (OSRS)</div>
+                                        <div class="stat-card-value" id="statsPlayerCount"><span class="stats-loading-dots">loading...</span></div>
+                                        <canvas class="stat-sparkline" id="statsPlayerGraph"></canvas>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-card-label">24h Tax Collected (GE)</div>
+                                        <div class="stat-card-value" id="statsTaxCollected">—</div>
+                                        <div class="stat-card-sub">sum of 2% tax × daily volume across all items</div>
+                                        <canvas class="stat-sparkline" id="statsTaxGraph"></canvas>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-card-label">24h GE Trade Volume</div>
+                                        <div class="stat-card-value" id="statsTradeVolume">—</div>
+                                        <div class="stat-card-sub">total gp traded in last 24h</div>
+                                        <canvas class="stat-sparkline" id="statsVolumeGraph"></canvas>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-card-label">Most Traded Item (24h)</div>
+                                        <div class="stat-card-value stat-card-name" id="statsMostTraded">—</div>
+                                        <div class="stat-card-sub" id="statsMostTradedSub"></div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-card-label">Best Flip Right Now</div>
+                                        <div class="stat-card-value stat-card-name" id="statsBestMargin">—</div>
+                                        <div class="stat-card-sub" id="statsBestMarginSub"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Flip Pick button -->
+                        <div class="flip-header-wrap" id="flipHeaderWrap" style="display:none">
+                            <button class="header-action-btn flip-header-btn" id="flipHeaderToggle" title="Best Flip Pick">
+                                <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+                                <span>Flip Pick</span>
+                            </button>
+                            <div class="flip-header-dropdown" id="flipHeaderDropdown">
+                                <div class="flip-panel-body" id="flipPanelBody">
+                                    <div class="flip-loading">
+                                        <div class="loading-spinner small"></div>
+                                        <span>Calculating…</span>
+                                    </div>
+                                </div>
+                                <div class="flip-panel-actions" id="flipPanelActions" style="display:none">
+                                    <button class="flip-action-btn flip-view-btn" id="flipViewBtn">View Item</button>
+                                    <button class="flip-action-btn flip-skip-btn" id="flipSkipBtn" title="Skip this item (session only)">Skip</button>
+                                    <button class="flip-action-btn flip-block-btn" id="flipBlockBtn" title="Never suggest this item again">Block</button>
+                                </div>
+                                <div class="flip-panel-footer">
+                                    <button class="flip-blocklist-btn" id="flipBlockListBtn">Block list (<span id="flipBlockCount">0</span>)</button>
+                                </div>
+                            </div>
+                        </div>
                         <!-- Hamburger Menu -->
                         <div class="hamburger-menu" id="hamburgerMenu">
                     <button class="header-action-btn hamburger-btn" id="hamburgerToggle" title="Menu">
@@ -268,16 +718,8 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div class="theme-effects-selector" id="themeEffectsSelector">
-                    <button class="header-action-btn" id="themeEffectsToggle" title="Theme & Effects">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M12 2a7 7 0 0 0 0 14h.5a5.5 5.5 0 0 0 0-11H12V2z"/><circle cx="12" cy="12" r="10" stroke-dasharray="2 2"/></svg>
-                        <span id="themeEffectsLabel">Settings</span>
-                        <svg class="theme-effects-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="6 9 12 15 18 9"/></svg>
-                    </button>
-                    <div class="theme-effects-dropdown" id="themeEffectsDropdown">
-                        <!-- Effects Section -->
+                        <div class="effects-dropdown-divider"></div>
+                        <!-- Settings Section -->
                         <div class="effects-dropdown-section">
                             <div class="effects-dropdown-header">Visual Effects</div>
                             <button class="effects-toggle-option" id="effectsOnOffBtn">
@@ -314,68 +756,72 @@
                                 <svg class="effects-section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="6 9 12 15 18 9"/></svg>
                             </button>
                             <div class="effects-section-body collapsed" id="themeSectionBody">
-                        <div class="theme-dropdown-options" id="themeDropdownOptions">
-                            <button class="theme-option" data-theme="dark">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #0f1117, #22263a)"></span>
-                                <span class="theme-option-name">Dark</span>
-                            </button>
-                            <button class="theme-option" data-theme="light">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #f5ebe0, #fdf8f0)"></span>
-                                <span class="theme-option-name">Light</span>
-                            </button>
-                            <button class="theme-option" data-theme="blood-moon">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #1a0a0a, #3d1111)"></span>
-                                <span class="theme-option-name">Blood Moon</span>
-                            </button>
-                            <button class="theme-option" data-theme="dark-green">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #0a1410, #132e1f)"></span>
-                                <span class="theme-option-name">Dark Forest</span>
-                            </button>
-                            <button class="theme-option" data-theme="ocean">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #0a1628, #142d4f)"></span>
-                                <span class="theme-option-name">Ocean Depths</span>
-                            </button>
-                            <button class="theme-option" data-theme="royal-purple">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #140a1e, #2a1540)"></span>
-                                <span class="theme-option-name">Royal Purple</span>
-                            </button>
-                            <button class="theme-option" data-theme="sunset">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #1a1008, #3d2810)"></span>
-                                <span class="theme-option-name">Sunset</span>
-                            </button>
-                            <button class="theme-option" data-theme="arctic">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #0d1f2d, #1a3350)"></span>
-                                <span class="theme-option-name">Arctic</span>
-                            </button>
-                            <button class="theme-option" data-theme="volcanic">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #121212, #262626)"></span>
-                                <span class="theme-option-name">Volcanic</span>
-                            </button>
-                            <button class="theme-option" data-theme="void">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #050508, #10101e)"></span>
-                                <span class="theme-option-name">Void Knight</span>
-                            </button>
-                            <button class="theme-option" data-theme="desert">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #1e1608, #3c2e18)"></span>
-                                <span class="theme-option-name">Desert</span>
-                            </button>
-                            <button class="theme-option" data-theme="cosmic">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #07040f, #180e32)"></span>
-                                <span class="theme-option-name">Cosmic</span>
-                            </button>
-                            <button class="theme-option" data-theme="toxic">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #080e08, #142014)"></span>
-                                <span class="theme-option-name">Toxic</span>
-                            </button>
-                            <button class="theme-option" data-theme="golden">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #16100a, #2e2010)"></span>
-                                <span class="theme-option-name">Golden</span>
-                            </button>
-                            <button class="theme-option" data-theme="midnight">
-                                <span class="theme-swatch" style="background: linear-gradient(135deg, #080a10, #141830)"></span>
-                                <span class="theme-option-name">Midnight</span>
-                            </button>
-                        </div>
+                                <div class="theme-dropdown-options" id="themeDropdownOptions">
+                                    <button class="theme-option" data-theme="dark">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #0f1117, #22263a)"></span>
+                                        <span class="theme-option-name">Dark</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="light">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #f5ebe0, #fdf8f0)"></span>
+                                        <span class="theme-option-name">Light</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="blood-moon">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #1a0a0a, #3d1111)"></span>
+                                        <span class="theme-option-name">Blood Moon</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="dark-green">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #0a1410, #132e1f)"></span>
+                                        <span class="theme-option-name">Dark Forest</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="ocean">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #0a1628, #142d4f)"></span>
+                                        <span class="theme-option-name">Ocean Depths</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="royal-purple">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #140a1e, #2a1540)"></span>
+                                        <span class="theme-option-name">Royal Purple</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="sunset">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #1a1008, #3d2810)"></span>
+                                        <span class="theme-option-name">Sunset</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="arctic">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #0d1f2d, #1a3350)"></span>
+                                        <span class="theme-option-name">Arctic</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="volcanic">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #121212, #262626)"></span>
+                                        <span class="theme-option-name">Volcanic</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="void">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #050508, #10101e)"></span>
+                                        <span class="theme-option-name">Void Knight</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="desert">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #1e1608, #3c2e18)"></span>
+                                        <span class="theme-option-name">Desert</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="cosmic">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #07040f, #180e32)"></span>
+                                        <span class="theme-option-name">Cosmic</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="toxic">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #080e08, #142014)"></span>
+                                        <span class="theme-option-name">Toxic</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="golden">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #16100a, #2e2010)"></span>
+                                        <span class="theme-option-name">Golden</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="marketplace-dashboard">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #0b0f12, #2b2f33)"></span>
+                                        <span class="theme-option-name">Marketplace Dashboard</span>
+                                    </button>
+                                    <button class="theme-option" data-theme="midnight">
+                                        <span class="theme-swatch" style="background: linear-gradient(135deg, #080a10, #141830)"></span>
+                                        <span class="theme-option-name">Midnight</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -470,17 +916,6 @@
                     <input type="text" id="maxBuyLimit" placeholder="0, 10k, 1m..." inputmode="numeric" autocomplete="one-time-code">
                 </div>
 
-                
-
-                <!-- 'Show' filter removed -->
-
-                <!-- View toggle moved to header for easier access -->
-
-                <!-- Save/Reset buttons removed: filters now autosave -->
-
-                
-
-                <!-- Item Spotlight removed -->
             </div>
         </div>
     </nav>
@@ -501,6 +936,7 @@
     <!-- Items Container -->
     <main class="main-content" id="mainContent" style="display: none;" aria-label="Grand Exchange item listings">
       <div class="content-with-sidebar">
+
         <div class="items-area">
             <div class="items-grid" id="itemsContainer"></div>
         
@@ -543,12 +979,12 @@
                 <div class="modal-tags" id="modalTags"></div>
                 <div class="modal-prices">
                     <div class="modal-price-card buy">
-                        <span class="price-label">Buy Price (Instant)</span>
+                        <span class="price-label">Buy Price</span>
                         <span class="price-value" id="modalBuyPrice">-</span>
                         <span class="price-time" id="modalBuyTime">-</span>
                     </div>
                     <div class="modal-price-card sell">
-                        <span class="price-label">Sell Price (Instant)</span>
+                        <span class="price-label">Sell Price</span>
                         <span class="price-value" id="modalSellPrice">-</span>
                         <span class="price-time" id="modalSellTime">-</span>
                     </div>
@@ -571,9 +1007,11 @@
                         <span>Buy Limit Profit</span>
                         <span id="modalLimitProfit">-</span>
                     </div>
+                    <div class="detail-row">
+                        <span>High Alch</span>
+                        <span id="modalHighAlch">-</span>
+                    </div>
                 </div>
-                </div>
-
                 <!-- Price & Volume History -->
                 <div class="history-section">
                     <div class="history-header">
@@ -587,6 +1025,7 @@
                     </div>
                     <div class="chart-container" style="display:none;">
                         <canvas id="priceChart"></canvas>
+                        <button id="resetZoom" class="reset-zoom-btn" title="Reset zoom" style="display:none;">Reset Zoom</button>
                     </div>
                     <div class="chart-container volume-chart" style="display:none;">
                         <canvas id="volumeChart"></canvas>
@@ -601,7 +1040,7 @@
                 </div>
 
                 <a class="wiki-link" id="modalWikiLink" href="#" target="_blank" rel="noopener">
-                    View on OSRS Wiki ?
+                    View on OSRS Wiki
                 </a>
             </div>
         </div>
@@ -615,7 +1054,7 @@
     <!-- Buy Me a Coffee Button -->
     <a href="https://ko-fi.com/whitezoomie" target="_blank" rel="noopener" class="donation-float-btn" title="Buy me a coffee">
         <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M20 3H4v10c0 2.2 1.8 4 4 4h6c2.2 0 4-1.8 4-4v-3h2c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 5h-2V5h2v3zM4 14c-1.1 0-2-.9-2-2v-2h2v4zm16 3H8c-1.1 0-2 .9-2 2s.9 2 2 2h12c1.1 0 2-.9 2-2s-.9-2-2-2z"/></svg>
-        <span>Buy me some Pizza</span>
+        <span>Buy me some Coffee</span>
     </a>
 
     <footer class="footer" role="contentinfo">
@@ -630,10 +1069,25 @@
             </div>
         </div>
         <p>Data from <a href="https://prices.runescape.wiki" target="_blank" rel="noopener noreferrer">prices.runescape.wiki</a> &bull; Not affiliated with Jagex Ltd &bull; &copy; 2026 Zoomie</p>
+        <p><a href="/sitemap-index">Browse All Items</a></p>
 
         <span class="footer-manage" id="footerManage" title="Site management">Manage</span>
     </footer>
 
+
+    <!-- Flip Block List Modal -->
+    <div class="flip-blocklist-overlay" id="flipBlockListOverlay">
+        <div class="flip-blocklist-modal">
+            <div class="flip-blocklist-modal-header">
+                <h3>Blocked Flip Items</h3>
+                <button class="flip-blocklist-close" id="flipBlockListClose">&times;</button>
+            </div>
+            <p class="flip-blocklist-desc">These items won't be suggested as Flip Picks. Remove any to allow them again.</p>
+            <div class="flip-blocklist-items" id="flipBlockListItems">
+                <p class="flip-blocklist-empty">No items blocked yet.</p>
+            </div>
+        </div>
+    </div>
 
     <!-- Admin Login Modal -->
     <div class="admin-overlay" id="adminOverlay">
@@ -833,6 +1287,8 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
     <script>
       // Auto-version: forces browser to always fetch fresh CSS & JS
       (function(){

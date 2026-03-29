@@ -43,6 +43,9 @@ function escapeXml(str) {
   // Homepage
   xml += `  <url>\n    <loc>https://therealge.com/</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n    <image:image>\n      <image:loc>https://therealge.com/og-image.png</image:loc>\n      <image:title>OSRS Grand Exchange Tracker</image:title>\n      <image:caption>Live item prices and market data for Old School RuneScape</image:caption>\n    </image:image>\n  </url>\n`;
 
+  // HTML sitemap index (high priority for crawl discovery)
+  xml += `  <url>\n    <loc>https://therealge.com/sitemap-index</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
+
   // Item pages
   const seenSlugs = new Set();
   // Count the homepage
