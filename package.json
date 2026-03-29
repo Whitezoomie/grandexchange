@@ -7,7 +7,8 @@
     "start": "node render-server/server.js",
     "generate-pages": "node render-server/generate-pages.js",
     "generate-sitemap": "node render-server/generate-sitemap.js",
-    "build": "node render-server/generate-pages.js && node render-server/generate-sitemap.js"
+    "generate-html-sitemap": "node render-server/generate-html-sitemap.js",
+    "build": "node render-server/generate-pages.js && node render-server/generate-sitemap.js && node render-server/generate-html-sitemap.js"
   },
   "engines": {
     "node": "24.x"
