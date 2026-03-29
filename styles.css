@@ -4779,6 +4779,26 @@ body.theme-transitioning *::after {
     padding: 10px;
 }
 
+.reset-zoom-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 10;
+    padding: 3px 9px;
+    font-size: 11px;
+    font-family: inherit;
+    background: rgba(30, 33, 50, 0.85);
+    color: #9ca0b0;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+.reset-zoom-btn:hover {
+    background: var(--accent);
+    color: #fff;
+}
+
 .chart-container.volume-chart {
     height: 180px;
 }

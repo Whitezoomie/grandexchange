@@ -765,6 +765,7 @@
                     </div>
                     <div class="chart-container" style="display:none;">
                         <canvas id="priceChart"></canvas>
+                        <button id="resetZoom" class="reset-zoom-btn" title="Reset zoom" style="display:none;">Reset Zoom</button>
                     </div>
                     <div class="chart-container volume-chart" style="display:none;">
                         <canvas id="volumeChart"></canvas>
@@ -1025,6 +1026,8 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
     <script>
       // Auto-version: forces browser to always fetch fresh CSS & JS
       (function(){

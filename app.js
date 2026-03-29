@@ -239,6 +239,7 @@
         bondIcon: $('bondIcon'),
         priceChart: $('priceChart'),
         volumeChart: $('volumeChart'),
+        resetZoom: $('resetZoom'),
         historyLoading: $('historyLoading'),
         historyError: $('historyError'),
         backToTop: $('backToTop'),
@@ -1252,6 +1253,21 @@
                                 return [];
                             }
                         }
+                    },
+                    zoom: {
+                        pan: {
+                            enabled: true,
+                            mode: 'x',
+                        },
+                        zoom: {
+                            wheel: { enabled: true },
+                            pinch: { enabled: true },
+                            mode: 'x',
+                            onZoom({ chart }) {
+                                if (dom.resetZoom) dom.resetZoom.style.display = 'block';
+                            },
+                        },
+                        limits: { x: { minRange: 2 } },
                     }
                 },
                 scales: {
@@ -1275,6 +1291,14 @@
                 }
             }
         });
+
+        if (dom.resetZoom) {
+            dom.resetZoom.style.display = 'none';
+            dom.resetZoom.onclick = function() {
+                priceChartInstance.resetZoom();
+                dom.resetZoom.style.display = 'none';
+            };
+        }
     }
 
     function renderVolumeChart(labels, buyVol, sellVol) {
@@ -3420,6 +3444,8 @@
 
     const playerCountHistory = [];
     const playerCountTimestamps = [];
+    let playerGraphZoomStart = 0;
+    let playerGraphZoomEnd = -1;
     const MAX_PLAYER_HISTORY = 720;
     const taxCountHistory = [];
     const MAX_TAX_HISTORY = 60;
@@ -3569,7 +3595,10 @@
         const ctx = canvas.getContext('2d');
         ctx.scale(dpr, dpr);
         ctx.clearRect(0, 0, w, h);
-        const history = playerCountHistory;
+        const _fullLen = playerCountHistory.length;
+        const _pZS = Math.max(0, playerGraphZoomStart);
+        const _pZE = (playerGraphZoomEnd >= 0 && playerGraphZoomEnd < _fullLen) ? playerGraphZoomEnd : _fullLen - 1;
+        const history = playerCountHistory.slice(_pZS, _pZE + 1);
         const min = Math.min.apply(null, history);
         const max = Math.max.apply(null, history);
         const range = (max - min) || 1;
@@ -3634,7 +3663,10 @@
                 <div class="player-graph-modal">
                     <div class="player-graph-modal-header">
                         <span class="player-graph-modal-title">Players Online (OSRS) — Last 12 Hours</span>
-                        <button class="player-graph-modal-close" id="playerGraphModalClose" aria-label="Close">&times;</button>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <button id="playerGraphResetZoom" class="reset-zoom-btn" style="position:static;display:none;">Reset Zoom</button>
+                            <button class="player-graph-modal-close" id="playerGraphModalClose" aria-label="Close">&times;</button>
+                        </div>
                     </div>
                     <div class="player-graph-modal-body">
                         <canvas id="playerGraphExpanded"></canvas>
@@ -3644,6 +3676,12 @@
             document.body.appendChild(overlay);
 
             document.getElementById('playerGraphModalClose').addEventListener('click', closePlayerGraphModal);
+            document.getElementById('playerGraphResetZoom').addEventListener('click', function() {
+                playerGraphZoomStart = 0;
+                playerGraphZoomEnd = -1;
+                this.style.display = 'none';
+                drawExpandedPlayerGraph(document.getElementById('playerGraphExpanded'));
+            });
             overlay.addEventListener('click', function(e) {
                 if (e.target === overlay) closePlayerGraphModal();
             });
@@ -3653,17 +3691,89 @@
 
             const expCanvas = document.getElementById('playerGraphExpanded');
             expCanvas.style.cursor = 'crosshair';
+            expCanvas.addEventListener('wheel', function(e) {
+                e.preventDefault();
+                const fullLen = playerCountHistory.length;
+                if (fullLen < 2) return;
+                const zs = Math.max(0, playerGraphZoomStart);
+                const ze = (playerGraphZoomEnd >= 0 && playerGraphZoomEnd < fullLen) ? playerGraphZoomEnd : fullLen - 1;
+                const sliceLen = ze - zs + 1;
+                const rect = expCanvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const padX = 10;
+                const chartW = rect.width - padX * 2;
+                const frac = Math.max(0, Math.min(1, (mouseX - padX) / chartW));
+                const zoomFactor = e.deltaY < 0 ? 0.7 : 1.4;
+                const newLen = Math.max(10, Math.min(fullLen, Math.round(sliceLen * zoomFactor)));
+                const center = zs + frac * (sliceLen - 1);
+                let newStart = Math.round(center - frac * (newLen - 1));
+                let newEnd = newStart + newLen - 1;
+                if (newStart < 0) { newEnd -= newStart; newStart = 0; }
+                if (newEnd >= fullLen) { newStart -= (newEnd - fullLen + 1); newEnd = fullLen - 1; }
+                playerGraphZoomStart = Math.max(0, newStart);
+                playerGraphZoomEnd = Math.min(fullLen - 1, newEnd);
+                const isFullView = playerGraphZoomStart === 0 && playerGraphZoomEnd === fullLen - 1;
+                const resetBtn = document.getElementById('playerGraphResetZoom');
+                if (resetBtn) resetBtn.style.display = isFullView ? 'none' : 'inline-block';
+                drawExpandedPlayerGraph(expCanvas);
+            }, { passive: false });
+
+            // Drag to pan
+            let _dragActive = false;
+            let _dragStartX = 0;
+            let _dragZoomStartAtDrag = 0;
+            let _dragZoomEndAtDrag = 0;
+            expCanvas.addEventListener('mousedown', function(e) {
+                _dragActive = true;
+                _dragStartX = e.clientX;
+                _dragZoomStartAtDrag = playerGraphZoomStart;
+                _dragZoomEndAtDrag = (playerGraphZoomEnd >= 0) ? playerGraphZoomEnd : playerCountHistory.length - 1;
+                expCanvas.style.cursor = 'grabbing';
+            });
+            window.addEventListener('mouseup', function() {
+                if (_dragActive) {
+                    _dragActive = false;
+                    expCanvas.style.cursor = 'crosshair';
+                }
+            });
+
             expCanvas.addEventListener('mousemove', function(e) {
+                if (_dragActive) {
+                    const fullLen = playerCountHistory.length;
+                    if (fullLen < 2) return;
+                    const rect = expCanvas.getBoundingClientRect();
+                    const chartW = rect.width - 20;
+                    const sliceLen = _dragZoomEndAtDrag - _dragZoomStartAtDrag + 1;
+                    const deltaX = e.clientX - _dragStartX;
+                    const deltaIdx = -Math.round(deltaX / chartW * sliceLen);
+                    let newStart = _dragZoomStartAtDrag + deltaIdx;
+                    let newEnd = _dragZoomEndAtDrag + deltaIdx;
+                    if (newStart < 0) { newEnd -= newStart; newStart = 0; }
+                    if (newEnd >= fullLen) { newStart -= (newEnd - fullLen + 1); newEnd = fullLen - 1; }
+                    playerGraphZoomStart = Math.max(0, newStart);
+                    playerGraphZoomEnd = Math.min(fullLen - 1, newEnd);
+                    const isFullView = playerGraphZoomStart === 0 && playerGraphZoomEnd === fullLen - 1;
+                    const resetBtn = document.getElementById('playerGraphResetZoom');
+                    if (resetBtn) resetBtn.style.display = isFullView ? 'none' : 'inline-block';
+                    drawExpandedPlayerGraph(expCanvas);
+                    document.getElementById('playerGraphExpandedTooltip').style.display = 'none';
+                    return;
+                }
                 if (playerCountHistory.length < 2) return;
                 const rect = expCanvas.getBoundingClientRect();
                 const mouseX = e.clientX - rect.left;
                 const padX = 10;
                 const chartW = rect.width - padX * 2;
-                const rawIdx = (mouseX - padX) / chartW * (playerCountHistory.length - 1);
-                const idx = Math.max(0, Math.min(playerCountHistory.length - 1, Math.round(rawIdx)));
-                drawExpandedPlayerGraph(expCanvas, idx);
-                const count = playerCountHistory[idx];
-                const ts = playerCountTimestamps[idx];
+                const fullLen = playerCountHistory.length;
+                const zs = Math.max(0, playerGraphZoomStart);
+                const ze = (playerGraphZoomEnd >= 0 && playerGraphZoomEnd < fullLen) ? playerGraphZoomEnd : fullLen - 1;
+                const sliceLen = ze - zs + 1;
+                const rawIdx = (mouseX - padX) / chartW * (sliceLen - 1);
+                const sliceIdx = Math.max(0, Math.min(sliceLen - 1, Math.round(rawIdx)));
+                drawExpandedPlayerGraph(expCanvas, sliceIdx);
+                const realIdx = zs + sliceIdx;
+                const count = playerCountHistory[realIdx];
+                const ts = playerCountTimestamps[realIdx];
                 const tip = document.getElementById('playerGraphExpandedTooltip');
                 let label = count != null ? count.toLocaleString() + ' players' : '';
                 if (ts) label += '<br><span class="sparkline-tooltip-time">' + formatSparklineTime(new Date(ts)) + '</span>';
@@ -3678,6 +3788,12 @@
                 document.getElementById('playerGraphExpandedTooltip').style.display = 'none';
             });
         }
+
+        // Reset zoom on each open
+        playerGraphZoomStart = 0;
+        playerGraphZoomEnd = -1;
+        const resetBtn = document.getElementById('playerGraphResetZoom');
+        if (resetBtn) resetBtn.style.display = 'none';
 
         overlay.classList.add('active');
         document.body.style.overflow = 'hidden';
