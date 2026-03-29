@@ -163,6 +163,20 @@
             from { width: 0%; }
             to   { width: 100%; }
         }
+        /* OSRS-style loading tip */
+        .splash-tip {
+            font-family: Inter, sans-serif;
+            font-size: 0.83rem;
+            color: #8a90a8;
+            text-align: center;
+            max-width: 300px;
+            margin: 0;
+            letter-spacing: 0.03em;
+            font-style: italic;
+            min-height: 1.8em;
+            line-height: 1.5;
+            animation: splashFadeUp 0.4s 0.42s ease-out both;
+        }
     </style>
     <noscript><style>html { display: block !important; }</style></noscript>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=optional" rel="stylesheet">
@@ -343,9 +357,30 @@
             <div class="splash-divider"></div>
             <p class="splash-sub">OSRS Grand Exchange Tracker</p>
             <div class="splash-bar-track"><div class="splash-bar-fill"></div></div>
+            <p class="splash-tip" id="splashTip"></p>
         </div>
     </div>
     <script>
+        // Random OSRS-style loading tip
+        (function () {
+            var tips = [
+                'Tip: Always check the buy limit before investing heavily in an item.',
+                'Tip: Prices often spike within hours of a new game update — act fast.',
+                'Tip: High Alchemy value sets a natural price floor for many items.',
+                'Tip: Patience is the most profitable skill in Old School RuneScape.',
+                'Tip: GE trade limits reset every 4 hours. Use them wisely.',
+                'Tip: Members-only items tend to have less price competition.',
+                'Tip: Items tied to popular quests often rise in value after update weeks.',
+                'Tip: Use the price history chart to spot support and resistance levels.',
+                'Tip: Add items to favourites to monitor your portfolio at a glance.',
+                'Tip: Low-volume items can move big on small buys — approach carefully.',
+                'Tip: Seasonal events drive demand for specific skilling supplies.',
+                'Tip: Checking the wiki drop tables can reveal underpriced items.',
+            ];
+            var el = document.getElementById('splashTip');
+            if (el) el.textContent = tips[Math.floor(Math.random() * tips.length)];
+        })();
+
         setTimeout(function () {
             var s = document.getElementById('splashScreen');
             if (s) {

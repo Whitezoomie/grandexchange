@@ -4877,7 +4877,7 @@ body.theme-transitioning *::after {
 /* ===== BACK TO TOP ===== */
 .back-to-top {
     position: fixed;
-    bottom: 52px;
+    bottom: 115px;
     right: 24px;
     width: 36px;
     height: 36px;
@@ -5019,8 +5019,7 @@ body.theme-transitioning *::after {
 
 @media (max-width: 640px) {
     .donation-float-btn {
-        bottom: 16px;
-        right: 16px;
+        right: 8px;
         padding: 8px 12px;
         font-size: 0.75rem;
     }
@@ -5107,8 +5106,7 @@ body.theme-transitioning *::after {
 
 @media (max-width: 640px) {
     .main-feedback {
-        right: 16px;
-        bottom: 76px;
+        right: 8px;
         width: 280px;
     }
 }
@@ -5132,7 +5130,7 @@ body.theme-transitioning *::after {
 .feedback-toggle-btn {
     position: fixed;
     right: 75px;
-    bottom: 90px;
+    bottom: 66px;
     z-index: 1002;
     display: none;
     align-items: center;
@@ -5149,8 +5147,7 @@ body.theme-transitioning *::after {
 }
 
 @media (max-width: 640px) {
-    .feedback-toggle-btn, .main-feedback { right: 16px; }
-    .feedback-toggle-btn { bottom: 76px; }
+    .feedback-toggle-btn, .main-feedback { right: 8px; }
 }
 
 /* (removed mobile swap overrides) */
