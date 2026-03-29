@@ -3559,13 +3559,147 @@
         return h12 + ':' + m + ' ' + ampm;
     }
 
+    function drawExpandedPlayerGraph(canvas, hoverIdx) {
+        if (!canvas || playerCountHistory.length < 2) return;
+        const dpr = window.devicePixelRatio || 1;
+        const w = canvas.offsetWidth || 700;
+        const h = canvas.offsetHeight || 260;
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+        ctx.clearRect(0, 0, w, h);
+        const history = playerCountHistory;
+        const min = Math.min.apply(null, history);
+        const max = Math.max.apply(null, history);
+        const range = (max - min) || 1;
+        const padX = 10, padY = 16;
+        const chartW = w - padX * 2;
+        const chartH = h - padY * 2;
+        function px(i) { return padX + (i / (Math.max(history.length - 1, 1))) * chartW; }
+        function py(v) { return padY + chartH - ((v - min) / range) * chartH; }
+        const greenColor = getComputedStyle(document.documentElement).getPropertyValue('--green').trim() || '#2ecc71';
+        const grad = ctx.createLinearGradient(0, padY, 0, padY + chartH);
+        grad.addColorStop(0, 'rgba(46,204,113,0.18)');
+        grad.addColorStop(1, 'rgba(46,204,113,0.0)');
+        ctx.beginPath();
+        ctx.moveTo(px(0), py(history[0]));
+        for (let i = 1; i < history.length; i++) ctx.lineTo(px(i), py(history[i]));
+        ctx.lineTo(px(history.length - 1), padY + chartH);
+        ctx.lineTo(px(0), padY + chartH);
+        ctx.closePath();
+        ctx.fillStyle = grad;
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(px(0), py(history[0]));
+        for (let i = 1; i < history.length; i++) ctx.lineTo(px(i), py(history[i]));
+        ctx.strokeStyle = greenColor;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        if (hoverIdx !== undefined && hoverIdx >= 0 && hoverIdx < history.length) {
+            const hx = px(hoverIdx), hy = py(history[hoverIdx]);
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(hx, padY);
+            ctx.lineTo(hx, padY + chartH);
+            ctx.setLineDash([4, 4]);
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            ctx.stroke();
+            ctx.restore();
+            ctx.beginPath();
+            ctx.arc(hx, hy, 5, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(hx, hy, 3, 0, Math.PI * 2);
+            ctx.fillStyle = greenColor;
+            ctx.fill();
+        } else {
+            const lx = px(history.length - 1), ly = py(history[history.length - 1]);
+            ctx.beginPath();
+            ctx.arc(lx, ly, 4, 0, Math.PI * 2);
+            ctx.fillStyle = greenColor;
+            ctx.fill();
+        }
+    }
+
+    function openPlayerGraphModal() {
+        let overlay = document.getElementById('playerGraphModalOverlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'playerGraphModalOverlay';
+            overlay.className = 'player-graph-modal-overlay';
+            overlay.innerHTML = `
+                <div class="player-graph-modal">
+                    <div class="player-graph-modal-header">
+                        <span class="player-graph-modal-title">Players Online (OSRS) — Last 12 Hours</span>
+                        <button class="player-graph-modal-close" id="playerGraphModalClose" aria-label="Close">&times;</button>
+                    </div>
+                    <div class="player-graph-modal-body">
+                        <canvas id="playerGraphExpanded"></canvas>
+                        <div id="playerGraphExpandedTooltip" class="player-graph-expanded-tooltip" style="display:none"></div>
+                    </div>
+                </div>`;
+            document.body.appendChild(overlay);
+
+            document.getElementById('playerGraphModalClose').addEventListener('click', closePlayerGraphModal);
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) closePlayerGraphModal();
+            });
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') closePlayerGraphModal();
+            });
+
+            const expCanvas = document.getElementById('playerGraphExpanded');
+            expCanvas.style.cursor = 'crosshair';
+            expCanvas.addEventListener('mousemove', function(e) {
+                if (playerCountHistory.length < 2) return;
+                const rect = expCanvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const padX = 10;
+                const chartW = rect.width - padX * 2;
+                const rawIdx = (mouseX - padX) / chartW * (playerCountHistory.length - 1);
+                const idx = Math.max(0, Math.min(playerCountHistory.length - 1, Math.round(rawIdx)));
+                drawExpandedPlayerGraph(expCanvas, idx);
+                const count = playerCountHistory[idx];
+                const ts = playerCountTimestamps[idx];
+                const tip = document.getElementById('playerGraphExpandedTooltip');
+                let label = count != null ? count.toLocaleString() + ' players' : '';
+                if (ts) label += '<br><span class="sparkline-tooltip-time">' + formatSparklineTime(new Date(ts)) + '</span>';
+                tip.innerHTML = label;
+                tip.style.display = 'block';
+                const relX = e.clientX - rect.left;
+                tip.style.left = Math.min(relX + 12, rect.width - 130) + 'px';
+                tip.style.top = (e.clientY - rect.top - 58) + 'px';
+            });
+            expCanvas.addEventListener('mouseleave', function() {
+                drawExpandedPlayerGraph(expCanvas);
+                document.getElementById('playerGraphExpandedTooltip').style.display = 'none';
+            });
+        }
+
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        requestAnimationFrame(function() {
+            drawExpandedPlayerGraph(document.getElementById('playerGraphExpanded'));
+        });
+    }
+
+    function closePlayerGraphModal() {
+        const overlay = document.getElementById('playerGraphModalOverlay');
+        if (overlay) overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
     function initPlayerSparklineHover() {
         if (_playerSparklineHoverSetup) return;
         const canvas = document.getElementById('statsPlayerGraph');
         if (!canvas) return;
         _playerSparklineHoverSetup = true;
         getOrCreateSparklineTooltip();
-        canvas.style.cursor = 'crosshair';
+        canvas.style.cursor = 'pointer';
+        canvas.addEventListener('click', openPlayerGraphModal);
         canvas.addEventListener('mousemove', function(e) {
             if (playerCountHistory.length < 2) return;
             const rect = canvas.getBoundingClientRect();
