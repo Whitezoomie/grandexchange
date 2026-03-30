@@ -78,9 +78,9 @@ async function initializeData() {
             count INTEGER NOT NULL,
             recorded_at TIMESTAMP WITH TIME ZONE DEFAULT now()
         )`);
-        // Load last 720 data points into memory
+        // Load last 1440 data points into memory (24h at 1-min resolution)
         const pcHist = await dbQuery(
-            'SELECT count, recorded_at FROM player_count_history ORDER BY recorded_at DESC LIMIT 720'
+            'SELECT count, recorded_at FROM player_count_history ORDER BY recorded_at DESC LIMIT 1440'
         );
         if (pcHist && pcHist.rows.length > 0) {
             _pc.history = pcHist.rows.reverse().map(r => ({
@@ -92,6 +92,36 @@ async function initializeData() {
             _pc.fetchedAt = latest.ts;
             _pc.lastHistoryTs = latest.ts;
             console.log(`[player-count] loaded ${_pc.history.length} history rows from DB, latest: ${_pc.count}`);
+        }
+
+        // Load per-day-of-week history: most recent occurrence of each weekday (UTC), last 8 days
+        const pcDailyRes = await dbQuery(`
+            WITH latest_dates AS (
+                SELECT
+                    EXTRACT(DOW FROM recorded_at AT TIME ZONE 'UTC')::int AS dow,
+                    MAX(TO_CHAR(recorded_at AT TIME ZONE 'UTC', 'YYYY-MM-DD')) AS latest_date
+                FROM player_count_history
+                WHERE recorded_at >= NOW() - INTERVAL '8 days'
+                GROUP BY dow
+            )
+            SELECT
+                EXTRACT(DOW FROM h.recorded_at AT TIME ZONE 'UTC')::int AS dow,
+                TO_CHAR(h.recorded_at AT TIME ZONE 'UTC', 'YYYY-MM-DD') AS date_str,
+                h.count,
+                EXTRACT(EPOCH FROM h.recorded_at)::bigint * 1000 AS ts_ms
+            FROM player_count_history h
+            JOIN latest_dates l
+                ON EXTRACT(DOW FROM h.recorded_at AT TIME ZONE 'UTC')::int = l.dow
+               AND TO_CHAR(h.recorded_at AT TIME ZONE 'UTC', 'YYYY-MM-DD') = l.latest_date
+            ORDER BY h.recorded_at ASC
+        `);
+        if (pcDailyRes && pcDailyRes.rows.length > 0) {
+            pcDailyRes.rows.forEach(r => {
+                const dow = r.dow;
+                if (!_pcDaily[dow]) _pcDaily[dow] = { date: r.date_str, points: [] };
+                _pcDaily[dow].points.push({ count: r.count, ts: Number(r.ts_ms) });
+            });
+            console.log(`[player-daily] loaded daily history for days: ${Object.keys(_pcDaily).join(',')}`);
         }
 
         // Ensure tax history table exists
@@ -176,6 +206,8 @@ function generateToken() {
 
 // --- OSRS player count cache + history ---
 const _pc = { count: null, fetchedAt: 0, history: [], lastHistoryTs: 0 };
+// Per-day-of-week history (UTC): { 0: { date: 'YYYY-MM-DD', points: [{count,ts}] }, ... }
+const _pcDaily = {};
 const https = require('https');
 
 // --- GE 24h tax estimate cache + history ---
@@ -245,7 +277,7 @@ async function refreshPlayerCount() {
         if (now - _pc.lastHistoryTs >= 60000) {
             _pc.lastHistoryTs = now;
             _pc.history.push({ count, ts: now });
-            if (_pc.history.length > 720) _pc.history.shift();
+            if (_pc.history.length > 1440) _pc.history.shift();
             console.log('[player-count] updated:', count);
             // Persist to DB (fire and forget)
             dbQuery(
@@ -256,6 +288,16 @@ async function refreshPlayerCount() {
             dbQuery(
                 "DELETE FROM player_count_history WHERE recorded_at < NOW() - INTERVAL '90 days'"
             ).catch(() => {});
+
+            // Update per-day-of-week in-memory cache (UTC day)
+            const d = new Date(now);
+            const dow = d.getUTCDay();
+            const dateStr = d.toISOString().slice(0, 10);
+            if (!_pcDaily[dow] || _pcDaily[dow].date !== dateStr) {
+                _pcDaily[dow] = { date: dateStr, points: [] };
+            }
+            _pcDaily[dow].points.push({ count, ts: now });
+            if (_pcDaily[dow].points.length > 1440) _pcDaily[dow].points.shift();
         }
     }
 }
@@ -370,7 +412,7 @@ const server = http.createServer(async (req, res) => {
             return res.end(JSON.stringify({
                 count: _pc.count,
                 age: Math.round((Date.now() - _pc.fetchedAt) / 1000),
-                history: _pc.history.slice(-720)
+                history: _pc.history.slice(-1440)
             }));
         }
         // Cache not ready yet — trigger a fetch now and wait for it
@@ -383,6 +425,12 @@ const server = http.createServer(async (req, res) => {
         }
         res.writeHead(503, headers);
         return res.end(JSON.stringify({ error: 'player count not available yet, try again shortly' }));
+    }
+
+    // --- Per-day-of-week player history (shared, server-authoritative) ---
+    if (path === '/player-daily-history' && req.method === 'GET') {
+        res.writeHead(200, headers);
+        return res.end(JSON.stringify(_pcDaily));
     }
 
     // --- GE 24h tax estimate (served from server-side cache, history from Supabase) ---

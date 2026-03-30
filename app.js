@@ -3917,6 +3917,8 @@
 
         overlay.classList.add('active');
         document.body.style.overflow = 'hidden';
+        // Refresh shared daily data from server each time the modal opens
+        fetchPlayerDailyHistory();
         requestAnimationFrame(function() {
             drawExpandedPlayerGraph(document.getElementById('playerGraphExpanded'));
         });
@@ -3929,25 +3931,51 @@
     }
 
     function loadPlayerDailyData() {
+        // Load cached localStorage data immediately (so modal isn't blank while fetching)
         try {
             const stored = localStorage.getItem('ge-player-daily-history');
             if (stored) playerDailyData = JSON.parse(stored);
         } catch(e) { playerDailyData = {}; }
+        // Then fetch authoritative shared data from server
+        fetchPlayerDailyHistory();
     }
 
-    function savePlayerDailyPoint(count, ts) {
-        const d = new Date(ts);
-        const dayIdx = d.getDay();
-        const dateStr = d.toISOString().slice(0, 10);
-        const key = 'day-' + dayIdx;
-        const metaKey = 'meta-' + dayIdx;
-        if (!playerDailyData[key] || playerDailyData[metaKey] !== dateStr) {
-            playerDailyData[key] = [];
-            playerDailyData[metaKey] = dateStr;
+    async function fetchPlayerDailyHistory() {
+        try {
+            const ctrl = new AbortController();
+            const timer = setTimeout(() => ctrl.abort(), 8000);
+            let data;
+            try {
+                const res = await fetch(FEEDBACK_SERVER + '/player-daily-history', { signal: ctrl.signal });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                data = await res.json();
+            } finally {
+                clearTimeout(timer);
+            }
+            // data: { 0: { date: 'YYYY-MM-DD', points: [{count,ts}] }, ... }
+            // Merge into playerDailyData format: { 'day-0': [{count,ts}], 'meta-0': 'YYYY-MM-DD', ... }
+            let changed = false;
+            Object.keys(data).forEach(function(dow) {
+                const dayData = data[dow];
+                if (dayData && dayData.points && dayData.points.length) {
+                    playerDailyData['day-' + dow] = dayData.points;
+                    playerDailyData['meta-' + dow] = dayData.date;
+                    changed = true;
+                }
+            });
+            if (changed) {
+                // Cache locally for next page load while server is fetched
+                try { localStorage.setItem('ge-player-daily-history', JSON.stringify(playerDailyData)); } catch(e) {}
+                // Redraw if modal is currently open on a day tab
+                const expCanvas = document.getElementById('playerGraphExpanded');
+                const overlay = document.getElementById('playerGraphModalOverlay');
+                if (expCanvas && overlay && overlay.classList.contains('active') && playerGraphModalDay >= 0) {
+                    drawExpandedPlayerGraph(expCanvas);
+                }
+            }
+        } catch(e) {
+            // fall through — use localStorage data
         }
-        playerDailyData[key].push({ count: count, ts: ts });
-        if (playerDailyData[key].length > MAX_DAILY_POINTS) playerDailyData[key].shift();
-        try { localStorage.setItem('ge-player-daily-history', JSON.stringify(playerDailyData)); } catch(e) {}
     }
 
     function getActiveDayHistory() {
@@ -4151,7 +4179,6 @@
                     // Only push + redraw when the count actually changed
                     playerCountHistory.push(data.count);
                     playerCountTimestamps.push(Date.now());
-                    savePlayerDailyPoint(data.count, Date.now());
                     if (playerCountHistory.length > MAX_PLAYER_HISTORY) { playerCountHistory.shift(); playerCountTimestamps.shift(); }
                     const el = document.getElementById('statsPlayerCount');
                     if (el) animateStatNumber(el, _statsPrev.playerCount, data.count, '');
