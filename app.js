@@ -3746,13 +3746,13 @@
                     </div>
                     <div class="player-graph-day-tabs" id="playerGraphDayTabs">
                         <button class="player-graph-day-btn active" data-day="-1">Live</button>
-                        <button class="player-graph-day-btn" data-day="0">Sun</button>
                         <button class="player-graph-day-btn" data-day="1">Mon</button>
                         <button class="player-graph-day-btn" data-day="2">Tue</button>
                         <button class="player-graph-day-btn" data-day="3">Wed</button>
                         <button class="player-graph-day-btn" data-day="4">Thu</button>
                         <button class="player-graph-day-btn" data-day="5">Fri</button>
                         <button class="player-graph-day-btn" data-day="6">Sat</button>
+                        <button class="player-graph-day-btn" data-day="0">Sun</button>
                     </div>
                     <div class="player-graph-modal-body">
                         <canvas id="playerGraphExpanded"></canvas>
