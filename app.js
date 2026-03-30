@@ -201,7 +201,7 @@
     const dom = {
         searchInput: $('searchInput'),
         clearSearch: $('clearSearch'),
-        membersFilter: $('membersFilter'),
+
         minPrice: $('minPrice'),
         maxPrice: $('maxPrice'),
         minMargin: $('minMargin'),
@@ -777,7 +777,6 @@
 
     function saveFiltersToStorage(showUI = true) {
         const filters = {
-            members: dom.membersFilter.value,
             minPrice: dom.minPrice.value,
             maxPrice: dom.maxPrice.value,
             minMargin: dom.minMargin.value,
@@ -811,7 +810,6 @@
         if (!raw) return;
         try {
             const f = JSON.parse(raw);
-            if (f.members) dom.membersFilter.value = f.members;
             if (f.minPrice) dom.minPrice.value = f.minPrice;
             if (f.maxPrice) dom.maxPrice.value = f.maxPrice;
             if (f.minMargin) dom.minMargin.value = f.minMargin;
@@ -827,7 +825,6 @@
     function resetAllFilters() {
         dom.searchInput.value = '';
         dom.clearSearch.classList.remove('visible');
-        dom.membersFilter.value = 'all';
         dom.minPrice.value = '';
         dom.maxPrice.value = '';
         dom.minMargin.value = '';
@@ -849,7 +846,6 @@
 
     function applyFilters() {
         const search = dom.searchInput.value.toLowerCase().trim();
-        const members = dom.membersFilter.value;
         const minP = parseNumberWithSuffix(dom.minPrice.value) || 0;
         const maxP = dom.maxPrice.value ? parseNumberWithSuffix(dom.maxPrice.value) : Infinity;
         const minM = dom.minMargin.value !== '' ? parseNumberWithSuffix(dom.minMargin.value) : -Infinity;
@@ -870,10 +866,6 @@
 
             // Search
             if (search && !item.name.toLowerCase().includes(search)) return false;
-
-            // Members filter
-            if (members === 'true' && !item.members) return false;
-            if (members === 'false' && item.members) return false;
 
             // Price filter
             const price = item.buyPrice || item.sellPrice || 0;
@@ -1511,7 +1503,6 @@
         });
 
         // Filters
-        dom.membersFilter.addEventListener('change', applyFilters);
         dom.minPrice.addEventListener('input', debounce(applyFilters, 500));
         dom.maxPrice.addEventListener('input', debounce(applyFilters, 500));
         dom.minMargin.addEventListener('input', debounce(applyFilters, 500));
@@ -1834,10 +1825,10 @@
     }
 
     // ========================================
-    // GE Radio Ã¢â‚¬â€ OSRS Ambient Soundtrack
+    // GE Radio  OSRS Ambient Soundtrack
     // ========================================
 
-    // Direct .ogg links from oldschool.runescape.wiki Ã¢â‚¬â€ all 834 OSRS music tracks
+    // Direct .ogg links from oldschool.runescape.wiki all 834 OSRS music tracks
     const GE_RADIO_TRACKS = [
         { name: '7th Realm', url: 'https://oldschool.runescape.wiki/images/7th_Realm.ogg' },
         { name: 'Adventure', url: 'https://oldschool.runescape.wiki/images/Adventure.ogg' },
@@ -2743,7 +2734,7 @@
             ensureAudio();
             audio.src = track.url;
             audio.volume = volumeSlider.value / 100;
-            nowPlayingEl.textContent = 'Ã¢â„¢Â« ' + track.name;
+            nowPlayingEl.textContent = '🎵' + track.name;
             labelEl.textContent = track.name;
             trackSelect.value = index;
         }
