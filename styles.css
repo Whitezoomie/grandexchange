@@ -1279,6 +1279,14 @@ body {
     padding: 16px 18px 18px;
 }
 
+.player-graph-tz-note {
+    margin-top: 6px;
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    text-align: right;
+    opacity: 0.7;
+}
+
 /* Day-of-week tab bar */
 .player-graph-day-tabs {
     display: flex;

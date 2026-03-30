@@ -3757,6 +3757,7 @@
                     <div class="player-graph-modal-body">
                         <canvas id="playerGraphExpanded"></canvas>
                         <div id="playerGraphExpandedTooltip" class="player-graph-expanded-tooltip" style="display:none"></div>
+                        <div class="player-graph-tz-note" id="playerGraphTzNote"></div>
                     </div>
                 </div>`;
             document.body.appendChild(overlay);
@@ -3917,6 +3918,20 @@
 
         overlay.classList.add('active');
         document.body.style.overflow = 'hidden';
+        // Show user's local timezone in the note
+        const tzNote = document.getElementById('playerGraphTzNote');
+        if (tzNote) {
+            try {
+                const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                const offset = -new Date().getTimezoneOffset();
+                const sign = offset >= 0 ? '+' : '-';
+                const hOff = String(Math.floor(Math.abs(offset) / 60)).padStart(2, '0');
+                const mOff = String(Math.abs(offset) % 60).padStart(2, '0');
+                tzNote.textContent = 'Times shown in your local timezone: ' + tz + ' (UTC' + sign + hOff + ':' + mOff + ')';
+            } catch(e) {
+                tzNote.textContent = 'Times shown in your local timezone';
+            }
+        }
         // Refresh shared daily data from server each time the modal opens
         fetchPlayerDailyHistory();
         requestAnimationFrame(function() {
