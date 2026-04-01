@@ -21,8 +21,8 @@ const DEFAULT_LOOKBACK = 36;
 const MIN_SAMPLES = 4;
 // Max items returned by /predict
 const DEFAULT_LIMIT = 100;
-// Keep data for this many days before pruning
-const RETENTION_DAYS = 3;
+// Keep data for this many days before pruning (1 day is 8x more than the 3hr lookback needs)
+const RETENTION_DAYS = 1;
 // Polling interval in ms
 const POLL_INTERVAL_MS = 5 * 60 * 1000;
 
