@@ -61,5 +61,24 @@ CREATE TABLE IF NOT EXISTS highlight_of_day (
     set_date TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Price Prediction: 5-minute OSRS Wiki price snapshots
+-- Polled server-side every 5 min; used to compute margin trend scores.
+-- The predictor.js module creates this table automatically on startup,
+-- but you can also run it manually here first.
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS price_snapshots (
+    id          BIGSERIAL PRIMARY KEY,
+    item_id     INTEGER   NOT NULL,
+    avg_high    BIGINT    NOT NULL,
+    high_volume BIGINT    NOT NULL DEFAULT 0,
+    avg_low     BIGINT    NOT NULL,
+    low_volume  BIGINT    NOT NULL DEFAULT 0,
+    ts          TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS price_snapshots_item_ts ON price_snapshots (item_id, ts DESC);
+CREATE INDEX IF NOT EXISTS price_snapshots_ts      ON price_snapshots (ts DESC);
+
 -- Enable Row Level Security for extra security (optional but recommended)
 -- Note: You can configure RLS policies through the Supabase dashboard

@@ -7,6 +7,7 @@ const http = require('http');
 const { WebSocketServer } = require('ws');
 const crypto = require('crypto');
 const { Pool } = require('pg');
+const predictor = require('./predictor');
 
 const PORT = process.env.PORT || 10000;
 
@@ -797,6 +798,11 @@ const server = http.createServer(async (req, res) => {
         }
     }
 
+    // --- Price Prediction endpoint ---
+    if (path === '/predict' && req.method === 'GET') {
+        return predictor.handleRequest(req, res, headers);
+    }
+
     // Fallback
     res.writeHead(404, headers);
     res.end(JSON.stringify({ error: 'Not found' }));
@@ -855,4 +861,5 @@ wss.on('connection', (ws) => {
 server.listen(PORT, async () => {
     console.log(`Visitor counter server running on port ${PORT}`);
     await initializeData();
+    predictor.init(pool);
 });
