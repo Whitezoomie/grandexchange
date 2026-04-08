@@ -66,7 +66,7 @@ import java.time.Instant;
 @Slf4j
 @PluginDescriptor(
     name        = "Zoom Flips",
-    description = "Live Grand Exchange prices powered by therealge.com – shows insta-buy/sell prices and flip margins",
+    description = "Live Grand Exchange prices powered by therealge.com â€“ shows insta-buy/sell prices and flip margins",
     tags        = {"grand exchange", "ge", "prices", "flipping", "trading", "market", "therealge"}
 )
 public class GEPricerPlugin extends Plugin
@@ -79,7 +79,7 @@ public class GEPricerPlugin extends Plugin
     private static final String PREDICT_URL   = "https://osrs-ge-server.onrender.com/predict?limit=200";
     private static final String LATEST_URL  = API_BASE + "/latest";
     private static final String VOLUMES_URL = API_BASE + "/volumes";
-    /** 1-hour aggregated avg prices — used for predicted GP/hr scoring. */
+    /** 1-hour aggregated avg prices â€” used for predicted GP/hr scoring. */
     private static final String AVG_1H_URL  = API_BASE + "/1h";
 
     /** Identify ourselves to the wiki per their usage policy. */
@@ -137,7 +137,7 @@ public class GEPricerPlugin extends Plugin
     /** Injected pause/resume button widget inside the GE interface. Null when GE is closed. */
     private Widget  gePauseWidget   = null;
 
-    /** Master item map keyed by item ID – populated by /mapping then enriched by /latest. */
+    /** Master item map keyed by item ID â€“ populated by /mapping then enriched by /latest. */
     final Map<Integer, GEPricerItem> itemsById = new ConcurrentHashMap<>();
 
     /** Item IDs that pay zero GE tax in OSRS (e.g. Old School bonds). */
@@ -172,7 +172,7 @@ public class GEPricerPlugin extends Plugin
     private final Instant[] slotTradeStart   = new Instant[8];
     /** When the last offer event for each slot was received. */
     private final Instant[] slotLastUpdate   = new Instant[8];
-    /** True if the offer was already active when the plugin started — start time is unknown. */
+    /** True if the offer was already active when the plugin started â€” start time is unknown. */
     private final boolean[] slotTimerUnknown = new boolean[8];
     /** True if the slot holds a buy-side offer (BUYING/BOUGHT/CANCELLED_BUY). */
     private final boolean[] slotIsBuy        = new boolean[8];
@@ -185,6 +185,7 @@ public class GEPricerPlugin extends Plugin
      * timestamps with Instant.now() on reconnect.
      */
     private final int[]     slotLastQty      = new int[8];
+    private final int[]     slotItemId       = new int[8];
     /** Scheduled task that updates GE slot timer widgets every second. */
     private ScheduledFuture<?> slotTimerTask;
 
@@ -203,7 +204,7 @@ public class GEPricerPlugin extends Plugin
         panel.setFlipAssistOnPauseStateChanged(
             () -> clientThread.invokeLater(this::refreshGePauseWidget));
 
-        // Stagnant buy banner — Modify: highlight slot and show raise-price guidance
+        // Stagnant buy banner â€” Modify: highlight slot and show raise-price guidance
         panel.setFlipPickOnModifyOffer(alert ->
         {
             boughtItemId    = alert.itemId;
@@ -212,7 +213,7 @@ public class GEPricerPlugin extends Plugin
             step = 13;
             updateAssistPanel();
         });
-        // Stagnant buy banner — New item: highlight slot and guide user to cancel it
+        // Stagnant buy banner â€” New item: highlight slot and guide user to cancel it
         panel.setFlipPickOnCancelNewOffer(alert ->
         {
             boughtItemId   = alert.itemId;
@@ -221,7 +222,7 @@ public class GEPricerPlugin extends Plugin
             updateAssistPanel();
         });
 
-        // Stagnant sell banner — Lower it: guide user to lower price in the GE
+        // Stagnant sell banner â€” Lower it: guide user to lower price in the GE
         panel.setFlipPickOnModifySellOffer(alert ->
         {
             boughtItemId    = alert.itemId;
@@ -255,12 +256,13 @@ public class GEPricerPlugin extends Plugin
         // Load mapping first, then prices, then schedule auto-refresh
         executor.execute(this::initialLoad);
 
-        // Start slot-timer task — updates GE slot widgets with elapsed offer time every second
+        // Start slot-timer task â€” updates GE slot widgets with elapsed offer time every second
         java.util.Arrays.fill(slotTimerUnknown, true);
         java.util.Arrays.fill(slotLastQty, -1);
+        java.util.Arrays.fill(slotItemId, 0);
         // Load any persisted timer data now. If the plugin starts while the player is already
         // logged in, no LOGGED_IN GameStateChanged event will fire, so onGameStateChanged would
-        // never call loadSlotTimers() — causing the startup fill(true) to be saved on next logout
+        // never call loadSlotTimers() â€” causing the startup fill(true) to be saved on next logout
         // and permanently wiping all persisted timer data.
         loadSlotTimers();
         slotTimerTask = executor.scheduleAtFixedRate(
@@ -606,12 +608,12 @@ public class GEPricerPlugin extends Plugin
     }
 
     // -----------------------------------------------------------------------
-    // Grand Exchange Assist – search injection
+    // Grand Exchange Assist â€“ search injection
     // -----------------------------------------------------------------------
 
     /**
      * Fires when the GE search chatbox opens (VarClientInt index 2 = MESLAYERMODE, value 14).
-     * We defer with invokeLater so widget children are fully initialised before we inject —
+     * We defer with invokeLater so widget children are fully initialised before we inject â€”
      * same technique used by flipping-copilot.
      */
     @Subscribe
@@ -624,16 +626,16 @@ public class GEPricerPlugin extends Plugin
         // value 14 = GE item search chatbox opened (user clicked a buy slot)
         if (inputType == 14)
         {
-            // In Sell Only mode, ignore buy-slot clicks entirely — don't start the buy flow.
+            // In Sell Only mode, ignore buy-slot clicks entirely â€” don't start the buy flow.
             if (panel != null && panel.isSellOnlyMode()) return;
             if (step == 0 || step == -1) { step = 1; updateAssistPanel(); }
-            // Always schedule — injectFlipPickSuggestion returns false (retry) when the
+            // Always schedule â€” injectFlipPickSuggestion returns false (retry) when the
             // widget is not ready yet, so invokeLater(BooleanSupplier) keeps retrying
             // each tick until the widget is available.
             clientThread.invokeLater(this::injectFlipPickSuggestion);
         }
 
-        // value 7 = price/quantity chatbox opened — detect which dialog and show the right suggestion
+        // value 7 = price/quantity chatbox opened â€” detect which dialog and show the right suggestion
         if (inputType == 7)
         {
             priceDialogOpen = true;
@@ -645,7 +647,7 @@ public class GEPricerPlugin extends Plugin
             }
         }
 
-        // value 0 = chatbox closed — advance step only when the PRICE dialog was dismissed.
+        // value 0 = chatbox closed â€” advance step only when the PRICE dialog was dismissed.
         // This lets the user set quantity (without using "...") before touching price,
         // and ensures the step only moves forward when price has actually been entered.
         if (inputType == 0 && priceDialogOpen)
@@ -653,7 +655,7 @@ public class GEPricerPlugin extends Plugin
             priceDialogOpen = false;
             clientThread.invokeLater(() ->
             {
-                // If re-opened immediately (user clicked "..."), priceDialogOpen is true again — skip
+                // If re-opened immediately (user clicked "..."), priceDialogOpen is true again â€” skip
                 if (priceDialogOpen) return;
                 if      (step == 2  && lastDialogWasPrice)  { step = 3; updateAssistPanel(); }
                 else if (step == 6  && lastDialogWasPrice)  { step = 7; updateAssistPanel(); }
@@ -681,7 +683,7 @@ public class GEPricerPlugin extends Plugin
         if (panel != null && panel.isFlipPickPaused()) return;
         int id = event.getScriptId();
 
-        // Initial chatbox build — only needed when widget was null at VarClientIntChanged time
+        // Initial chatbox build â€” only needed when widget was null at VarClientIntChanged time
         if (id == ScriptID.CHAT_TEXT_INPUT_REBUILD
                 && client.getVarcIntValue(VarClientInt.INPUT_TYPE) == 14
                 && step == 1)
@@ -689,13 +691,13 @@ public class GEPricerPlugin extends Plugin
             clientThread.invokeLater(this::injectFlipPickSuggestion);
         }
 
-        // After each live search result set loads (every keypress) → re-inject so our row stays.
+        // After each live search result set loads (every keypress) â†’ re-inject so our row stays.
         if (id == ScriptID.GE_ITEM_SEARCH && step == 1)
         {
             clientThread.invokeLater(this::injectFlipPickSuggestion);
         }
 
-        // GE slot UI update scripts — recolor price text to indicate profitability
+        // GE slot UI update scripts â€” recolor price text to indicate profitability
         if (id == 782 || id == 804)
         {
             colorizeSlotPrices();
@@ -703,7 +705,7 @@ public class GEPricerPlugin extends Plugin
             updateSlotTimerWidgets();
         }
 
-        // GE slot hover tooltip (script 526) — append profit line to SELLING tooltips
+        // GE slot hover tooltip (script 526) â€” append profit line to SELLING tooltips
         if (id == 526)
         {
             injectSellTooltipProfit();
@@ -745,7 +747,7 @@ public class GEPricerPlugin extends Plugin
             }
             else
             {
-                // BUYING — use the standard RuneLite buy color
+                // BUYING â€” use the standard RuneLite buy color
                 hex = "ff981f";
             }
             priceWidget.setText("<col=" + hex + ">" + plain + "</col>");
@@ -791,7 +793,7 @@ public class GEPricerPlugin extends Plugin
         if (matched == null) return;
 
         long buySpent = tradeSession != null ? tradeSession.peekBuySpent(matched.getId()) : -1L;
-        if (buySpent < 0) return; // no buy recorded — can't show profit
+        if (buySpent < 0) return; // no buy recorded â€” can't show profit
 
         GrandExchangeOffer[] offers = client.getGrandExchangeOffers();
         if (offers == null) return;
@@ -799,7 +801,7 @@ public class GEPricerPlugin extends Plugin
         {
             if (o == null || o.getItemId() != matched.getId()) continue;
             if (o.getState() != GrandExchangeOfferState.SELLING) continue;
-            // Use current price × qty sold so far as a preview of proceeds
+            // Use current price Ã— qty sold so far as a preview of proceeds
             long sellPrice = o.getPrice();
             long qty       = o.getTotalQuantity();
             long tax       = Math.min((long) Math.floor(sellPrice * qty * 0.02), 5_000_000L);
@@ -870,7 +872,7 @@ public class GEPricerPlugin extends Plugin
             step = 0;
             updateAssistPanel();
             // Immediately check whether the player already has an item in inventory
-            // to sell — if so, prioritise that over the "click a buy slot" guidance.
+            // to sell â€” if so, prioritise that over the "click a buy slot" guidance.
             checkInventoryForFlipPickItem();
         }
     }
@@ -894,7 +896,7 @@ public class GEPricerPlugin extends Plugin
         updateAssistPanel();
     }
 
-    /** Fires after a GE search completes — lock results to our suggested item at step 1. */
+    /** Fires after a GE search completes â€” lock results to our suggested item at step 1. */
     @Subscribe
     public void onGrandExchangeSearched(GrandExchangeSearched event)
     {
@@ -950,7 +952,7 @@ public class GEPricerPlugin extends Plugin
         if (step == 12) clientThread.invokeLater(this::checkSoldOfferCollected);
 
         // At steps 2 and 3 (item selected, waiting for price / confirming), detect if the user
-        // clicked the back button — CURRENT_GE_ITEM resets to -1/0 when they go back.
+        // clicked the back button â€” CURRENT_GE_ITEM resets to -1/0 when they go back.
         if (step == 2 || step == 3)
         {
             clientThread.invokeLater(() ->
@@ -1055,7 +1057,7 @@ public class GEPricerPlugin extends Plugin
      * Scans all active BUYING and SELLING GE offers against the current recommended prices
      * from the Flip Pick panel. Any offer whose price has drifted past the 1% (min 1000 gp)
      * threshold is surfaced as a banner at the top of the Flip Pick tab.
-     * Also detects BUYING offers that haven't had a single fill in ≥10 minutes and surfaces
+     * Also detects BUYING offers that haven't had a single fill in â‰¥10 minutes and surfaces
      * a stagnant-buy banner asking the player whether to keep, modify, or swap to a new item.
      * Must be called from the client thread.
      */
@@ -1096,10 +1098,10 @@ public class GEPricerPlugin extends Plugin
 
             if (item == null || !item.hasPrices()) continue;
 
-            // Only alert on SELL offers — for BUY offers the stagnant banner above guides the user.
+            // Only alert on SELL offers â€” for BUY offers the stagnant banner above guides the user.
             if (st == GrandExchangeOfferState.BUYING) continue;
 
-            // ---- Stagnant sell detection (SELLING only, ≥60 min) ----
+            // ---- Stagnant sell detection (SELLING only, â‰¥60 min) ----
             if (!slotTimerUnknown[i] && slotLastUpdate[i] != null)
             {
                 long minsSinceLastFill = Duration.between(slotLastUpdate[i], Instant.now()).toMinutes();
@@ -1109,7 +1111,7 @@ public class GEPricerPlugin extends Plugin
                     if (suggestedPrice > 0)
                     {
                         long floor   = breakEvenSellPrice(offer.getItemId(), offer.getTotalQuantity());
-                        // canLower if suggested >= floor and loss per unit ≤ 100k total
+                        // canLower if suggested >= floor and loss per unit â‰¤ 100k total
                         long lossTotal = (offer.getPrice() - suggestedPrice) * (long) offer.getTotalQuantity();
                         boolean canLower = suggestedPrice >= floor && lossTotal <= 100_000L;
                         String name = item.getName();
@@ -1172,7 +1174,7 @@ public class GEPricerPlugin extends Plugin
     {
         if (step != 6 && step != 7 && step != 11) return;
 
-        // At step 11 the sell screen hasn't necessarily been opened yet — the user
+        // At step 11 the sell screen hasn't necessarily been opened yet â€” the user
         // still needs to click the inventory item to enter the offer screen.
         // Only fire the back-out logic if the sell screen WAS previously open (i.e. step moved
         // past 11 to 6/7) but disappeared, or if the item has been loaded via checkSellAssistStep.
@@ -1181,19 +1183,19 @@ public class GEPricerPlugin extends Plugin
         {
             Widget offerContainer = client.getWidget(465, 26);
             boolean screenVisible = offerContainer != null && !offerContainer.isHidden();
-            if (!screenVisible) return; // still waiting for user to open sell screen — no backout yet
+            if (!screenVisible) return; // still waiting for user to open sell screen â€” no backout yet
         }
 
         Widget offerContainer = client.getWidget(465, 26);
         boolean screenGone = offerContainer == null || offerContainer.isHidden();
         if (!screenGone)
         {
-            // Screen is visible — check if the item shown is no longer ours
+            // Screen is visible â€” check if the item shown is no longer ours
             int currentItemId = client.getVarpValue(VarPlayer.CURRENT_GE_ITEM);
             if (currentItemId == boughtItemId) return; // still on the right screen
         }
 
-        // Player backed out — return to the appropriate pre-screen step.
+        // Player backed out â€” return to the appropriate pre-screen step.
         // If the item is still in their inventory, show the inventory-detection guidance (step 11).
         // Otherwise fall back to step 5 (collect + sell from GE).
         ItemContainer inv = client.getItemContainer(InventoryID.INVENTORY);
@@ -1294,7 +1296,7 @@ public class GEPricerPlugin extends Plugin
             if (it != null && it.getId() == boughtItemId) return; // still there
         }
 
-        // Item no longer in inventory — check if there is another sellable item to handle next.
+        // Item no longer in inventory â€” check if there is another sellable item to handle next.
         boughtItemId     = -1;
         activeFlipItemId = -1;
         boughtItemName   = null;
@@ -1323,7 +1325,7 @@ public class GEPricerPlugin extends Plugin
             }
         }
 
-        // No more sellable items — fall back to buy guidance if GE is still open.
+        // No more sellable items â€” fall back to buy guidance if GE is still open.
         Widget geMain = client.getWidget(GE_GROUP_ID, 0);
         step = (geMain != null && !geMain.isHidden()) ? 0 : -1;
         updateAssistPanel();
@@ -1348,7 +1350,7 @@ public class GEPricerPlugin extends Plugin
         int currentItemId = client.getVarpValue(VarPlayer.CURRENT_GE_ITEM);
         if (currentItemId == boughtItemId && boughtItemId > 0)
         {
-            step = 6; // sell offer screen loaded with our item — now set quantity then price
+            step = 6; // sell offer screen loaded with our item â€” now set quantity then price
             updateAssistPanel();
         }
     }
@@ -1361,7 +1363,7 @@ public class GEPricerPlugin extends Plugin
     private void checkForAnySoldOffer()
     {
         if (step != -1 && step != 0 && step != 8) return;
-        if (boughtItemId > 0) return; // tracked flip — handled by normal offer-changed flow
+        if (boughtItemId > 0) return; // tracked flip â€” handled by normal offer-changed flow
         GrandExchangeOffer[] offers = client.getGrandExchangeOffers();
         if (offers == null) return;
         for (GrandExchangeOffer o : offers)
@@ -1389,7 +1391,7 @@ public class GEPricerPlugin extends Plugin
         {
             if (o != null && o.getState() == GrandExchangeOfferState.SOLD) return; // still uncollected
         }
-        // All SOLD offers collected — clear state and start fresh
+        // All SOLD offers collected â€” clear state and start fresh
         boughtItemId   = -1;
         boughtItemName = null;
         step = 0;
@@ -1417,7 +1419,7 @@ public class GEPricerPlugin extends Plugin
             if (step == 8) { step = 0; updateAssistPanel(); }
             return;
         }
-        // GE is full — run the full redirect logic
+        // GE is full â€” run the full redirect logic
         checkAndRedirectToCollect();
     }
 
@@ -1446,7 +1448,7 @@ public class GEPricerPlugin extends Plugin
         int currentItemId = client.getVarpValue(VarPlayer.CURRENT_GE_ITEM);
         if (currentItemId == pick.getId())
         {
-            step = 2; // correct item — now set quantity then price
+            step = 2; // correct item â€” now set quantity then price
             updateAssistPanel();
         }
     }
@@ -1537,7 +1539,7 @@ public class GEPricerPlugin extends Plugin
 
     /**
      * Injects our flip pick suggestion into the GE search result widget, displayed
-     * immediately when the search box opens — no text injection, no runScript.
+     * immediately when the search box opens â€” no text injection, no runScript.
      * Mimics the "previous search" approach used by flipping-copilot:
      *   child 0 = clickable background rectangle (RECTANGLE with op-listener)
      *   child 1 = "Zoom item:" label (TEXT)
@@ -1557,7 +1559,7 @@ public class GEPricerPlugin extends Plugin
         if (pick == null) return true;
 
         Widget searchResults = client.getWidget(ComponentID.CHATBOX_GE_SEARCH_RESULTS);
-        if (searchResults == null) return false; // widget not ready yet — retry
+        if (searchResults == null) return false; // widget not ready yet â€” retry
 
         int    itemId   = pick.getId();
         String itemName = pick.getName();
@@ -1606,7 +1608,7 @@ public class GEPricerPlugin extends Plugin
         }
         else
         {
-            // No previous search children — create from scratch at specific indices.
+            // No previous search children â€” create from scratch at specific indices.
 
             // child 0: clickable background rectangle
             Widget bg = searchResults.createChild(0, WidgetType.RECTANGLE);
@@ -1667,7 +1669,7 @@ public class GEPricerPlugin extends Plugin
     }
 
     /**
-     * Checks whether static children already exist on the search results widget —
+     * Checks whether static children already exist on the search results widget â€”
      * either the game's own "Previous search:" row or our previously-injected row.
      */
     private boolean hasPreviousSearchChildren(Widget searchResults)
@@ -1791,11 +1793,11 @@ public class GEPricerPlugin extends Plugin
 
     /**
      * Adds a clickable text widget inside the chatbox price-entry dialog showing
-     * the FlipPick suggested price. Clicking it sets the price — exactly matching
+     * the FlipPick suggested price. Clicking it sets the price â€” exactly matching
      * the approach used by Flipping Utilities and Flipping Copilot.
      *
      * Key ordering: revalidate() FIRST, then set action + op-listener.
-     * Both FU and copilot follow this pattern — revalidate after op-listener
+     * Both FU and copilot follow this pattern â€” revalidate after op-listener
      * appears to clear the listener in some client versions.
      */
     private void showPriceClickWidget()
@@ -1830,7 +1832,7 @@ public class GEPricerPlugin extends Plugin
         else return;
 
         // MES_LAYER = interface 162, child 39 = 10616871 (gameval: InterfaceID.Chatbox.MES_LAYER)
-        // This is where FU creates its price suggestion widgets — 2 children past CHATBOX_CONTAINER (37)
+        // This is where FU creates its price suggestion widgets â€” 2 children past CHATBOX_CONTAINER (37)
         Widget parent = client.getWidget(10616871);
         if (parent == null) return;
 
@@ -1851,7 +1853,7 @@ public class GEPricerPlugin extends Plugin
         text.setOnMouseRepeatListener((JavaScriptCallback) ev -> text.setTextColor(0xFFFFFF));
         text.setOnMouseLeaveListener((JavaScriptCallback) ev -> text.setTextColor(0x00A000));
 
-        // Step 2: revalidate to commit layout — BEFORE setting action/op-listener
+        // Step 2: revalidate to commit layout â€” BEFORE setting action/op-listener
         text.revalidate();
 
         // Step 3: set action and op-listener AFTER revalidate (matches FU pattern exactly)
@@ -1861,7 +1863,7 @@ public class GEPricerPlugin extends Plugin
             text.setOnOpListener((JavaScriptCallback) ev ->
             {
                 // MES_TEXT2 = interface 162, child 44 = 10616876 (gameval: InterfaceID.Chatbox.MES_TEXT2)
-                // This is the ACTUAL display widget FU uses — NOT CHATBOX_FULL_INPUT (child 42)
+                // This is the ACTUAL display widget FU uses â€” NOT CHATBOX_FULL_INPUT (child 42)
                 Widget displayWidget = client.getWidget(10616876);
                 if (displayWidget != null)
                 {
@@ -1874,7 +1876,7 @@ public class GEPricerPlugin extends Plugin
 
     /**
      * Track completed buys/sells for the stats tab, and drive the guided
-     * overlay steps 4 (buying in progress) and 5 (bought → show sell price).
+     * overlay steps 4 (buying in progress) and 5 (bought â†’ show sell price).
      */
     @Subscribe
     public void onGrandExchangeOfferChanged(GrandExchangeOfferChanged event)
@@ -1929,7 +1931,7 @@ public class GEPricerPlugin extends Plugin
                 }
                 else if (state == GrandExchangeOfferState.SELLING)
                 {
-                    // Sell offer confirmed — clear tracked buy state immediately
+                    // Sell offer confirmed â€” clear tracked buy state immediately
                     activeFlipItemId = -1;
                     boughtItemId     = -1;
                     boughtItemName   = null;
@@ -1955,7 +1957,7 @@ public class GEPricerPlugin extends Plugin
                 }
                 else if (state == GrandExchangeOfferState.CANCELLED_BUY)
                 {
-                    // Buy was cancelled — skip this item and guide user to pick a different one.
+                    // Buy was cancelled â€” skip this item and guide user to pick a different one.
                     if (panel != null) SwingUtilities.invokeLater(() -> panel.skipFlipPickItem());
                     activeFlipItemId = -1;
                     boughtItemId     = -1;
@@ -1966,7 +1968,7 @@ public class GEPricerPlugin extends Plugin
                 }
                 else if (state == GrandExchangeOfferState.CANCELLED_SELL)
                 {
-                    // User aborted a sell — tell them the price to re-sell at (step 10)
+                    // User aborted a sell â€” tell them the price to re-sell at (step 10)
                     // boughtItemId/boughtItemName/sellTargetPrice are still set from the buy phase
                     step = 10;
                     updateAssistPanel();
@@ -2042,7 +2044,7 @@ public class GEPricerPlugin extends Plugin
 
             if (st == GrandExchangeOfferState.BOUGHT)
             {
-                // Only add to pendingBuys if not already present — avoids double-counting
+                // Only add to pendingBuys if not already present â€” avoids double-counting
                 // when the offer was in BOUGHT state at logout and fires again on login.
                 if (!tradeSession.hasPendingBuy(o.getItemId()))
                 {
@@ -2053,7 +2055,7 @@ public class GEPricerPlugin extends Plugin
             }
             else if (st == GrandExchangeOfferState.SOLD)
             {
-                // Only record if there is a matching pending buy — this means the sell
+                // Only record if there is a matching pending buy â€” this means the sell
                 // completed while offline (between RL sessions).  If no pending buy exists
                 // the SOLD event already fired in-session and was recorded then; processing
                 // it again would create a duplicate unmatched "?" entry.
@@ -2091,7 +2093,7 @@ public class GEPricerPlugin extends Plugin
 
         // ---- Step guidance: set step from current offer state (highest priority first) ----
 
-        // Priority 1: a BOUGHT (filled buy, not yet collected) offer exists → guide to collect+sell
+        // Priority 1: a BOUGHT (filled buy, not yet collected) offer exists â†’ guide to collect+sell
         for (GrandExchangeOffer o : offers)
         {
             if (o == null) continue;
@@ -2112,7 +2114,7 @@ public class GEPricerPlugin extends Plugin
             }
         }
 
-        // Priority 2: a SOLD (completed sell, not yet collected) offer exists → guide to collect GP
+        // Priority 2: a SOLD (completed sell, not yet collected) offer exists â†’ guide to collect GP
         for (GrandExchangeOffer o : offers)
         {
             if (o == null) continue;
@@ -2183,7 +2185,7 @@ public class GEPricerPlugin extends Plugin
         GrandExchangeOffer[] offers = client.getGrandExchangeOffers();
         if (offers == null) return false;
 
-        // Check if any slot is empty — if so the GE is not full, no redirect needed.
+        // Check if any slot is empty â€” if so the GE is not full, no redirect needed.
         for (GrandExchangeOffer o : offers)
         {
             if (o.getState() == GrandExchangeOfferState.EMPTY) return false;
@@ -2208,7 +2210,7 @@ public class GEPricerPlugin extends Plugin
             }
         }
 
-        // Full but nothing to collect yet — all offers still filling/selling.
+        // Full but nothing to collect yet â€” all offers still filling/selling.
         step = 8;
         updateAssistPanel();
         return true;
@@ -2226,7 +2228,7 @@ public class GEPricerPlugin extends Plugin
 
     /**
      * Returns the minimum sell price per unit that avoids a loss on an item the user bought.
-     * Formula: ceil( buySpent / qty ) + 1  — enough to cover cost + 1 gp per unit after 2% GE tax.
+     * Formula: ceil( buySpent / qty ) + 1  â€” enough to cover cost + 1 gp per unit after 2% GE tax.
      * More precisely: we need sellPrice_per_unit such that sellPrice * 0.98 >= costPerUnit,
      * so sellPrice >= ceil(costPerUnit / 0.98).
      *
@@ -2254,7 +2256,7 @@ public class GEPricerPlugin extends Plugin
         return raw > 0 ? Math.max(raw, floor) : floor;
     }
 
-    // (onGrandExchangeOfferChanged merged above — handles stats tracking)
+    // (onGrandExchangeOfferChanged merged above â€” handles stats tracking)
 
     // -----------------------------------------------------------------------
     // Session persistence
@@ -2457,7 +2459,7 @@ public class GEPricerPlugin extends Plugin
     }
 
     // -----------------------------------------------------------------------
-    // Slot activity timers — mirrors the Flipping Utilities SlotActivityTimer
+    // Slot activity timers â€” mirrors the Flipping Utilities SlotActivityTimer
     // -----------------------------------------------------------------------
 
     /**
@@ -2471,7 +2473,7 @@ public class GEPricerPlugin extends Plugin
 
         if (offer.getItemId() == 0)
         {
-            // Slot emptied (offer collected) — clear timer state
+            // Slot emptied (offer collected) â€” clear timer state
             slotTradeStart[slot]   = null;
             slotLastUpdate[slot]   = null;
             slotTimerUnknown[slot] = true;
@@ -2505,19 +2507,23 @@ public class GEPricerPlugin extends Plugin
         // that would reset the "time since last fill" timer to zero on every login.
         //
         // Cases where we DO update timestamps:
-        //   (a) No persisted data yet                      → record baseline
-        //   (b) Offer just placed this session (qty==0)    → start from now
-        //   (c) quantitySold increased                     → genuine new fill
-        //   (d) Offer just completed (state transition)    → record completion time
-        // Otherwise (same qty, same completion state, data already loaded) → preserve timestamps.
+        //   (a) No persisted data yet                      â†’ record baseline
+        //   (b) Offer just placed this session (qty==0)    â†’ start from now
+        //   (c) quantitySold increased                     â†’ genuine new fill
+        //   (d) Offer just completed (state transition)    â†’ record completion time
+        // Otherwise (same qty, same completion state, data already loaded) â†’ preserve timestamps.
+
+        // If the item ID in this slot changed, it is definitely a new offer â€” always reset.
+        boolean itemChanged     = (slotItemId[slot] != 0 && slotItemId[slot] != offer.getItemId());
+        slotItemId[slot]        = offer.getItemId();
 
         boolean noPersistedData = (slotLastUpdate[slot] == null);
         boolean newOfferPlaced  = (newQty == 0 && !isComplete
-                                   && (slotTradeStart[slot] == null || prevQty > 0));
-        boolean genuineFill     = (prevQty >= 0 && newQty > prevQty);
+                                   && (slotTradeStart[slot] == null || prevQty > 0 || itemChanged));
+        boolean genuineFill     = (prevQty >= 0 && newQty > prevQty && !itemChanged);
         boolean justCompleted   = (isComplete && !prevComplete);
 
-        if (noPersistedData || newOfferPlaced)
+        if (noPersistedData || newOfferPlaced || itemChanged)
         {
             slotTradeStart[slot] = Instant.now();
             slotLastUpdate[slot] = Instant.now();
@@ -2528,15 +2534,15 @@ public class GEPricerPlugin extends Plugin
             if (slotTradeStart[slot] == null)
                 slotTradeStart[slot] = Instant.now();
         }
-        // else: reconnect / duplicate event — silently preserve persisted timestamps.
+        // else: reconnect / duplicate event â€” silently preserve persisted timestamps.
     }
 
     /**
      * Builds the formatted "HH:MM:SS" timer string for a slot.
      * <ul>
-     *   <li>Active (BUYING/SELLING) — counts up from the last fill / initial placement,
+     *   <li>Active (BUYING/SELLING) â€” counts up from the last fill / initial placement,
      *       resetting to 0 on each partial fill (same as Flipping Utilities).</li>
-     *   <li>Complete (BOUGHT/SOLD/CANCELLED) — shows total offer duration, frozen.</li>
+     *   <li>Complete (BOUGHT/SOLD/CANCELLED) â€” shows total offer duration, frozen.</li>
      * </ul>
      */
     private String createTimerString(int slot)
@@ -2593,7 +2599,7 @@ public class GEPricerPlugin extends Plugin
 
             if (slotTimerUnknown[i] || slotLastUpdate[i] == null || slotTradeStart[i] == null)
             {
-                // Offer was there before plugin could track it — leave widget as game renders it
+                // Offer was there before plugin could track it â€” leave widget as game renders it
                 stateWidget.setFontId(SLOT_FONT_DEFAULT);
                 stateWidget.setXTextAlignment(1);
                 continue;
