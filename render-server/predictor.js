@@ -15,14 +15,15 @@
 const WIKI_5M_URL   = 'https://prices.runescape.wiki/api/v1/osrs/5m';
 const USER_AGENT    = 'therealge.com prediction service - contact@therealge.com';
 
-// How many 5-minute periods to look back for trend analysis (default 36 = 3 hours)
+// How many 5-minute periods to look back for the SHORT trend signal (default 36 = 3 hours)
+// The long-window averages always use the full RETENTION_DAYS window.
 const DEFAULT_LOOKBACK = 36;
-// Minimum samples before we include an item in predictions
-const MIN_SAMPLES = 4;
+// Minimum 7-day samples before we include an item in predictions
+const MIN_SAMPLES = 12;
 // Max items returned by /predict
 const DEFAULT_LIMIT = 100;
-// Keep data for this many days before pruning (1 day is 8x more than the 3hr lookback needs)
-const RETENTION_DAYS = 1;
+// Keep data for this many days before pruning
+const RETENTION_DAYS = 7;
 // Polling interval in ms
 const POLL_INTERVAL_MS = 5 * 60 * 1000;
 
@@ -136,71 +137,100 @@ async function poll() {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Prediction query: linear regression slope per item
+// Prediction query: dual-window scoring
 //
-// Returns rows ordered by score descending.  Score =
-//   avg_margin * avg_throughput * (1 + clamped_trend_factor)
+// Long window  (RETENTION_DAYS): avg_margin + avg_throughput
+//   → stable, 7-day averages filter out noise and one-off spikes
 //
-// margin_slope is from REGR_SLOPE(margin, -rn):
-//   rn=1 (newest) → x=-1 (highest X)
-//   rn=N (oldest) → x=-N (lowest X)
-// So a positive slope means margin is going UP over time. ✓
+// Short window ($1 × 5 min, default 3 hr): REGR_SLOPE trend
+//   → reactive signal catches items moving up right now
+//
+// Score = 7d_avg_margin * 7d_avg_throughput * (1 + clamped_trend)
 // ─────────────────────────────────────────────────────────────
 async function runPredictionQuery(lookback, limit) {
     const result = await pool.query(`
-        WITH samples AS (
+        WITH long_samples AS (
+            -- Full retention window: stable margin and throughput averages
             SELECT
                 item_id,
                 GREATEST(0,
                     avg_high - avg_low
                     - LEAST(FLOOR(avg_high * 0.02)::bigint, 5000000)
                 ) AS margin,
-                LEAST(high_volume, low_volume) AS throughput,
+                LEAST(high_volume, low_volume) AS throughput
+            FROM price_snapshots
+            WHERE ts > now() - ($3 * interval '1 day')
+        ),
+        trend_samples AS (
+            -- Short recent window: trend slope only
+            SELECT
+                item_id,
+                GREATEST(0,
+                    avg_high - avg_low
+                    - LEAST(FLOOR(avg_high * 0.02)::bigint, 5000000)
+                ) AS margin,
                 ROW_NUMBER() OVER (PARTITION BY item_id ORDER BY ts DESC) AS rn
             FROM price_snapshots
             WHERE ts > now() - ($1 * interval '5 minutes')
         ),
-        per_item AS (
+        latest AS (
+            -- Most recent margin snapshot per item
+            SELECT DISTINCT ON (item_id)
+                item_id,
+                GREATEST(0,
+                    avg_high - avg_low
+                    - LEAST(FLOOR(avg_high * 0.02)::bigint, 5000000)
+                ) AS latest_margin
+            FROM price_snapshots
+            ORDER BY item_id, ts DESC
+        ),
+        long_agg AS (
             SELECT
                 item_id,
-                MAX(CASE WHEN rn = 1 THEN margin END)     AS latest_margin,
-                AVG(margin)::bigint                       AS avg_margin,
-                AVG(throughput)::bigint                   AS avg_throughput,
-                COUNT(*)                                  AS sample_count,
-                REGR_SLOPE(margin::float, (-rn)::float)  AS margin_slope
-            FROM samples
-            WHERE rn <= $1
+                AVG(margin)::bigint     AS avg_margin,
+                AVG(throughput)::bigint AS avg_throughput,
+                COUNT(*)                AS sample_count
+            FROM long_samples
             GROUP BY item_id
             HAVING COUNT(*) >= $2
+        ),
+        trend_agg AS (
+            SELECT
+                item_id,
+                REGR_SLOPE(margin::float, (-rn)::float) AS margin_slope
+            FROM trend_samples
+            GROUP BY item_id
         )
         SELECT
-            item_id,
-            latest_margin,
-            avg_margin,
-            avg_throughput,
-            sample_count,
-            COALESCE(margin_slope, 0)     AS margin_slope,
-            CASE WHEN avg_margin > 0
-                 THEN (COALESCE(margin_slope, 0) / avg_margin) * 100.0
+            la.item_id,
+            lt.latest_margin,
+            la.avg_margin,
+            la.avg_throughput,
+            la.sample_count,
+            COALESCE(ta.margin_slope, 0)     AS margin_slope,
+            CASE WHEN la.avg_margin > 0
+                 THEN (COALESCE(ta.margin_slope, 0) / la.avg_margin) * 100.0
                  ELSE 0
-            END                           AS trend_pct,
-            CASE WHEN avg_margin > 0 AND avg_throughput > 0
+            END                              AS trend_pct,
+            CASE WHEN la.avg_margin > 0 AND la.avg_throughput > 0
                  THEN GREATEST(0,
-                          avg_margin::float
-                          * avg_throughput::float
+                          la.avg_margin::float
+                          * la.avg_throughput::float
                           * (1.0 + LEAST(GREATEST(
-                              CASE WHEN avg_margin > 0
-                                   THEN COALESCE(margin_slope, 0) / avg_margin
+                              CASE WHEN la.avg_margin > 0
+                                   THEN COALESCE(ta.margin_slope, 0) / la.avg_margin
                                    ELSE 0 END,
                               -0.5), 0.5)))
                  ELSE 0
-            END                           AS raw_score
-        FROM per_item
-        WHERE latest_margin > 0
-          AND avg_throughput > 0
+            END                              AS raw_score
+        FROM long_agg la
+        JOIN latest lt ON lt.item_id = la.item_id
+        LEFT JOIN trend_agg ta ON ta.item_id = la.item_id
+        WHERE lt.latest_margin > 0
+          AND la.avg_throughput > 0
         ORDER BY raw_score DESC
-        LIMIT $3
-    `, [lookback, MIN_SAMPLES, limit]);
+        LIMIT $4
+    `, [lookback, MIN_SAMPLES, RETENTION_DAYS, limit]);
 
     return result.rows.map(r => ({
         item_id:       r.item_id,

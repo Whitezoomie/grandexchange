@@ -3718,6 +3718,21 @@
             ctx.fillStyle = greenColor;
             ctx.fill();
         }
+
+    }
+
+    function updatePlayerGraphStats() {
+        const peakEl = document.getElementById('playerGraphPeakVal');
+        const lowEl = document.getElementById('playerGraphLowVal');
+        if (!peakEl || !lowEl) return;
+        const valid = getActiveDayHistory().history.filter(v => v != null);
+        if (!valid.length) {
+            peakEl.textContent = '\u2014';
+            lowEl.textContent = '\u2014';
+            return;
+        }
+        peakEl.textContent = Math.max.apply(null, valid).toLocaleString();
+        lowEl.textContent = Math.min.apply(null, valid).toLocaleString();
     }
 
     function openPlayerGraphModal() {
@@ -3748,6 +3763,17 @@
                     <div class="player-graph-modal-body">
                         <canvas id="playerGraphExpanded"></canvas>
                         <div id="playerGraphExpandedTooltip" class="player-graph-expanded-tooltip" style="display:none"></div>
+                        <div class="player-graph-stats-row" id="playerGraphStatsRow">
+                            <span class="player-graph-stat high">
+                                <span class="player-graph-stat-label">Peak</span>
+                                <span class="player-graph-stat-value" id="playerGraphPeakVal">&mdash;</span>
+                            </span>
+                            <span class="player-graph-stat-sep">&middot;</span>
+                            <span class="player-graph-stat low">
+                                <span class="player-graph-stat-label">Low</span>
+                                <span class="player-graph-stat-value" id="playerGraphLowVal">&mdash;</span>
+                            </span>
+                        </div>
                         <div class="player-graph-tz-note" id="playerGraphTzNote"></div>
                     </div>
                 </div>`;
@@ -3784,6 +3810,7 @@
                 }
                 document.getElementById('playerGraphExpandedTooltip').style.display = 'none';
                 drawExpandedPlayerGraph(document.getElementById('playerGraphExpanded'));
+                updatePlayerGraphStats();
             });
 
             overlay.addEventListener('click', function(e) {
@@ -3927,6 +3954,7 @@
         fetchPlayerDailyHistory();
         requestAnimationFrame(function() {
             drawExpandedPlayerGraph(document.getElementById('playerGraphExpanded'));
+            updatePlayerGraphStats();
         });
     }
 
@@ -3977,6 +4005,7 @@
                 const overlay = document.getElementById('playerGraphModalOverlay');
                 if (expCanvas && overlay && overlay.classList.contains('active') && playerGraphModalDay >= 0) {
                     drawExpandedPlayerGraph(expCanvas);
+                    updatePlayerGraphStats();
                 }
             }
         } catch(e) {
@@ -5966,21 +5995,57 @@
     let flipCurrentItem = null;
     let flipSuggesterReady = false;
 
+    // Predictor data: item_id -> { raw_score, signal, avg_margin, avg_throughput, trend_pct }
+    let predictorData = new Map();
+    const PREDICTOR_TTL_MS = 10 * 60 * 1000; // re-fetch every 10 minutes
+    const MIN_FLIP_ROI_PCT = 1.5;            // filter out flips with <1.5% ROI
+
+    async function loadPredictorData() {
+        try {
+            const res = await fetch(
+                `${FEEDBACK_SERVER}/predict?limit=500`,
+                { signal: AbortSignal.timeout(10_000) }
+            );
+            if (!res.ok) return;
+            const json = await res.json();
+            const newMap = new Map();
+            for (const item of (json.items || [])) {
+                newMap.set(item.item_id, item);
+            }
+            predictorData = newMap;
+        } catch (e) { /* silent — fall back to raw margin */ }
+    }
+
     function saveFlipBlockList() {
         localStorage.setItem('ge_flip_blocklist', JSON.stringify([...flipBlockList]));
     }
 
     function getBestFlipCandidates() {
+        const usePred = predictorData.size > 0;
         return allItems
-            .filter(item =>
-                item.volume >= 150 &&
-                item.margin > 0 &&
-                item.buyPrice > 0 &&
-                item.sellPrice > 0 &&
-                !flipBlockList.has(item.id) &&
-                !flipSkipSet.has(item.id)
-            )
-            .sort((a, b) => (b.margin || 0) - (a.margin || 0));
+            .filter(item => {
+                if (item.volume < 150 || item.margin <= 0 || item.buyPrice <= 0 || item.sellPrice <= 0) return false;
+                if (flipBlockList.has(item.id) || flipSkipSet.has(item.id)) return false;
+                // Minimum ROI guard — below 1.5% barely clears GE tax
+                const roi = item.buyPrice > 0 ? (item.margin / item.buyPrice) * 100 : 0;
+                if (roi < MIN_FLIP_ROI_PCT) return false;
+                // Drop items the predictor marks as actively falling
+                if (usePred) {
+                    const pred = predictorData.get(item.id);
+                    if (pred && pred.signal === 'FALLING') return false;
+                }
+                return true;
+            })
+            .sort((a, b) => {
+                if (usePred) {
+                    // Sort by 7-day weighted score (avg_margin × avg_throughput × trend boost)
+                    const sa = (predictorData.get(a.id) || {}).raw_score || 0;
+                    const sb = (predictorData.get(b.id) || {}).raw_score || 0;
+                    if (sb !== sa) return sb - sa;
+                }
+                // Fallback: raw live margin
+                return (b.margin || 0) - (a.margin || 0);
+            });
     }
 
     function showFlipSuggestion() {
@@ -6156,7 +6221,10 @@
         // Show the header button now that data is ready
         wrapEl.style.display = '';
         updateFlipBlockCount();
-        showFlipSuggestion();
+        // Fetch 7-day predictor scores before showing the first suggestion,
+        // then refresh every 10 minutes to keep rankings current.
+        loadPredictorData().then(() => showFlipSuggestion());
+        setInterval(() => loadPredictorData().then(() => refreshFlipSuggestion()), PREDICTOR_TTL_MS);
 
         // Toggle dropdown
         toggleBtn.addEventListener('click', e => {
