@@ -489,7 +489,8 @@ public class GEFlipPickPanel extends JPanel {
     private List<GEPricerItem> getCandidates() {
         return allItems.stream()
             .filter(i -> i.getVolume() >= minVolume)
-            .filter(i -> i.getMargin() > 0)
+            .filter(i -> i.getMargin() >= 500)           // min 500 gp live margin
+            .filter(i -> i.getMarginPercent() >= 1.0)    // min 1% ROI
             .filter(i -> i.getInstaBuy() > 0 && i.getInstaSell() > 0)
             .filter(i -> !blockSet.contains(i.getId()))
             .filter(i -> !skipSet.contains(i.getId()))
