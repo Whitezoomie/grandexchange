@@ -497,6 +497,16 @@ public class GEFlipPickPanel extends JPanel {
             .filter(i -> perSlotBudget <= 0 || (i.getInstaSell() + overcutGp) <= perSlotBudget)
             .filter(i -> i.getBuyLimit() <= 0 || i.getVolume() <= 0 || sellTimeHours(i) <= 2.0)
             .filter(this::hasPositiveAdjustedMargin)
+            // Skip items whose prices haven't been updated in over an hour — stale margin is fictional
+            .filter(i -> {
+                long newestTs = Math.max(i.getInstaBuyTime(), i.getInstaSellTime());
+                return newestTs <= 0 || (System.currentTimeMillis() / 1000L) - newestTs < 3600;
+            })
+            // Skip items the server flags as declining (FALLING or STABLE_DOWN)
+            .filter(i -> {
+                String sig = i.getServerSignal();
+                return sig == null || (!sig.equals("FALLING") && !sig.equals("STABLE_DOWN"));
+            })
             .sorted(Comparator.comparingLong((GEPricerItem i) -> {
                 long score = i.getEffectiveScore();
                 return score > 0 ? score : i.getMargin();

@@ -6029,10 +6029,10 @@
                 // Minimum ROI guard — below 1.5% barely clears GE tax
                 const roi = item.buyPrice > 0 ? (item.margin / item.buyPrice) * 100 : 0;
                 if (roi < MIN_FLIP_ROI_PCT) return false;
-                // Drop items the predictor marks as actively falling
+                // Drop items the predictor marks as declining or falling
                 if (usePred) {
                     const pred = predictorData.get(item.id);
-                    if (pred && pred.signal === 'FALLING') return false;
+                    if (pred && (pred.signal === 'FALLING' || pred.signal === 'STABLE_DOWN')) return false;
                 }
                 return true;
             })

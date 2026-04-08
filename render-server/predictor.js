@@ -137,20 +137,26 @@ async function poll() {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Prediction query: dual-window scoring
+// Prediction query: dual-window scoring with volatility penalty
 //
-// Long window  (RETENTION_DAYS): avg_margin + avg_throughput
-//   → stable, 7-day averages filter out noise and one-off spikes
+// Long window  (RETENTION_DAYS): avg_margin, avg_throughput, stddev
+//   → stable 7-day averages; stddev used to penalise volatile items
 //
 // Short window ($1 × 5 min, default 3 hr): REGR_SLOPE trend
 //   → reactive signal catches items moving up right now
 //
-// Score = 7d_avg_margin * 7d_avg_throughput * (1 + clamped_trend)
+// Score = 7d_avg_margin × 7d_avg_throughput
+//         × (1 + clamped_trend)
+//         × stability_factor          ← NEW: 1/(1+cv), cv=stddev/avg
+//
+// Items with avg_margin < 500 gp are excluded (not worth the effort).
+// Items whose entire history has zero variance (only 1 price ever) get
+// a stability_factor of 1.0 (no penalty, no bonus).
 // ─────────────────────────────────────────────────────────────
 async function runPredictionQuery(lookback, limit) {
     const result = await pool.query(`
         WITH long_samples AS (
-            -- Full retention window: stable margin and throughput averages
+            -- Full retention window: stable margin and throughput
             SELECT
                 item_id,
                 GREATEST(0,
@@ -187,12 +193,19 @@ async function runPredictionQuery(lookback, limit) {
         long_agg AS (
             SELECT
                 item_id,
-                AVG(margin)::bigint     AS avg_margin,
-                AVG(throughput)::bigint AS avg_throughput,
-                COUNT(*)                AS sample_count
+                AVG(margin)::bigint                                    AS avg_margin,
+                AVG(throughput)::bigint                                AS avg_throughput,
+                COUNT(*)                                               AS sample_count,
+                -- Coefficient of variation: stddev / avg (0 = perfectly stable, high = volatile)
+                COALESCE(
+                    STDDEV_SAMP(margin::float) / NULLIF(AVG(margin::float), 0),
+                    0
+                )                                                      AS coeff_variation
             FROM long_samples
             GROUP BY item_id
+            -- Require enough history AND a meaningful average margin (≥500 gp)
             HAVING COUNT(*) >= $2
+               AND AVG(margin) >= 500
         ),
         trend_agg AS (
             SELECT
@@ -207,22 +220,28 @@ async function runPredictionQuery(lookback, limit) {
             la.avg_margin,
             la.avg_throughput,
             la.sample_count,
-            COALESCE(ta.margin_slope, 0)     AS margin_slope,
+            la.coeff_variation,
+            COALESCE(ta.margin_slope, 0)    AS margin_slope,
             CASE WHEN la.avg_margin > 0
                  THEN (COALESCE(ta.margin_slope, 0) / la.avg_margin) * 100.0
                  ELSE 0
-            END                              AS trend_pct,
+            END                             AS trend_pct,
             CASE WHEN la.avg_margin > 0 AND la.avg_throughput > 0
                  THEN GREATEST(0,
-                          la.avg_margin::float
-                          * la.avg_throughput::float
-                          * (1.0 + LEAST(GREATEST(
-                              CASE WHEN la.avg_margin > 0
-                                   THEN COALESCE(ta.margin_slope, 0) / la.avg_margin
-                                   ELSE 0 END,
-                              -0.5), 0.5)))
+                     la.avg_margin::float
+                     * la.avg_throughput::float
+                     -- Trend boost: clamped ±50 %
+                     * (1.0 + LEAST(GREATEST(
+                         CASE WHEN la.avg_margin > 0
+                              THEN COALESCE(ta.margin_slope, 0) / la.avg_margin
+                              ELSE 0 END,
+                         -0.5), 0.5))
+                     -- Stability factor: penalises high-variance items
+                     -- CV capped at 2.0 so max penalty is ×0.33 (never zeroed)
+                     * (1.0 / (1.0 + LEAST(la.coeff_variation, 2.0)))
+                 )
                  ELSE 0
-            END                              AS raw_score
+            END                             AS raw_score
         FROM long_agg la
         JOIN latest lt ON lt.item_id = la.item_id
         LEFT JOIN trend_agg ta ON ta.item_id = la.item_id
@@ -233,14 +252,15 @@ async function runPredictionQuery(lookback, limit) {
     `, [lookback, MIN_SAMPLES, RETENTION_DAYS, limit]);
 
     return result.rows.map(r => ({
-        item_id:       r.item_id,
-        latest_margin: Number(r.latest_margin),
-        avg_margin:    Number(r.avg_margin),
+        item_id:        r.item_id,
+        latest_margin:  Number(r.latest_margin),
+        avg_margin:     Number(r.avg_margin),
         avg_throughput: Number(r.avg_throughput),
-        sample_count:  Number(r.sample_count),
-        trend_pct:     parseFloat(Number(r.trend_pct).toFixed(2)),
-        raw_score:     Math.round(Number(r.raw_score)),
-        signal:        trendSignal(Number(r.trend_pct)),
+        sample_count:   Number(r.sample_count),
+        coeff_variation: parseFloat(Number(r.coeff_variation).toFixed(3)),
+        trend_pct:      parseFloat(Number(r.trend_pct).toFixed(2)),
+        raw_score:      Math.round(Number(r.raw_score)),
+        signal:         trendSignal(Number(r.trend_pct)),
     }));
 }
 
