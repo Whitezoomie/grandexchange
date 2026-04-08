@@ -1,0 +1,45 @@
+plugins {
+    id 'java'
+}
+
+// RuneLite plugin hub format
+group = 'com.therealge'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+    maven {
+        url = uri("https://repo.runelite.net")
+    }
+}
+
+def runeliteVersion = 'latest.release'
+
+dependencies {
+    compileOnly group: 'net.runelite', name: 'client', version: runeliteVersion
+
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+    // GSON is provided by RuneLite client at runtime
+    compileOnly 'com.google.code.gson:gson:2.10.1'
+    // OkHttp is provided by RuneLite client at runtime
+    compileOnly 'com.squareup.okhttp3:okhttp:3.14.9'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+jar {
+    manifest {
+        attributes(
+            'Premain-Class': 'com.therealge.gepricer.GEPricerAgent'
+        )
+    }
+}

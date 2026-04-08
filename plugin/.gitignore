@@ -1,0 +1,17 @@
+# Gradle build outputs
+build/
+.gradle/
+.gradle-dist/
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local binaries
+bin/
+net/
