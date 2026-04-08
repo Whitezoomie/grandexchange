@@ -840,9 +840,11 @@ public class GEPricerPlugin extends Plugin
         }
         else if (state == GameState.LOGGED_IN)
         {
-            // Reload session in case another client instance saved newer data
+            // Reload session in case another client instance saved newer data.
+            // NOTE: do NOT call loadSlotTimers() here — a reconnect (DC recovery) fires
+            // LOGGED_IN without a prior HOPPING/LOGIN_SCREEN save, which would overwrite
+            // fresh in-memory timer state with stale config data and cause false stagnant alerts.
             loadSession();
-            loadSlotTimers();
         }
     }
 
@@ -1893,8 +1895,15 @@ public class GEPricerPlugin extends Plugin
         GrandExchangeOfferState state = offer.getState();
         int slot = event.getSlot();
 
-        // Update slot activity timer state for this slot
+        // Update slot activity timer state for this slot; persist immediately so that
+        // a reconnect (DC) loads the correct fresh timestamp rather than stale config data.
+        boolean prevUnknown = slotTimerUnknown[slot];
+        Instant prevUpdate  = slotLastUpdate[slot];
         updateSlotTimerState(slot, offer);
+        if (slotLastUpdate[slot] != prevUpdate || (prevUnknown && !slotTimerUnknown[slot]))
+        {
+            executor.execute(this::saveSlotTimers);
+        }
         {
             GEPricerItem pick  = getFlipPickItem();
             boolean isOurFlip = (pick != null && offer.getItemId() == pick.getId())
