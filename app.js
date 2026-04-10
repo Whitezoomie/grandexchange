@@ -479,7 +479,7 @@
         if (pageItems.length === 0) {
             dom.itemsContainer.innerHTML = `
                 <div class="no-results">
-                    <div class="no-results-icon">Ã°Å¸â€Â</div>
+                    <div class="no-results-icon">🔍</div>
                     <h3>No items found</h3>
                     <p>Try adjusting your search or filters</p>
                 </div>`;
